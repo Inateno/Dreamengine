@@ -1,0 +1,20 @@
+{
+    "name": "DreamEngine"
+  , "description": "Engine to go on the moon with JavaScript"
+  , "version": "0.0.1"
+  , "author": "Inateno - Dreamirl"
+  , "licenses": [
+    {
+        "type": "MIT"
+      , "url": "http://dreamengine.dreamirl.com"
+    }
+  ]
+  , "devDependencies": {
+      "grunt": "~0.4.1"
+    , "grunt-contrib-requirejs": "~0.4.1"
+    , "grunt-contrib-copy": "~0.4.0"
+    , "grunt-contrib-clean": "~0.5.0"
+    , "grunt-contrib-concat": "~0.3.0"
+    , "grunt-contrib-uglify": "~0.2.2"
+  }
+}

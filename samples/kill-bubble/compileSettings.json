@@ -1,0 +1,42 @@
+{
+  "platforms": {
+    "w8": {
+      "setup": {
+        "files": {
+          "_dev/js/main.js": "_dev/js/main.js"
+        }
+        , "options": {
+          "replacements": [ {
+            "pattern"      : ", 'DE.dictionnary' ],"
+            , "replacement": ", 'DE.dictionnary', 'W8' ],"
+          }, {
+            "pattern"      : ", dictionnary )"
+            , "replacement": ", dictionnary, system )"
+          }, {
+            "pattern"      : "// grunt regex plug system"
+            , "replacement": ", 'system': system, 'paramSystem': {}"
+          } ]
+        }
+      }
+      ,"clean": {
+        "files": {
+          "_dev/js/main.js": "_dev/js/main.js"
+        }
+        , "options": {
+          "replacements": [ {
+            "pattern"      : ", 'DE.dictionnary', 'W8' ],"
+            , "replacement": ", 'DE.dictionnary' ],"
+          }, {
+            "pattern"      : ", dictionnary, system )"
+            , "replacement": ", dictionnary )"
+          }, {
+            "pattern"      : ", 'system': system, 'paramSystem': {}"
+            , "replacement": "// grunt regex plug system"
+          } ]
+        }
+      }
+    }
+  }
+  
+  
+}
