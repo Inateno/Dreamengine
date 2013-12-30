@@ -107,9 +107,9 @@ function( DreamE )
   Game.init = function()
   {
     console.log( "game init" );
-    // DreamE.CONFIG.DEBUG = 1;
+    DreamE.CONFIG.DEBUG = 1;
     // DreamE.CONFIG.DEBUG_LEVEL = 1;
-    // DreamE.CONFIG.DEBUG_LEVEL = 2;
+    DreamE.CONFIG.DEBUG_LEVEL = 2;
     // render
     Game.render = new DreamE.Render( "render", { fullScreen: "ratioStretch" } );
     Game.render.init();

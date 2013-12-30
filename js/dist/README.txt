@@ -5,8 +5,8 @@ files.js is used to list all custom files and the engine, it's a "ready to compi
 We suggest you to copy them to make you a good start with DreamEngine, RequireJS.
 
 Datas files are required like it's wrote inside (if you won't use RequireJS you can remove define part)
-When the engine start, it need imagesDatas, a dictionnary, inputsLists and audiosList.
-If you mess one parameters in one of theses files, it'll crash (except for dictionnary).
+When the engine start, it need imagesDatas, a dictionary, inputsLists and audiosList.
+If you mess one parameters in one of theses files, it'll crash (except for dictionary).
 
 DreamEngine-min-require is a version working with RequireJS if you want to make modules and a good structure in your code, it's perfect for you.
 

@@ -28,7 +28,7 @@ require.config( {
     , 'DE.imagesDatas' : 'datas/imagesDatas'
     , 'DE.inputsList'  : 'datas/inputsList'
     , 'DE.audiosList'  : 'datas/audiosList'
-    , 'DE.dictionnary' : 'datas/dictionnary'
+    , 'DE.dictionary'  : 'datas/dictionary'
     
     ,'gameLoop'       : 'custom/gameLoop'
     ,'Game'           : 'custom/Game'

@@ -36,7 +36,7 @@ function( DreamE, GuiLabel, GuiImage )
   Game.start = function()
   {
     console.log( "hello, you killed a total of " + DreamE.SaveSystem.get( "ballKilled" ) + " balls" );
-    Game.scene = new DreamE.Scene( "Test", { backgroundColor: "black" } );
+    Game.scene = new DreamE.Scene( "Test" );
     
     // camera
     Game.camera = new DreamE.Camera( screenW, screenH, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );

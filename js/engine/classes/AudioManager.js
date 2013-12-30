@@ -109,6 +109,15 @@ function( CONFIG, buzz )
       this.currentPlayed = "";
       
       /****
+       * get@Sound( name@String )
+        should be usefull sometimes
+       */
+      this.get = function( name )
+      {
+        return _musics[ name ];
+      }
+      
+      /****
        * add@void
        */
       this.add = function( mus )
@@ -204,18 +213,41 @@ function( CONFIG, buzz )
       this.volume = 80;
       this.muted = false;
       
+      /****
+       * get@Sound( name@String )
+        should be usefull sometimes
+       */
+      this.get = function( name )
+      {
+        return _fxs[ name ];
+      }
+      
+      /****
+       * add@void( fx@Sound )
+        add a sound in the library
+       */
       this.add = function( fx )
       {
         _fxs[ fx.name ] = fx;
       }
       
+      /****
+       * play@void( name@String )
+        play an fx
+       */
       this.play = function( name )
       {
         if ( this.muted )
           return;
+        if ( !_fxs[ name ].sound.isPaused() )
+          _fxs[ name ].sound.stop();
         _fxs[ name ].sound.play();
       }
       
+      /****
+       * mute@void
+        mute all fxs
+       */
       this.mute = function()
       {
         this.muted = true;
@@ -223,11 +255,19 @@ function( CONFIG, buzz )
           _fxs[ i ].sound.stop();
       }
       
+      /****
+       * unmute@void
+        unmute all fxs
+       */
       this.unmute = function()
       {
         this.muted = false;
       }
       
+      /****
+       * setVolume@void( val@Int )
+        set fxs volume
+       */
       this.setVolume = function( val )
       {
         this.volume = val || 0;

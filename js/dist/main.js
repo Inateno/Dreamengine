@@ -10,8 +10,8 @@
 write here the function launching the engine
 **/
 
-define( [ 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionnary' ],
-function( gameLoop, Game, images, audios, inputs, dictionnary )
+define( [ 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionary' ],
+function( gameLoop, Game, images, audios, inputs, dictionary )
 {
   // make a function, will be called by engine
   function launch( DreamE )
@@ -23,7 +23,7 @@ function( gameLoop, Game, images, audios, inputs, dictionnary )
       'customLoop': gameLoop, 'onReady': Game.init
       , 'onStart': Game.start, 'loader': { "scale": 2 }
       , 'images': images, 'audios': audios
-      , 'inputs': inputs, 'dictionnary': dictionnary
+      , 'inputs': inputs, 'dictionary': dictionary
     } );
   }
   

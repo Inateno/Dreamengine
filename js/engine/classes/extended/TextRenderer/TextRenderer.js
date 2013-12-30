@@ -21,7 +21,7 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer )
   {
     Renderer.call( this, param );
     
-    if ( !param && !text )
+    if ( !param || !width || !height || !text )
       throw new Error( "TextRenderer :: Can't instantiate without param, width, height, text" );
     
     this.text = text || undefined;

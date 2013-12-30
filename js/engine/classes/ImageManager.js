@@ -40,7 +40,7 @@ function( CONFIG, States, Event, CanvasBuffer )
       for ( var i = 0, img; i < imgs.length; ++i )
       {
         img = imgs[ i ];
-        if ( !img )
+        if ( !img || ( img[ 3 ] || {} ).load === false )
           continue;
         this.pushImage( img[ 0 ], img[ 1 ], img[ 2 ], img[ 3 ] );
       }
@@ -71,7 +71,7 @@ function( CONFIG, States, Event, CanvasBuffer )
       img.isAnimated = params.isAnimated || false;
       img.isPaused   = params.isPaused || false;
       img.isLoop     = ( params.isLoop != undefined ) ? params.isLoop : true;
-      if ( img.totalFrame == 0 )
+      if ( img.totalFrame <= 1 )
       {
         img.isAnimated = false;
       }

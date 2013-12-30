@@ -21,22 +21,22 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
   {
     param    = param || {};
     
-    this.id     = param.id || Math.random() * 999999999;
-    this.name   = param.name || '';
-    this.tag    = param.tag || 'none';
-    this.scene  = null;
+    this.id      = param.id || Math.random() * 999999999;
+    this.name    = param.name || '';
+    this.tag     = param.tag || 'none';
+    this.scene   = null;
     this.disable = false;
     
     this.sceneIndex = 0;
-    this.parent    = param.parent || undefined;
+    this.parent     = param.parent || undefined;
     this.childrens  = param.childrens || new Array();
     
-    this.position = param.position || new Vector2( param.x || 0, param.y || 0, param.z || 0 );
+    this.position       = param.position || new Vector2( param.x || 0, param.y || 0, param.z || 0 );
     this.parentPosition = null;
-    this.biggerOffset = new Sizes( 1, 1, 1, 1 );
-    this.automatism  = {}; // push an object inside with what, value and frequences
-    this.flag = null;
-    this.zindex = param.zindex || 0;
+    this.biggerOffset   = new Sizes( 1, 1, 1, 1 );
+    this.automatism     = {}; // push an object inside with what, value and frequences
+    this.flag           = null;
+    this.zindex         = param.zindex || 0;
     
     this.renderers  = new Array();
     if ( param.renderers && param.renderers.length > 0 )

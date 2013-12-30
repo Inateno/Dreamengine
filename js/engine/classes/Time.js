@@ -42,10 +42,10 @@ function( CONFIG, Event )
       
       this.deltaTime = this.timeSinceLastFrame / 16 * this.scaleDelta;
       this.missedFrame = this.deltaTime;
-      if ( this.deltaTime > 1 )
+      if ( this.deltaTime > 2 )
         this.deltaTime = this.deltaTime % 1;
-      if ( this.deltaTime == 0 )
-        this.deltaTime = 1;
+      if ( this.deltaTime < 0 )
+        this.deltaTime += 1;
       this.missedFrame = this.missedFrame - this.deltaTime;
       this.timeSinceLastFrameScaled = ( this.currentTime - this.lastRender ) * this.scaleDelta;
       this.lastRender = this.currentTime;

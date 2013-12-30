@@ -19,14 +19,14 @@ function( CONFIG )
     this.DEName        = "LangSystem";
     this.currentLang   = "en";
     
-    this.dictionnary   = {};
+    this.dictionary   = {};
     this.avalaibleLang = new Array();
     
-    this.init = function( dictionnary )
+    this.init = function( dictionary )
     {
-      for ( var i in dictionnary )
+      for ( var i in dictionary )
       {
-        this.dictionnary[ i ] = dictionnary[ i ];
+        this.dictionary[ i ] = dictionary[ i ];
         this.avalaibleLang.push( i );
       }
     }
@@ -37,7 +37,7 @@ function( CONFIG )
      */
     this.get = function( what )
     {
-      return this.dictionnary[ this.currentLang ][ what ] || null;
+      return this.dictionary[ this.currentLang ][ what ] || null;
     }
     
     /****
@@ -48,7 +48,7 @@ function( CONFIG )
     {
       if ( this.avalaibleLang.indexOf( lang ) == -1 )
         return null;
-      return this.dictionnary[ lang ][ what ] || null;
+      return this.dictionary[ lang ][ what ] || null;
     }
     
     /****
@@ -61,7 +61,7 @@ function( CONFIG )
       if ( !lang )
         lang = navigator.language || navigator.browserLanguage || "en";
       
-      for ( var i in this.dictionnary )
+      for ( var i in this.dictionary )
       {
         if ( lang.match( i ) )
         {

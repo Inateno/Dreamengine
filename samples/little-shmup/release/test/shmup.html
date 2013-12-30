@@ -1,0 +1,36 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8" />
+    <title>Shoot'em Up</title>
+    
+    <meta name="description" content="A little shmup">
+    <meta name="keywords" content="">
+    <meta name="author" content="Dreamirl">
+    <meta name="viewport" 
+      content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="img/logo64.png" />
+    
+    <!-- apple web-app -->
+    <link rel="apple-touch-icon-precomposed" href="img/logo64.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-startup-image" href="img/logo128.png" />
+    
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+    <body>
+      <div id="render" style="position:relative"></div>
+      <div id="notifsContainer"></div>
+      
+      <div id="notificationTemplate">
+        <div class="notification">
+          <span class="content"></span>
+          <div class="notifClose">X</div>
+        </div>
+      </div>
+      <script type="text/javascript" src="require.js" data-main="game"></script>
+    </body>
+</html>

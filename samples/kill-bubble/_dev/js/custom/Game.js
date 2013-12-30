@@ -10,8 +10,8 @@
  there is no "end" and no menus, it's a very lite "how to" for basics
  and you can create complete game with this :)
 **/
-define( [ 'DREAM_ENGINE', 'DE.GuiLabel', 'DE.GuiImage' ],
-function( DreamE, GuiLabel, GuiImage )
+define( [ 'DREAM_ENGINE' ],
+function( DreamE )
 {
   var Game = {};
   
@@ -25,6 +25,7 @@ function( DreamE, GuiLabel, GuiImage )
   Game.init = function()
   {
     console.log( "init Engine" );
+    DreamE.CONFIG.DEBUG = 1; // debug on
     DreamE.CONFIG.DEBUG_LEVEL = 5; // all debug
     
     // create render
@@ -40,7 +41,7 @@ function( DreamE, GuiLabel, GuiImage )
   {
     // simple localStorage usage here :)
     console.log( "hello, you killed a total of " + ( DreamE.SaveSystem.get( "ballKilled" ) || 0 ) + " balls" );
-    Game.scene = new DreamE.Scene( "Test", { backgroundColor: "black" } );
+    Game.scene = new DreamE.Scene( "Test" );
     
     // create your camera
     Game.camera = new DreamE.Camera( screenW, screenH, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );

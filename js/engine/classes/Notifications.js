@@ -62,7 +62,7 @@ function()
       
       params = params || {};
       var time = params.expire || this.defaultExpirationTime;
-      var id = Date.now() + "-" + ( Math.random() * 100 ) >> 0;
+      var id = Date.now() + "-" + ( ( Math.random() * 100 ) >> 0 );
       
       var notif = document.createElement( 'div' );
         notif.innerHTML = this.template;

@@ -78,6 +78,9 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
       {
         this.tickers[ i ].update();
       }
+      
+      if ( this.waitSortGameObjects )
+        this.sortGameObjects();
     }
     
     /****
@@ -112,6 +115,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
           return b.position.z - a.position.z;
         } );
       }
+      this.waitSortGameObjects = false;
     }
     
     /****
@@ -130,7 +134,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
       // gameObject.sceneIndex = this.maxObjects;
       gameObject.scene = this;
       ++this.maxObjects;
-      this.sortGameObjects();
+      this.waitSortGameObjects = true;
     }
     
     this.init();

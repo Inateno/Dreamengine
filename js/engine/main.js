@@ -46,7 +46,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     DREAM_ENGINE.SaveSystem.init( params.saveModel, params.saveIgnoreVersion );
     
     // init lang and system
-    DREAM_ENGINE.LangSystem.init( params.dictionnary );
+    DREAM_ENGINE.LangSystem.init( params.dictionary );
     DREAM_ENGINE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
     
     DREAM_ENGINE.on( 'udpateScreenSizes', function( ratioToConception, sizes )

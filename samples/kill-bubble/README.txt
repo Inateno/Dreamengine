@@ -6,7 +6,7 @@ When you will grunt your project, it'll create only a game.js file to require in
 
 If you want to make your games for each platforms who need special includes / functions, you can do it in the same way I did it for Windows8.
 Add your custom regex in compileSettings, it'll change the main.js before the grunt require, then restore the main.js.
-I decided to use the commented line to detect the good place to inject my code, and I decided to inject custom OS dependencies after the required module DE.dictionnary.
+I decided to use the commented line to detect the good place to inject my code, and I decided to inject custom OS dependencies after the required module DE.dictionary.
 
 You can do like me if you want, it'll be easier if you got problems and require help, but you can change it of course.
 

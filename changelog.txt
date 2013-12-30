@@ -1,0 +1,14 @@
+---- 0.0.1a ----
+* Correct dictionnary to dictionary (you can say lol I assume!)
+* Time.js - improve deltaTime calcul on Firefox + Safari + Opera (sometimes we got 0.06 with 0 missed frame, and it result on a very slow frame, now with 5 browser opens they go at the same "feel" speed)
+* Scene.js - sortGameObjects on add an object only at the end of the current update (with a Bool flag) reduce call number (if lot of add in the same frame) and correct "object miss frames" bug
+* Inputs.js - add escape key
+* gamepad.js - clean code (format and indents)
+* gamepad.js - add force value on axes events method
+* gamepad.js - added [] fallbacks on Chrome gamepads (some version don't provide API and provide an error)
+* AudioManager - commented methods on fxs
+* AudioManager - add a get method on fxs and musics
+* AudioManager - play an fx stop it if this one is playing
+* Notifications - correct multi-Notifications that non disapear (id always 0)
+* ImageManager - correct if totalFrame is under 1 set isAnimated to false as default (was 0)
+* ImageManager - add the ignore load if you set load to false on an image

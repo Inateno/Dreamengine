@@ -22,7 +22,7 @@ require.config( {
     ,'DE.imagesDatas' : 'datas/imagesDatas'
     ,'DE.inputsList'  : 'datas/inputsList'
     ,'DE.audiosList'  : 'datas/audiosList'
-    ,'DE.dictionnary' : 'datas/dictionnary'
+    ,'DE.dictionary'  : 'datas/dictionary'
     
     ,'gameLoop'       : 'custom_balls/gameLoop'
     ,'Game'           : 'custom_balls/Game'
@@ -31,8 +31,8 @@ require.config( {
 } );
 
 // init here your game with your code by using the Engine (as DreamE)
-require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionnary' ],
-function( files, gameLoop, Game, images, audios, inputs, dictionnary )
+require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionary' ],
+function( files, gameLoop, Game, images, audios, inputs, dictionary )
 {
   console.log( "My Custom loads - balls" );
   var DreamE = DreamEngine;
@@ -41,7 +41,7 @@ function( files, gameLoop, Game, images, audios, inputs, dictionnary )
     'customLoop': gameLoop, 'onReady': Game.init
     , 'onStart': Game.start, 'loader': { "scale": 2 }
     , 'images': images, 'audios': audios
-    , 'inputs': inputs, 'dictionnary': dictionnary
+    , 'inputs': inputs, 'dictionary': dictionary
     , 'about': { 'gameName': "ProtoBalls", 'author': "Dreamirl", 'gameVersion': "0.1" }
     , 'saveModel': { 'ballKilled': 0 }, 'saveIgnoreVersion': true
   } );

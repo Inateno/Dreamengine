@@ -63,8 +63,8 @@ This part is in early release, I won't push stuff that's not working well.
 Documentation
 -------
 
-I didn't wrote a documentation, it's ask lot of time and I prefer use my time to clean and debugs the engine as possible.
-But now it's on Github (first step) now I'll do it on dreamengine's website.
+[The "ig" how to here](http://dreamengine.dreamirl.com/#howto).
+I didn't wrote a documentation yet, I'll use jsdoc or something like that. I just finished the "how to" (it's big enough to make a complete game).
 
 Contributing
 -------
