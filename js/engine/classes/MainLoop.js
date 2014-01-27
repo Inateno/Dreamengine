@@ -75,6 +75,7 @@ function( Time, CONFIG, States, Inputs, GamePad
               j.update();
             }
           }
+          Time.deltaTime = 1;
           --Time.missedFrame;
         }
       }

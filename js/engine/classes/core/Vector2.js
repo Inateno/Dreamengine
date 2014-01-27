@@ -137,8 +137,8 @@ function( Time, CONFIG )
     this.normalize = function()
     {
       var len = Math.sqrt( this.x * this.x + this.y * this.y );
-      this.x = this.x / len >> 0;
-      this.y = this.y / len >> 0;
+      this.x = this.x / len;
+      this.y = this.y / len;
       return this;
     }
     

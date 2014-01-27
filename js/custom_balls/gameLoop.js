@@ -9,7 +9,7 @@
 simple gameLoop example
 **/
 define( [ 'DREAM_ENGINE', 'Game' ],
-function( DreamE, Game )
+function( DE, Game )
 {
   function gameLoop( time )
   {

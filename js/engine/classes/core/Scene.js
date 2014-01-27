@@ -17,7 +17,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
 {
   function Scene( name )
   {
-    this.name  = name || "NoName-" + Date.now() + Mant.random() * Date.now() >> 0;
+    this.name  = name || "NoName-" + ( Date.now() + Math.random() * Date.now() >> 0 );
     
     this.gameObjects= new Array();
     

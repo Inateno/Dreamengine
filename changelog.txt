@@ -1,3 +1,9 @@
+---- 0.0.2 ----
+* Add shake on camera -> use camera.shake( xRange, yRange, duration)
+* Changed focus method on camera (now you give the target and it auto-focusing while you don't remove/change the target)
+* correct bug on normalize in Vector2 (was using a >> 0 to produce int, but no int on normalize)
+* improved deltaTime and missedFrame calcul - sometimes you got 0.2 delta and cause very sloooow motion (but with 30fps so wtf)
+
 ---- 0.0.1a ----
 * Correct dictionnary to dictionary (you can say lol I assume!)
 * Time.js - improve deltaTime calcul on Firefox + Safari + Opera (sometimes we got 0.06 with 0 missed frame, and it result on a very slow frame, now with 5 browser opens they go at the same "feel" speed)

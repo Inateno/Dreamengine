@@ -30,13 +30,13 @@ require.config( {
   , urlArgs: 'bust=' + Date.now()
 } );
 
-// init here your game with your code by using the Engine (as DreamE)
+// init here your game with your code by using the Engine (as DE)
 require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionary' ],
 function( files, gameLoop, Game, images, audios, inputs, dictionary )
 {
   console.log( "My Custom loads - balls" );
-  var DreamE = DreamEngine;
-  DreamE.init(
+  var DE = DreamEngine;
+  DE.init(
   {
     'customLoop': gameLoop, 'onReady': Game.init
     , 'onStart': Game.start, 'loader': { "scale": 2 }
@@ -45,5 +45,5 @@ function( files, gameLoop, Game, images, audios, inputs, dictionary )
     , 'about': { 'gameName': "ProtoBalls", 'author': "Dreamirl", 'gameVersion': "0.1" }
     , 'saveModel': { 'ballKilled': 0 }, 'saveIgnoreVersion': true
   } );
-  window.DREAM_E = DreamE;
+  window.DREAM_E = DE;
 } );

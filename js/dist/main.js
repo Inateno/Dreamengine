@@ -14,11 +14,11 @@ define( [ 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList'
 function( gameLoop, Game, images, audios, inputs, dictionary )
 {
   // make a function, will be called by engine
-  function launch( DreamE )
+  function launch( DE )
   {
-    DreamE.CONFIG.DEBUG = true;
-    DreamE.CONFIG.DEBUG_LEVEL = 2;//5;
-    DreamE.init(
+    DE.CONFIG.DEBUG = true;
+    DE.CONFIG.DEBUG_LEVEL = 2;//5;
+    DE.init(
     {
       'customLoop': gameLoop, 'onReady': Game.init
       , 'onStart': Game.start, 'loader': { "scale": 2 }
