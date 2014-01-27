@@ -63,7 +63,7 @@ This part is in early release, I won't push stuff that's not working well.
 Documentation
 -------
 
-[The "ig" how to here](http://dreamengine.dreamirl.com/#howto).
+[The "big" how to here](http://dreamengine.dreamirl.com/#howto).
 I didn't wrote a documentation yet, I'll use jsdoc or something like that. I just finished the "how to" (it's big enough to make a complete game).
 
 Contributing
