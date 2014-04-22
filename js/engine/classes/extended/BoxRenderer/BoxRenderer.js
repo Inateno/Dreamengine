@@ -1,21 +1,17 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-*
-* BoxRenderer
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
 /**
-** The BoxRenderer is child of Renderer
-** It draws a colored square for the gameObject
-** need the GameObject to draw
-** list of params are the sames as Renderer
-** need a width (int) in px
-** need a height (int) in px
-**/
-
+ * @constructor BoxRenderer
+ * @augments Renderer
+ * @class draw a a colored square<br>
+ * checkout Renderer for standard parameters
+ * @example var itsJustABox = new DE.GameObject( {
+ *   x: 500, y: 500,
+ *   renderer: new DE.BoxRenderer( { "fillColor": "red" }, 250, 100 )
+ * } );
+ */
 define( [ 'DE.Renderer', 'DE.BoxRenderer.render', 'DE.CONFIG', 'DE.Sizes' ],
 function( Renderer, BoxRender, CONFIG, Sizes )
 {
@@ -23,9 +19,8 @@ function( Renderer, BoxRender, CONFIG, Sizes )
   {
     Renderer.call( this, param );
     
-    this.sizes = new Sizes( width, height, 1, 1 );
-    this.localPosition.x -= ( width * 0.5 );
-    this.localPosition.y -= ( height * 0.5 );
+    this.sizes = new Sizes( width, height, 1, 1, this );
+    this.sizes._center();
     
     /***
     * @fillIt
@@ -54,40 +49,26 @@ function( Renderer, BoxRender, CONFIG, Sizes )
     /***
     * @changeWidth
     ***/
-    this.changeWidth = function( newWidth )
+    this.setWidth = function( newWidth )
     {
-      var delta = newWidth - this.sizes.width
-      this.sizes.width = newWidth;
-      
-      this.localPosition.x -= ( delta * 0.5 ) >> 0;
+      this.sizes.setSizes( newWidth, this.sizes.height );
     }
     
     /***
     * @changeHeight
     ***/  
-    this.changeHeight = function( newHeight )
+    this.setHeight = function( newHeight )
     {
-      var delta = newHeight - this.sizes.height
-      this.sizes.height = newHeight;
-      
-      this.localPosition.y -= ( delta * 0.5 ) >> 0;
+      this.sizes.setSizes( this.sizes.width, newHeight );
     }
       
     /***
     * @changeSizes
     ***/
-    this.changeSizes = function( newWidth, newHeight )
+    this.setSizes = function( newWidth, newHeight )
     {
-      var deltaw = newWidth - this.sizes.width
-      this.sizes.width = newWidth;
-      
-      var deltah = newHeight - this.sizes.height
-      this.sizes.height = newHeight;
-      
-      this.localPosition.x -= ( deltaw * 0.5 ) >> 0;
-      this.localPosition.y -= ( deltah * 0.5 ) >> 0;
+      this.sizes.setSizes( newWidth, newHeight );
     }
-    /* // */
   }
 
   BoxRenderer.prototype = new Renderer();

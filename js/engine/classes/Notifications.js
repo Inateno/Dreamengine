@@ -1,131 +1,153 @@
 /**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
-
-* ContributorsList
- @Inateno
-
-***
-* singleton@Notifications
- make Notifications poping in the window (bottom-left as default)
- you can override template in the default index.html and override animation in the default style.css
-**/
+* @author Inateno / http://inateno.com / http://dreamirl.com
+*/
+/**
+ * <b>You have to write your own CSS to place it, of course I give you a sample to try it<br>
+ * Don't use margins on "notification" element directly, that's why I use a div inside<br>
+ * (and set padding on the parent to simulate a margin)</b>
+ * @namespace Notifications
+ * @author Inateno
+ */
 define( [],
 function()
 {
   var Notifications = new function()
   {
-    this.DEName                = "Notifications";
-    this.notifs                = {};
-    this.heightNotifs          = 0;
+    this.DEName = "Notifications";
+    this.notifs                = {}; // contain all notifications created
+    this.notifsHeight          = 0;
     this.selector              = "notifsContainer";
-    this.el                    = null;
+    this.container             = null;
     this.templateName          = "notificationTemplate";
     this.template              = null;
     this.defaultExpirationTime = 3500;
+    this.closeAnimationDuration= 400;
+    this.notificationClassName = "notification";
     this.inited                = false;
     var _self = this;
     
-    /****
-     * init@void
+    /**
+     * Init Notifications, get template and container in the dom
+     * @memberOf Notifications
+     * @protected
+     * @param {object} params - Optional parameters, you can change all default value (check out the main constructor)
      */
     this.init = function( params )
     {
-      if ( this.inited )
-        return;
       params = params || {};
-      params.notifications = params.notifications || {};
       
-      this.selector = params.notifications.selector || this.selector;
-      this.templateName = params.notifications.templateName || this.templateName;
+      this.selector               = params.selector || this.selector;
+      this.templateName           = params.templateName || this.templateName;
+      this.closeAnimationDuration = params.closeAnimationDuration || this.closeAnimationDuration;
+      this.notificationClassName  = params.notificationClassName || this.notificationClassName;
       
-      this.el = document.getElementById( this.selector );
-      this.template = document.getElementById( this.templateName ).innerHTML;
+      this.container = params.container || document.getElementById( this.selector );
       
-      if ( !this.el || !this.template )
-        throw new Error( "FATAL ERROR: Can't init Notifications without an element AND a template -- "
-                        + "selector:: " + this.selector + " -- templateName:: " + this.templateName );
+      var templateContainer = document.getElementById( this.templateName )
+      this.template  = params.template || templateContainer ? templateContainer.innerHTML : null;
+      
+      if ( !this.container || !this.template )
+        throw new Error( "Can't init Notifications without a container element AND a template -- "
+            + "container selector:: " + this.selector + " -- templateName:: " + this.templateName );
+      
       this.inited = true;
-      document.body.removeChild( document.getElementById( this.templateName ) );
+      this.notifsHeight = this.container.offsetHeight || 0;
+      
+      if ( templateContainer )
+        document.body.removeChild( templateContainer );
     }
     
-    /****
-     * create@void( text@String, params@object )
-      create a Notification
-      TODO - WIP - add notification fx sound in params
+    /**
+     * Create a notification
+     * @memberOf Notifications
+     * @public
+     * @param {string} text - The title of the book.
+     * @param {int} expirationTime - Optional parameters in milliseconds
+     * @example DE.Notifications.create( "hello world", 1500 );
      */
-    this.create = function( text, params )
+    this.create = function( text, expirationTime ) // use this one
     {
       if ( !this.inited )
+      {
+        console.log( "You don't init Notifications, init it before call it" );
         return;
-      this.heightNotifs = this.heightNotifs < 0 ? 0 : this.heightNotifs;
+      }
+      this.notifsHeight = this.notifsHeight < 0 ? 0 : this.notifsHeight;
       
-      params = params || {};
-      var time = params.expire || this.defaultExpirationTime;
+      var time = expirationTime || this.defaultExpirationTime;
       var id = Date.now() + "-" + ( ( Math.random() * 100 ) >> 0 );
       
       var notif = document.createElement( 'div' );
+        notif.className = this.notificationClassName;
         notif.innerHTML = this.template;
         notif.getElementsByClassName( 'content' )[ 0 ].innerHTML = text;
         notif.id = 'notif' + id;
-      this.el.appendChild( notif );
+      this.container.appendChild( notif );
       
       this.notifs[ id ] = notif;
-      this.notifs[ id ].getElementsByClassName( 'notifClose' )[ 0 ].addEventListener( 'click', function()
+      this.notifs[ id ].getElementsByClassName( 'notifClose' )[ 0 ]
+        .addEventListener( 'click', function()
       {
-        _self.remove( id, true );
+        _self.remove( id );
       } );
       
       var height = this.notifs[ id ].offsetHeight;
-      this.heightNotifs += height;
-      this.el.style.height = this.heightNotifs + 'px';
+      this.notifsHeight += height;
+      this.container.style.height = this.notifsHeight + 'px';
       
       this.bindRemove( id, time );
     }
     
-    /****
-     * bindRemove@void
-      bind a setTimeout to remove the notification
+    /**
+     * bind the remove function
+     * @memberOf Notifications
+     * @protected
+     * @param {string} id - Is the notification to bind
+     * @param {int} time - is the time notification will stay on screen
      */
     this.bindRemove = function( id, time )
     {
       time = time || this.defaultExpirationTime;
       setTimeout( function()
       {
-        _self.remove( id );
+        _self.triggerRemove( id );
       }, time );
     }
     
-    /****
-     * remove@void
-      remove a notification in the page, called by callback time
+    /**
+     * launch animation to remove a notification
+     * @memberOf Notifications
+     * @protected
+     * @param {string} id - Is the notification to animate
      */
-    this.remove = function( id, ignoreFade )
+    this.triggerRemove = function( id )
     {
       if ( !this.notifs[ id ] )
         return;
       
-      if ( ignoreFade )
-      {
-        var newHeight = this.el.offsetHeight - this.notifs[ id ].offsetHeight;
-        this.el.style.height = newHeight + 'px';
-        this.el.removeChild( this.notifs[ id ] );
-        delete this.notifs[ id ];
-        return;
-      }
-      
-      var height = this.notifs[ id ].offsetHeight;
       this.notifs[ id ].className = this.notifs[ id ].className + ' disapear';
-      _self.heightNotifs -= height;
-      _self.el.style.height = _self.heightNotifs + 'px';
       
       setTimeout( function()
       {
-        _self.el.removeChild( _self.notifs[ id ] );
-        delete _self.notifs[ id ];
-      }, 110 );
+        _self.remove( id );
+      }, this.closeAnimationDuration );
+    }
+    
+    /**
+     * remove a notification from dom and object container
+     * @memberOf Notifications
+     * @protected
+     * @param {string} id - Is the notification to remove
+     */
+    this.remove = function( id )
+    {
+      var height = this.notifs[ id ].offsetHeight;
+      this.notifsHeight -= height;
+      this.container.style.height = this.notifsHeight + 'px';
+      this.container.removeChild( this.notifs[ id ] );
+      delete this.notifs[ id ];
+      return;
     }
   };
-  
   return Notifications;
 } );

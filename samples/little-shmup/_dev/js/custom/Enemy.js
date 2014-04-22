@@ -26,7 +26,7 @@ function( datas, DE, Bullet )
     {
       if ( this.position.y > 1400 )
         this.askToKill();
-      if ( !_player.disable && !_player.flipping
+      if ( _player.enable && !_player.flipping
           && DE.CollisionSystem.circleCollision( this.collider, _player.collider ) )
       {
         this.askToKill();
@@ -38,7 +38,7 @@ function( datas, DE, Bullet )
     // very simple fire method, just a fireRate
     this.fire = function()
     {
-      if ( this.disabled || !this.fireRate || Date.now() - this.lastFire < this.fireRate )
+      if ( !this.enable || !this.fireRate || Date.now() - this.lastFire < this.fireRate )
         return;
       this.lastFire = Date.now();
       this.scene.add( new Bullet( _screenSizes, this, _player ) );
@@ -51,7 +51,7 @@ function( datas, DE, Bullet )
         this.askToKill();
     }
     
-    this.addAutomatism( "IA", { "type": "gameLogic" } );
+    this.addAutomatism( "IA", "gameLogic" );
   };
   
   Enemy.prototype = new DE.GameObject();

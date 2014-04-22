@@ -1,18 +1,21 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
-
-***
-* Renderer( params )
- Renderer is to Render a gameObject, you can add unllimited renderers on a gameObject and they can have offsets
- when you want to create a customized Renderer, you have to herits from this one
- (you can look at SpriteRenderer, BoxRenderer, CircleRenderer)
- 
- !!Warning!! Default Renderer.render is empty, do not forget did it when you create custom Renderer
-**/
+/**
+ * @constructor Renderer
+ * @class Renderer is used to Render a GameObject, you can add unlimited renderers on a gameObject and they can have offsets<br>
+ * when you want to create a customized Renderer, you have to herits from this one 
+ * (you can look at SpriteRenderer, BoxRenderer, CircleRenderer... are pretty good examples)
+ * <b>!!Warning!! Default Renderer.render is empty, do not forget did it when you create custom Renderer</b>
+ * @example function MyRenderer = function( params, args )
+ * {
+ *   DE.Renderer.call( this, params );
+ * }
+ * MyRenderer.prototype = new Renderer();
+ * MyRenderer.prototype.constructor = MyRenderer;
+ * MyRenderer.prototype.supr        = Renderer.prototype;
+ */
 define( [ 'DE.COLORS', 'DE.Vector2', 'DE.CONFIG' ],
 function( COLORS, Vector2, CONFIG )
 {

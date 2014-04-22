@@ -1,31 +1,35 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
-
-***
-* Collider( params )
- default Collider Class.
- If you create custom Colliders, herit from this one
-*/
+/**
+ * @constructor Collider
+ * @class default Collider Class<br>
+ * don't use this one, but you can inherits from if you want to create a custom Collider
+ *
+ * @param {object} params - parameters, (gameObject, type, localPosition, isTrigger)
+ */
 define( [ 'DE.Vector2', 'DE.CONFIG' ],
 function( Vector2, CONFIG )
 {
   function Collider( params )
   {
-    params          = params || {};
-    this.type       = params.type || undefined;
-    // a collider without gameObject should provide bug if you use it 
+    params    = params || {};
+    this.type = params.type || undefined;
+    // a collider without gameObject should provide bug if you use it
+    
+    /**
+     * The collider's gameObject, if there isn't, you'll not be able to call CollisionSystem with this collider
+     * @type GameObject
+     */
     this.gameObject = params.gameObject || undefined;
     
     this.localPosition = params.localPosition || new Vector2( params.offsetX || params.offsetLeft || 0, params.offsetY || params.offsetTop || 0 );
     
     // not sure about this 3 attributes, will probably change
-    this.isColliding   = false;
-    this.isTrigger     = params.isTrigger || false;
-    this.collideWith   = new Array();
+    this.isColliding = false;
+    this.isTrigger   = params.isTrigger || false;
+    this.collideWith = new Array(); // not sure
     
     /****
      * getRealPosition@void

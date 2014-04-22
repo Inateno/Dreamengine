@@ -111,7 +111,7 @@ function( DE, GuiLabel, GuiImage )
       this.speedy = ( this.speedy > 10 ) ? 10 : this.speedy;
       this.speedy = ( this.speedy < -10 ) ? -10 : this.speedy;
     }
-    ball.addAutomatism( "move", { "type": "move" } );
+    ball.addAutomatism( "move", "move" );
     ball.onMouseDown = function( e )
     {
       this.askToKill();

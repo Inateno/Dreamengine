@@ -1,21 +1,32 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-* @constructor
-* FixedBoxCollider
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
+/**
+ * @constructor OrientedBoxCollider
+ * @class <b>Work In Progress don't use it</b><br>
+ * make an oriented box Collider that follow your gameObject rotations
+ * @augments Collider
+ * @param {int} width - box width
+ * @param {int} height - box height
+ * @param {object} params - Optional parameters (offets)
+ * @example // classic GameObject declaration
+ * var myObject = new DE.GameObject( {
+ *   x: 150, y: 200,
+ *   collider: new DE.OrientedBoxCollider( 150, 100 )
+ * } );
+ * @example // adding a collider later
+ * myObject.collider = new DE.OrientedBoxCollider( 150, 100 );
+ */
 define( [ 'DE.Collider', 'DE.CONFIG', 'DE.CanvasBuffer', 'DE.COLORS' ],
 function( Collider, CONFIG, CanvasBuffer, COLORS )
 {
-  function OrientedBoxCollider( width, height, param )
+  function OrientedBoxCollider( width, height, params )
   {
-    param = param || {};
-    param.type = CONFIG.COLLISION_TYPE.ORIENTED_BOX;
+    params = params || {};
+    params.type = CONFIG.COLLISION_TYPE.ORIENTED_BOX;
     
-    Collider.call( this, param );
+    Collider.call( this, params );
     
     var _points    = new Array();
     var _inCircles = new Array();

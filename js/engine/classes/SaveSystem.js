@@ -69,9 +69,9 @@ function( stash, CONFIG, about )
      */
     this.get = function( key )
     {
-      if ( !(key in this.saveModel ) )
+      if ( !( key in this.saveModel ) )
       {
-        this.saveModel[ key ] = stash.get( this.namespace + this.version + key );
+        this.saveModel[ key ] = stash.get( this.namespace + this.version + key ) || this.saveModel[ key ];
       }
       return this.saveModel[ key ];
     }
@@ -86,6 +86,8 @@ function( stash, CONFIG, about )
       {
         CONFIG.debug.log( "%c[WARN] You save a key doesn't exist in your saveModel ! add it to your saveModel but engine wont be able to get it later", 0, "color:orange" );
       }
+      if ( !value )
+        value = this.get( key );
       stash.set( this.namespace + this.version + key, value );
       this.saveModel[ key ] = value;
     }

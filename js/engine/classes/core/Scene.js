@@ -1,19 +1,18 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
+/* TODO - I was working on physic system by adding "colliders" and grids stuff inside the Scene
+ * but I'm still working on */
 
-***
-* Scene( name )
- a Scene is a world. You push GameObjects inside this world.
- There is no world Size, just objects inside
- TODO - I was working on physic system by adding "colliders" and grids stuff inside the Scene
- but I'm still working on
-**/
-define( [ 'DE.CONFIG', 'DE.COLORS', 'DE.GameObject', 'DE.Time', 'DE.MainLoop' ],
-function( CONFIG, COLORS, GameObject, Time, MainLoop )
+/**
+ * @constructor Scene
+ * @class a Scene is a world. You push GameObjects inside this world.
+ * There is no world Size, just objects inside
+ * @example Game.scene = new DE.Scene( "Test" );
+ */
+define( [ 'DE.CONFIG', 'DE.COLORS', 'DE.GameObject', 'DE.Time', 'DE.MainLoop', 'DE.Event' ],
+function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
 {
   function Scene( name )
   {
@@ -30,10 +29,19 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
     /*this.cameras    = new Array();
     this.maxCameras = 0;*/
     
-    // if this worl is sleeping, update will be ignored
+    // if this world is sleeping, update will be ignored
     this.sleep      = false;
     this.maxObjects = 0;
     this.tickers    = new Array(); // tickers can be stored in the world directly
+    
+    this.onGlobalMouseDown      = {};
+    this.onLastGlobalMouseDown  = {};
+    this.onGlobalMouseMove      = {};
+    this.onLastGlobalMouseMove  = {};
+    this.onGlobalMouseUp        = {};
+    this.onLastGlobalMouseUp    = {};
+    this.onGlobalMouseClick     = {};
+    this.onLastGlobalMouseClick = {};
     
     /****
      * init@void
@@ -84,16 +92,6 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
     }
     
     /****
-     * getGameObjects@Array
-      previously gameObjects was private, still here to maintain retro-compatibility
-      but will be removed
-     */
-    this.getGameObjects = function()
-    {
-      return this.gameObjects;
-    }
-    
-    /****
      * sortGameObjects@void
       sort gameObjects in the world depend on z axe and z-index
      */
@@ -106,15 +104,8 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
         return b.position.z - a.position.z;
       } );
       
-      for (var i = 0, go; go = this.gameObjects[ i ]; i++ )
-      {
-        go.childrens.sort( function( a, b )
-        {
-          if ( b.position.z == a.position.z )
-            return a.zindex - b.zindex;
-          return b.position.z - a.position.z;
-        } );
-      }
+      for ( var i = 0, go; go = this.gameObjects[ i ]; ++i )
+        go.sortChildrens();
       this.waitSortGameObjects = false;
     }
     
@@ -129,24 +120,46 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
         CONFIG.debug.log( "%cIt's not or not herits from a GameObjects", 1, "color:red" );
         return;
       }
+      gameObject.scene = this;
       this.gameObjects.push( gameObject );
+      
       // nope, when sort the scene this is not correct anymore
       // gameObject.sceneIndex = this.maxObjects;
-      gameObject.scene = this;
+      
       ++this.maxObjects;
       this.waitSortGameObjects = true;
     }
     
+    Event.addEventComponents( this );
     this.init();
   }
   
   Scene.prototype = Scene.prototype || {};
+  Event.addEventCapabilities( Scene );
+  
+  /**
+   * remove global events binded
+   * @memberOf Scene
+   * @protected
+   * @param {GameObject} object
+   */
+  Scene.prototype.cleanObjectBinding = function( object )
+  {
+    delete this.onGlobalMouseDown[ object.id ];
+    delete this.onLastGlobalMouseDown[ object.id ];
+    delete this.onGlobalMouseMove[ object.id ];
+    delete this.onLastGlobalMouseMove[ object.id ];
+    delete this.onGlobalMouseUp[ object.id ];
+    delete this.onLastGlobalMouseUp[ object.id ];
+  };
+  
   /****
    * remove@void
     remove an object on this scene ( not deleted ! )
    */
   Scene.prototype.remove = function( object )
   {
+    this.cleanObjectBinding( object );
     if ( this.gameObjects[ object ] )
     {
       this.gameObjects.splice( object, 1 );
@@ -185,10 +198,9 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop )
    */
   Scene.prototype.deleteAll = function()
   {
-    for ( var i = 0, go; go = this.gameObjects[ i ]; i++ )
-    {
-      this.delete( i );
-    }
+    var objs = this.gameObjects;
+    while ( objs.length > 0 )
+      this.delete( 0 );
     this.maxObjects = 0;
   }
   Scene.prototype.DEName = "Scene";

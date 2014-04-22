@@ -17,12 +17,14 @@ function( DE, Game )
     // you can ask for a key state like this
     if ( DE.Inputs.key("left") )
     {
-      Game.ship.translateX( -10 );
+      // Game.ship.translateX( -10 );
+      Game.ship.rotate( -0.05 );
       Game.ship.renderers[ 0 ].setFrame( 9 );
     }
     else if ( DE.Inputs.key( "right" ) )
     {
-      Game.ship.translateX( 10 );
+      // Game.ship.translateX( 10 );
+      Game.ship.rotate( 0.05 );
       Game.ship.renderers[ 0 ].setFrame( 1 );
     }
     else

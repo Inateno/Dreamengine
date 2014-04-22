@@ -53,7 +53,7 @@ function( DreamE )
     Game.render.add( Game.camera );
     
     // lastOn is the last event append on the camera, if no gameObject has stoped the propagation
-    Game.camera.lastOnMouseDown = function( e )
+    Game.camera.onLastMouseDown = function( e )
     {
       // for ( var i = 0; i < 50; ++i ) // stress test if you want try
         addBall( Game, e.x, e.y );
@@ -119,7 +119,7 @@ function( DreamE )
         this.position.y = 30;
       }
     }
-    ball.addAutomatism( "move", { "type": "move" } );
+    ball.addAutomatism( "move", "move" );
     
     // pointers events on gameObjects
     ball.onMouseDown = function( e )

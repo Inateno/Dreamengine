@@ -42,7 +42,7 @@ define( [ "datas", "DREAM_ENGINE" ]
       
       if ( _player )
       {
-        if ( !_player.disable && !_player.flipping
+        if ( _player.enable && !_player.flipping
             && DE.CollisionSystem.circleCollision( this.collider, _player.collider ) )
         {
           this.askToKill();
@@ -66,7 +66,7 @@ define( [ "datas", "DREAM_ENGINE" ]
       }
     }
     
-    this.addAutomatism( "logic", { "type": "gameLogic" } );
+    this.addAutomatism( "logic", "gameLogic" );
   }
   
   Bullet.prototype = new DE.GameObject();

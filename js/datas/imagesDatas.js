@@ -25,7 +25,7 @@ function( CONFIG )
     screenSizes: [
       { "w": 1920, "h": 1080, "path": "" }
       // { "w": 1280, "h": 720, "path": "" }
-      , { "w": 640, "h": 360, "path": "", "notRatio": true }
+      // , { "w": 640, "h": 360, "path": "", "notRatio": true }
       // , { "w": 480, "h": 270, "path": "sd/" }
     ]
     

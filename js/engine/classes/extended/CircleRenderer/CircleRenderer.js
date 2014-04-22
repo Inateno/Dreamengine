@@ -1,23 +1,19 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-*
-* CircleRenderer
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
 /**
-** The CircleRenderer is child of Renderer
-** It draws a colored circle for the gameObject
-** need the GameObject to draw
-** list of params are the sames as Renderer
-** need a radius (int) in px
-** optional: angleStart in radians
-** optional: angleEnd in radians
-** optional: clockRotation (bool);
-**/
-
+ * @constructor CircleRenderer
+ * @augments Renderer
+ * @class draw a a colored circle<br>
+ * checkout Renderer for standard parameters
+ * @example var cropCircle = new DE.GameObject( {
+ *   x: 500, y: 500,
+ *   renderer: new DE.CircleRenderer( {
+ *     "fillColor": "red", "strokeColor: "black", "method": "strokeAndFill"
+ *   }, 100, 0, Math.PI * 2, true )
+ * } );
+ */
 define( [ 'DE.Renderer', 'DE.CircleRenderer.render', 'DE.CONFIG', 'DE.CanvasBuffer' ],
 function( Renderer, CircleRender, CONFIG, CanvasBuffer )
 {

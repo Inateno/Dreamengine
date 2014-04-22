@@ -1,15 +1,14 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
+/* TODO - still WIP, don't use it I'm working on it :) */
 
-***
-* Ticker( params )
- create a timer, can bind it on a dom element
- TODO - still WIP, don't use it I'm working on it :)
-**/
+/**
+ * @constructor Ticker
+ * @class <b>Work In Progress - don't use it !</b><br>
+ * create a timer, can bind it on a dom element or a TextRenderer
+ */
 define( [ 'DE.CONFIG' ],
 function( CONFIG )
 {

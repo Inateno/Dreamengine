@@ -1,15 +1,14 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
+/* TODO - add DOM Gui possible, remove specific GuiComponents and use GameObjects
+ So I don't comment methods here because this will change a lot */
 
-***
-* Gui( camera, params )
- TODO - add DOM Gui possible, remove specific GuiComponents and use GameObjects
- So I don't comment methods here because this will change a lot
-**/
+/**
+ * @constructor Gui
+ * @class used to create a CanvasGui binded on the given camera
+ */
 define( [ 'DE.CONFIG', 'DE.COLORS', 'DE.Inputs', 'DE.CanvasBuffer' ],
 function( CONFIG, COLORS, InputHandler, CanvasBuffer )
 {
@@ -26,7 +25,7 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
     
     this.components = params.components || {};
     
-    var _buffer = new CanvasBuffer( camera.sizes.width, camera.sizes.height );
+    var _buffer = new CanvasBuffer( camera.renderSizes.width, camera.renderSizes.height );
     
     this.needUpdate = true;
     
@@ -56,7 +55,7 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
       {
         for ( var i in this.components )
         {
-          if ( this.components[ i ].disable )
+          if ( !this.components[ i ].enable )
           {
             if ( !this.components[ i ].isDisable )
               this.components[ i ].clearMe( _buffer.ctx );
@@ -122,7 +121,8 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
     {
       for ( var i in this.components )
       {
-        if ( this.components[ i ].disable ){ continue; }
+        if ( !this.components[ i ].enable )
+          continue;
         var component = this.components[ i ];
         if (  component.checkState && component.checkState( mouse ) )
         {
@@ -140,7 +140,8 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
     {
       for ( var i in this.components )
       {
-        if ( this.components[ i ].disable ){ continue; }
+        if ( !this.components[ i ].enable )
+          continue;
         var component = this.components[ i ];
         if (  component.checkState && component.checkState( mouse ) )
         {
@@ -159,7 +160,8 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
     {
       for ( var i in this.components )
       {
-        if ( this.components[ i ].disable ){ continue; }
+        if ( !this.components[ i ].enable )
+          continue;
         var component = this.components[ i ];
         if (  component.checkState && component.checkState( mouse ) )
         {
@@ -176,17 +178,15 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
     */
     this.onMouseClick = function( mouseEvent )
     {
-      //get mouse coordinates 
-      InputHandler.mouseMove( mouseEvent );
-      
       //launch click on components 
-      for ( var i in Gui.components )
+      for ( var i in this.components )
       {
-        if ( Gui.components[ i ].disable ){ continue; }
-        var component = Gui.components[i];
+        if ( !this.components[ i ].enable )
+          continue;
+        var component = this.components[i];
         if ( typeof( component.checkState ) !== "undefined" )
         {
-          Gui.isFocus = component.checkState( InputHandler.mouse, true ); //if focus obtained via click return it in function
+          this.isFocus = component.checkState( InputHandler.mouse, true ); //if focus obtained via click return it in function
         }
       }
     }
@@ -196,7 +196,8 @@ function( CONFIG, COLORS, InputHandler, CanvasBuffer )
       //send onKeyDown event to all components . NOTE : component MUST HAVE FOCUS to receive the event (test is made)
       for ( var i in Gui.components )
       {
-        if ( Gui.components[ i ].disable ){ continue; }
+        if ( !Gui.components[ i ].enable )
+          continue;
         var component = Gui.components[i];
         if ( typeof( component.onKeyDown ) !== "undefined" )
         {

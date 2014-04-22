@@ -14,19 +14,20 @@ function(  CollisionSystem, CONFIG, Time )
 {
   function update( time )
   {
-    if ( this.disable ){ return; }
+    if ( !this.enable )
+      return;
     // execute registered automatisms
     for ( var a in this.automatism )
     {
       var auto = this.automatism[ a ];
-      if ( time - auto.lastCall < auto.interval / Time.scaleDelta ){ continue;}
+      if ( auto.interval && time - auto.lastCall < auto.interval / Time.scaleDelta ){ continue;}
       auto.lastCall = time;
-      // only 2 vals max, I could make a this[ auto.type ].apply( this, args ) but it's slower
-      //
-      this[ auto.type ]( auto.value1, auto.value2 );
+      // only 2 vals max, I could make a this[ auto.methodName ].apply( this, args ) but it's slower
+      // I think
+      this[ auto.methodName ]( auto.value1, auto.value2 );
       
-      // if this one isn't persistant delete it
-      if ( !auto.persistant )
+      // if this one isn't persistent delete it
+      if ( !auto.persistent )
         delete this.automatism[ a ];
     }
     

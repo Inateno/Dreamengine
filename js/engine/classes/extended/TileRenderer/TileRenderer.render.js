@@ -23,12 +23,12 @@ function( ImageManager, CONFIG, Time )
     if ( ImageManager.imageNotRatio )
     {
       ctx.drawImage( ImageManager.images[ this.imageName ]
-              , this.tileposition.x, this.tileposition.y
-              , this.tilesizes.width, this.tilesizes.height
+              , this.tileposition.x * physicRatio >> 0, this.tileposition.y * physicRatio >> 0
+              , this.tilesizes.width * physicRatio +1 >> 0, this.tilesizes.height * physicRatio +1 >> 0
               , this.localPosition.x * physicRatio * ratioz >> 0
               , this.localPosition.y * physicRatio * ratioz >> 0
-              , this.sizes.width * this.sizes.scaleX * physicRatio * ratioz >> 0
-              , this.sizes.height * this.sizes.scaleY * physicRatio * ratioz >> 0 );
+              , this.sizes.width * this.sizes.scaleX * physicRatio * ratioz +2 >> 0
+              , this.sizes.height * this.sizes.scaleY * physicRatio * ratioz +1 >> 0 );
     }
     else
     {

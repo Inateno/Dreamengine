@@ -22,13 +22,13 @@ function( DE )
     object.bulletSpeed = 3;
     object.fire = function( target, distance )
     {
-      if ( target.position.isInRangeFrom( this.getPos(), distance ) )
+      if ( DE.CollisionSystem.pointCircleCollision( target.getPos(), this.collider ) )
       {
         var pos = this.getPos();
         var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-        var tir = new DE.GameObject( { "name": "tir", "tag":"time", "x": pos.x, "y": pos.y, "renderer": sprite } );
-        tir.position.setRotation( this.getRotation() );
-        tir.moving = function( value )
+        var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "renderer": sprite } );
+        bullet.position.setRotation( this.getRotation() );
+        bullet.moving = function( value )
         {
           this.translateY( value );
           if ( this.position.x < -50 || this.position.y < -50 || this.position.x > 1920 || this.position.y > 1080 )
@@ -36,8 +36,8 @@ function( DE )
             this.askToKill();
           }
         }
-        tir.addAutomatism( "moving", { "type":"moving", "value1": this.bulletSpeed } );
-        Game.scene.add( tir );
+        bullet.addAutomatism( "moving", "moving", { "value1": this.bulletSpeed } );
+        Game.scene.add( bullet );
       }
     }
   }
@@ -65,7 +65,7 @@ function( DE )
         , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
       } );
       var gatling = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 50 )
+        , 'collider': new DE.CircleCollider( 200 )
       } );
       gatling.onMouseDown = function(){ console.log( "%cgatling gun down", "color:orange" ); }
       gatling.onMouseEnter = function(){ console.log( "%cgatling gun enter", "color:orange" ); }
@@ -76,7 +76,7 @@ function( DE )
         , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
       } );
       var rocketo = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 50 )
+        , 'collider': new DE.CircleCollider( 300 )
       } );
       canon2.add( rocketo );
       
@@ -88,18 +88,18 @@ function( DE )
       // STEP 2
       enemy.move = function()
       {
-        this.rotate( 0.04 );
-        this.translateY( 2 );
+        this.translateY( 4 );
+        this.rotate( 0.01 );
         // this.arm.lookAt( this.target.position );
-        // this.arm.rotate( 0.008 ); //lookAt( this.target.position );
+        this.arm.lookAt( this.target.position );
       }
-      enemy.addAutomatism( "gameLogic", { "type": "move" } );
+      enemy.addAutomatism( "gameLogic", "move" );
       
       // STEP 3
-      // addFire( gatling );
-      // gatling.addAutomatism( "tire", { "type":"fire", "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-      // addFire( rocketo );
-      // rocketo.addAutomatism( "tire", { "type":"fire", "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+      addFire( gatling );
+      gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+      addFire( rocketo );
+      rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
       rocketo.bulletSpeed = 7;
   }
   
@@ -176,13 +176,13 @@ function( DE )
     // Create Enemies
     Game.enemies = new Array();
     var n = 22;
-    // addEnemy( Game, 500, 500, Game.ship );
+    addEnemy( Game, 1000, 500, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 0+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 200+i%2*100, Game.ship );
     for ( var i = 0; i < n; ++i )
-      addEnemy( Game, 180 + i*80, 400+i%2*100, Game.ship );
+      // addEnemy( Game, 180 + i*80, 400+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 600+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
@@ -191,7 +191,7 @@ function( DE )
     //   addEnemy( Game, 180 + i*80, 1000+i%2*100, Game.ship );
     
     Game.camera.gui.add( new DE.GuiLabel( { 'id': "hello", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Hello world" ) );
-    Game.camera.gui.add( new DE.GuiButton( { 'id': "Click me plz", 'x': 450, 'y': 600, "w": 100, "h": 100, 'fillColor': "white", "disable": true } ) );
+    Game.camera.gui.add( new DE.GuiButton( { 'id': "Click me plz", 'x': 450, 'y': 600, "w": 100, "h": 100, 'fillColor': "white", "enable": false } ) );
     Game.camera.gui.add( new DE.GuiImage( { 'id': 'simpleImage', 'spriteName': "reactor", "x": 200, "y": 600, "w": 100, "h": 100, "paused": true } ) );
     
     Game.camera.gui.components[ 'hello' ].onMouseUp = function()
@@ -205,7 +205,7 @@ function( DE )
     Game.camera.gui.components[ 'Click me plz' ].onMouseUp = function()
     {
       console.log( "clickcik" );
-      Game.camera.position.rotate( Math.PI*0.1 );
+      Game.camera.renderPosition.rotate( Math.PI*0.1 );
     }
     // Game.camera.position.rotate( Math.PI );
     
@@ -214,10 +214,10 @@ function( DE )
     {
       var pos = this.getPos();
       var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-      var tir = new DE.GameObject( { "name": "tir", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
-      tir.position.setRotation( this.position.rotation );
-      tir.addAutomatism( "bouge", { "type":"translateY", "value1": -3 } );
-      Game.scene.add( tir );
+      var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
+      bullet.position.setRotation( this.position.rotation );
+      bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
+      Game.scene.add( bullet );
     }
     //
     // DE.Inputs.addActionInput( "fire", "launchMissile", function(){Game.ship.fire();}, "up" )

@@ -1,0 +1,4 @@
+/*
+  waves - little demoscene for fun - by Inateno
+  arts come from Dreamirl and are not free to use
+*/

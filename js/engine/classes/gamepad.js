@@ -572,27 +572,18 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
       this.onBtnDown( padIndex, num, function( force )
       {
         InputManager.usedInputs[ inputName ].isDown = true;
-        for ( var ev in InputManager.queue[ 'keyDown' ][ inputName ] )
-        {
-          InputManager.queue[ 'keyDown' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'keyDown', inputName, force );
       }, false );
       
       this.onBtnUp( padIndex, num, function( force )
       {
         InputManager.usedInputs[ inputName ].isDown = false;
-        for ( var ev in InputManager.queue[ 'keyUp' ][ inputName ] )
-        {
-          InputManager.queue[ 'keyUp' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'keyUp', inputName, force );
       }, false );
       
       this.onBtnMove( padIndex, num, function( force )
       {
-        for ( var ev in InputManager.queue[ 'btnMoved' ][ inputName ] )
-        {
-          InputManager.queue[ 'btnMoved' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'btnMoved', inputName, force );
       }, false );
     }
     
@@ -600,26 +591,17 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     {
       this.onAxeStart( padIndex, num, function( force )
       {
-        for ( var ev in InputManager.queue[ 'axeStart' ][ inputName ] )
-        {
-          InputManager.queue[ 'axeStart' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'axeStart', inputName, force );
       }, false );
       
       this.onAxeStop( padIndex, num, function( force )
       {
-        for ( var ev in InputManager.queue[ 'axeStop' ][ inputName ] )
-        {
-          InputManager.queue[ 'axeStop' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'axeStop', inputName, force );
       }, false );
             
       this.onAxeMove( padIndex, num, function( force )
       {
-        for ( var ev in InputManager.queue[ 'axeMoved' ][ inputName ] )
-        {
-          InputManager.queue[ 'axeMoved' ][ inputName ][ ev ]( force );
-        }
+        InputManager.trigger( 'axeMoved', inputName, force );
       }, false );
     }
     

@@ -9,26 +9,26 @@ herits this class to create a GUI components, look at GuiButton / GuiImage or Gu
 define( [ 'DE.CONFIG', 'DE.COLORS', 'DE.Vector2', 'DE.Sizes' ],
 function( CONFIG, COLORS, Vector2, Sizes )
 {
-  function BaseGui( param )
+  function BaseGui( params )
   {
-    if ( !param )
+    if ( !params )
       throw new Error( "BaseGui :: You have to pass arguments object to instantiate -- see the doc" );
-    if ( param.ignore )
+    if ( params.ignore )
       return;
     
     this.gui       = null;
-    this.id        = param.id || param.name || Date.now() + Math.random() * Date.now() >> 0;
-    this.name      = param.name || null;
-    this.disable   = param.disable || false;
+    this.id        = params.id || params.name || Date.now() + Math.random() * Date.now() >> 0;
+    this.name      = params.name || null;
+    this.enable    = params.enable === false ? false : true;
     this.isDisable = false;
     
-    param.scaleX = param.scale || param.scaleX || param.scalex || 1;
-    param.scaleY = param.scale || param.scaleY || param.scaley || 1;
+    params.scaleX = params.scale || params.scaleX || params.scalex || 1;
+    params.scaleY = params.scale || params.scaleY || params.scaley || 1;
     
-    this.position = new Vector2( param.x || param.posX || param.posx || param.X || 0, param.y || param.posY || param.posy || param.Y || 0 );
-    this.sizes = new Sizes( param.width || param.w || CONFIG.DEFAULT_SIZES.GUI.WIDTH
-                      , param.height || param.h || CONFIG.DEFAULT_SIZES.GUI.HEIGHT
-                      , param.scaleX, param.scaleY );
+    this.position = new Vector2( params.x || params.posX || params.posx || params.X || 0, params.y || params.posY || params.posy || params.Y || 0 );
+    this.sizes = new Sizes( params.width || params.w || CONFIG.DEFAULT_SIZES.GUI.WIDTH
+                      , params.height || params.h || CONFIG.DEFAULT_SIZES.GUI.HEIGHT
+                      , params.scaleX, params.scaleY );
     
     // events states
     this.isOver     = false;
@@ -45,7 +45,7 @@ function( CONFIG, COLORS, Vector2, Sizes )
     
     /***
     * @public @oRender
-    @param @canvasContext2D ctx
+    @params @canvasContext2D ctx
     * don't override it !
     Clear the ctx with sizes, where this Gui is
     then call @render
@@ -76,7 +76,7 @@ function( CONFIG, COLORS, Vector2, Sizes )
     
     /***
     * @public @clearMe
-    @param @canvasContext2D ctx
+    @params @canvasContext2D ctx
     Clear the ctx with sizes, where this Gui is
     */
     this.clearMe = function( ctx )
@@ -90,14 +90,14 @@ function( CONFIG, COLORS, Vector2, Sizes )
     
     /***
     * @public @render
-    * @param @canvasContext2D ctx
+    * @params @canvasContext2D ctx
     * @override
     */
     this.render = function( ctx, physicRatio, render ){}
     
     /***
     * @checkState
-    * @params
+    * @paramss
     - verify the visual state of button
     */
     this.checkState = function( pos, click )
@@ -124,9 +124,9 @@ function( CONFIG, COLORS, Vector2, Sizes )
     */
     this.hide = function()
     {
-      if ( !this.disable )
+      if ( this.enable )
         this.gui.needUpdate = true;
-      this.disable = true;
+      this.enable = false;
     }
     
     /***
@@ -134,9 +134,9 @@ function( CONFIG, COLORS, Vector2, Sizes )
     */
     this.show = function()
     {
-      if ( this.disable )
+      if ( !this.enable )
         this.gui.needUpdate = true;
-      this.disable = false;
+      this.enable = true;
     }
     
     /***
@@ -144,7 +144,7 @@ function( CONFIG, COLORS, Vector2, Sizes )
     */
     this.toggle = function()
     {
-      this.disable = Game.camera.gui.components[ 'Click me plz' ].disable^1;
+      this.enable = Game.camera.gui.components[ 'Click me plz' ].enable^1;
       this.gui.needUpdate = true;
     }
   }

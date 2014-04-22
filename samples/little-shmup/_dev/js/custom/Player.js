@@ -25,8 +25,8 @@ function( datas, DE, GamePad, Bullet )
       this.life = 3;
       this.position.setPosition( _screenSizes.w / 2, _screenSizes.h - 280 );
       for ( var i = 0; i < this.hearts.length; ++i )
-        this.hearts[ i ].disable = false;
-      this.disable = false;
+        this.hearts[ i ].enable = true;
+      this.enable = true;
     }
     
     this.checkPos = function()
@@ -164,14 +164,14 @@ function( datas, DE, GamePad, Bullet )
       }
       this.gui.restartBtn.onMouseUp = function()
       {
-        this.parent.disable = true;
+        this.parent.enable = false;
         this.renderers[ 0 ].setFrame( 0 );
         _self.trigger( "restart" ); // use trigger method - Game will catch it
       }
       this.gui.add( loose );
       this.gui.add( this.gui.restartBtn );
       this.scene.add( this.gui );
-      this.gui.disable = true;
+      this.gui.enable = false;
     }
     
     // register down keys to detect a flip intention
@@ -179,7 +179,7 @@ function( datas, DE, GamePad, Bullet )
     DE.Inputs.on( "keyDown", "right", function(){ _self.flip( 1 ) } );
     // when menu is up, check gamePad keys
     DE.Inputs.on( "keyDown", "confirm", function(){
-      if ( !_self.gui.disable )
+      if ( _self.gui.enable )
         _self.gui.restartBtn.onMouseUp();
     } );
     
@@ -190,7 +190,7 @@ function( datas, DE, GamePad, Bullet )
     DE.Inputs.on( "axeStop", "haxe", function(){ _self.updateAxes( 0, undefined ); } );
     DE.Inputs.on( "axeStop", "vaxe", function(){ _self.updateAxes( undefined, 0 ); } );
     
-    this.addAutomatism( "checkInputs", { "type": "checkInputs" } );
+    this.addAutomatism( "checkInputs", "checkInputs" );
   };
   
   Player.prototype = new DE.GameObject();
@@ -206,12 +206,12 @@ function( datas, DE, GamePad, Bullet )
     if ( this.life < 0 )
     {
       // active loose gui
-      this.gui.disable = false;
+      this.gui.enable = true;
       // DE.AudioManager.fx.play( "kaboom" );
-      this.disable = true;
+      this.enable = false;
       return;
     }
-    this.hearts[ this.life ].disable = true;
+    this.hearts[ this.life ].enable = false;
   }
   
   // here update axes, and flip intention

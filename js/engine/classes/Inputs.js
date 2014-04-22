@@ -23,7 +23,7 @@ function( CONFIG, gamePad )
     
     // @private renders, stock renders to bind inputs and call them
     var _renders = {};
-    this.kbLostFocus = false;
+    this.keyLocked = false;
     
     // to support multi-touch, use 12 mouses pos possible
     this.mouse = [
@@ -200,11 +200,13 @@ function( CONFIG, gamePad )
      * trigger@void( eventType@String, keyName@String )
       trigger manually an event
      */
-    this.trigger = function( eventType, keyName )
+    this.trigger = function( eventType, keyName, val )
     {
+      if ( Inputs.keyLocked && eventType.search( "mouse" ) == -1 )
+        return;
       for ( var ev in Inputs.queue[ eventType ][ keyName ] )
       {
-        Inputs.queue[ eventType ][ keyName ][ ev ]();
+        Inputs.queue[ eventType ][ keyName ][ ev ]( val );
       }
     }
     
@@ -214,6 +216,8 @@ function( CONFIG, gamePad )
      */
     this.key = function( name )
     {
+      if ( Inputs.keyLocked )
+        return;
       if ( this.usedInputs[ name ] && this.usedInputs[ name ].isDown
         && ( !this.usedInputs[ name ].interval || Date.now() - this.usedInputs[ name ].lastCall >= this.usedInputs[ name ].interval )
       )
@@ -298,7 +302,7 @@ function( CONFIG, gamePad )
      */
     this.keyDown = function( event )
     {
-      if ( Inputs.kbLostFocus )
+      if ( Inputs.keyLocked )
         return false;
       var e = event || window.event;
       var code = e.which || e.keyCode;
@@ -318,12 +322,7 @@ function( CONFIG, gamePad )
           
           /* specific on keydown event handler here */
           if ( !Inputs.usedInputs[ isDown ].isDown )
-          {
-            for ( var ev in Inputs.queue[ 'keyDown' ][ isDown ] )
-            {
-              Inputs.queue[ 'keyDown' ][ isDown ][ ev ]();
-            }
-          }
+            Inputs.trigger( 'keyDown', isDown, 1 );
           Inputs.usedInputs[ isDown ].isDown = true;
         }
         Inputs.usedInputs[ isDown ].numberPress++;
@@ -338,7 +337,7 @@ function( CONFIG, gamePad )
      */
     this.keyUp = function( event )
     {
-      if ( Inputs.kbLostFocus )
+      if ( Inputs.keyLocked )
         return false;
       var e = event || window.event;
       var code = e.which || e.keyCode;
@@ -349,13 +348,7 @@ function( CONFIG, gamePad )
       if ( isUp !== false )
       {
         if ( Inputs.usedInputs[ isUp ].isDown )
-        {
-          /* "on" keyup event handler here */
-          for ( var ev in Inputs.queue[ 'keyUp' ][ isUp ] )
-          {
-            Inputs.queue[ 'keyUp' ][ isUp ][ ev ]();
-          }
-        }
+          Inputs.trigger( 'keyUp', isUp );
         
         if ( Inputs.usedInputs[ isUp ].stayOn )
         {
@@ -409,13 +402,7 @@ function( CONFIG, gamePad )
       if ( isDown !== false )
       {
         if ( !Inputs.usedInputs[ isDown ].isDown )
-        {
-          /* "on" event handler here */
-          for ( var ev in Inputs.queue[ 'mouseDown' ][ isDown ] )
-          {
-            Inputs.queue[ 'mouseDown' ][ isDown ][ ev ]();
-          }
-        }
+          Inputs.trigger( 'mouseDown', isDown );
         
         Inputs.usedInputs[ isDown ].isDown = true;
       }
@@ -438,13 +425,7 @@ function( CONFIG, gamePad )
       if ( isDown !== false )
       {
         if ( Inputs.usedInputs[ isDown ].isDown )
-        {
-          /* "on" event handler here */
-          for ( var ev in Inputs.queue[ 'mouseUp' ][ isDown ] )
-          {
-            Inputs.queue[ 'mouseUp' ][ isDown ][ ev ]();
-          }
-        }
+          Inputs.trigger( 'mouseUp', isDown );
         Inputs.usedInputs[ isDown ].isDown = false;
       }
       

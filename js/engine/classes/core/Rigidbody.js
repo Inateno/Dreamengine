@@ -1,15 +1,14 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
+/* TODO - do it */
 
-***
-* Rigidbody( gameObject, params )
- TODO - still WIP - don't use it
- Will be used to add physic on a gameObject
-**/
+/**
+ * @constructor RigidBody
+ * @class <b>Work In Progress don't use it!!</b><br>
+ * Will be used to add physic on a gameObject
+ */
 define( [ 'DE.Vector2', 'DE.CONFIG' ],
 function( Vector2, CONFIG )
 {

@@ -1,35 +1,72 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
-
-***
-* Vector2( x, y, z )
- so, this is strange I assume, there is a z.
- But this z isn't a real axis, it's usefull to make a fake 3D scale on objects and
- ordering GameObject by z and z-index (order is important, lower z will be under higher z of course)
- So it's a Vector2 because you can't rotate or do anything on z axe, z is totally optionnal
- TODO - check dotProduct call and getAngle method if it's ok
-**/
+/**
+ * @constructor Vector2
+ * @class so, this is strange I assume, there is a z.<br>
+ * But this z isn't a real axis, it's usefull to make a fake 3D scale on objects and<br>
+ * ordering GameObject by z + z-index (order is important, lower z will be under higher z of course)<br>
+ * So it's a Vector2 because you can't rotate or do anything on z axe, z is totally optional<br>
+ * (of course, you can produce really nice effects with z, by calculating collisions along z axis, you should be able to do a nice Street of Rage like)
+ * @example var pos = new DE.Vector2( 150, 100 );
+ * @param {Float} [x=0]
+ * @param {Float} [y=0]
+ * @param {Float} [z=0]
+ */
 define( [ 'DE.Time', 'DE.CONFIG' ],
 function( Time, CONFIG )
 {
   var _PI = Math.PI;
   function Vector2( x, y, z )
   {
+    /**
+     * @public
+     * @memberOf Vector2
+     * @type {Float}
+     */
     this.x = x || 0;
+    /**
+     * @public
+     * @memberOf Vector2
+     * @type {Float}
+     */
     this.y = y || 0;
+    /**
+     * @public
+     * @memberOf Vector2
+     * @type {Float}
+     */
     this.z = z || 0;
+    /**
+     * current rotation, between 0 and 2PI
+     * @public
+     * @memberOf Vector2
+     * @type {Float}
+     */
     this.rotation = 0;
     
-    var _cosAngle = 0;
+    /**
+     * store cosinus
+     * @private
+     * @memberOf Vector2
+     * @type {Float}
+     */
+    var _cosAngle = 1;
+    /**
+     * store sinus
+     * @private
+     * @memberOf Vector2
+     * @type {Float}
+     */
     var _sinAngle = 0;
     
-    /****
-     * setRotation@radian( newAngle@radian )
-      set the rotation between 0 and 2PI
+    /**
+     * set precise rotation
+     * @public
+     * @memberOf Vector2
+     * @param {Float} newAngle
+     * @returns {Float} this.rotation current rotation
      */
     this.setRotation = function( newAngle )
     {
@@ -38,7 +75,7 @@ function( Time, CONFIG )
       if ( this.rotation == 0 )
       {
         _sinAngle = 0;
-        _cosAngle = 0;
+        _cosAngle = 1;
       }
       else
       {
@@ -48,10 +85,12 @@ function( Time, CONFIG )
       return this.rotation;
     }
     
-    /****
-     * setPosition@Vector2( first@Vector2 || Int, y@Int )
-      first can be a vector or an object with x and y
-      otherwhise can pass x and y directly
+    /**
+     * set precise position
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2|Float} Vector2 or x
+     * @returns {Vector2} this current instance
      */
     this.setPosition = function( first, y )
     {
@@ -66,11 +105,13 @@ function( Time, CONFIG )
       return this;
     }
 
-    /****
-     * rotate@radian( angle@radian, [ignoreDelta@bool] )
-      rotate this vector by adding given angle
-      trunk final value between 0 and 2PI
-      can ignore deltaTime
+    /**
+     * apply the given angle to rotation
+     * @public
+     * @memberOf Vector2
+     * @param {Float} angle rotation value
+     * @param {Boolean} [ignoreDelta] if you want to prevent deltaTime adjustment
+     * @returns {Float} this.rotation current rotation
      */
     this.rotate = function( angle, ignoreDelta )
     {
@@ -79,9 +120,12 @@ function( Time, CONFIG )
       return this.setRotation( this.rotation + ( angle * Time.deltaTime ) );
     }
     
-    /****
-     * multiply@Vector2( coef@float )
-      multiply this vector with coef
+    /**
+     * multiply this vector with coef
+     * @public
+     * @memberOf Vector2
+     * @param {Float} coef
+     * @returns {Vector2} this current instance
      */
     this.multiply = function( coef )
     {
@@ -90,11 +134,14 @@ function( Time, CONFIG )
       return this;
     }
     
-    /****
-     * translate@void( vector2@Vector2, [absolute@bool, ignoreDelta@bool] )
-      add the given vector to current
-      if absolute, will ignore the current Vector2 rotation
-      can ignore deltaTime
+    /**
+     * move position along the given Vector2
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} vector2 vector to translate along
+     * @param {Boolean} absolute if absolute, translation will ignore current rotation
+     * @param {Boolean} [ignoreDelta] if you want to prevent deltaTime adjustment
+     * @returns {Vector2} this current instance
      */
     this.translate = function ( vector2, absolute, ignoreDelta )
     {
@@ -103,23 +150,23 @@ function( Time, CONFIG )
       
       if ( !ignoreDelta )
       {
-        var vector2 = {
-          x : ( vector2.x * Time.deltaTime ) >> 0
-          ,y: ( vector2.y * Time.deltaTime ) >> 0
-        }
+        vector2 = {
+          x : ( vector2.x * Time.deltaTime )
+          ,y: ( vector2.y * Time.deltaTime )
+        };
       }
       
       if ( !absolute )
       {
-        if ( _cosAngle && _sinAngle )
-        {
-          this.x -= -vector2.x * _cosAngle + vector2.y * _sinAngle;
-          this.y -= -vector2.x * _sinAngle + vector2.y * -_cosAngle;
-        }
-        else
+        if ( this.rotation == 0 )
         {
           this.x += vector2.x;
           this.y += vector2.y;
+        }
+        else
+        {
+          this.x -= -vector2.x * _cosAngle + vector2.y * _sinAngle;
+          this.y -= -vector2.x * _sinAngle + vector2.y * -_cosAngle;
         }
       }
       else
@@ -130,9 +177,11 @@ function( Time, CONFIG )
       return this;
     }
     
-    /****
-     * normalize@Vector2
-      change the vector length to 1 (check wikipedia normalize if you want know more about)
+    /**
+     * change the vector length to 1 (check wikipedia normalize if you want know more about)
+     * @public
+     * @memberOf Vector2
+     * @returns {Vector2} this current instance
      */
     this.normalize = function()
     {
@@ -142,9 +191,13 @@ function( Time, CONFIG )
       return this;
     }
     
-    /****
-     * getVector@Vector2( a@Vector2, b@Vector2 )
-      return the Vector between two Vector2
+    /**
+     * return the Vector between two Vector2
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} a first vector2
+     * @param {Vector2} b second vector2
+     * @returns {Vector2} this current instance
      */
     this.getVector = function( a, b )
     {
@@ -157,29 +210,31 @@ function( Time, CONFIG )
       return this;
     }
     
-    /****
-     * dotProduct@Vector2( a@Vector2, b@Vector2 )
-      return the dotProduct between two Vector
-      See wikipedia dot product for more informations
+    /**
+     * return the dotProduct between two Vector<br>
+     * See wikipedia dot product for more informations
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} a first vector2
+     * @param {Vector2} b second vector2
+     * @returns {Float} dotProduct result
      */
     this.dotProduct = function( a, b )
     {    
       if ( !a.x || !a.y )
         throw new Error( "Vector2 need two Vector2 to return dotProduct" );
-        // || (!b.x && b.x != 0) || (!b.y && b.y != 0) )
-      
-      /* this was previous code but it's wrong, but if it was here, it's probably for a reason
-      this.x = b.x * a.x;
-      this.y = b.y * a.y;
-      return this;*/
-      if ( b.x )
+      if ( b && b.x )
         return a.x * b.x + a.y * b.y;
       return this.x * a.x + this.y * a.y;
     }
     
-    /****
-     * getAngle@radian( a@Vector2, b@Vector2 )
-      return the angle (radians) between two vector2
+    /**
+     * return the angle (radians) between two vector2
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} a first vector2
+     * @param {Vector2} b second vector2
+     * @returns {Float} angle result
      */
     this.getAngle = function ( a, b )
     {
@@ -192,9 +247,15 @@ function( Time, CONFIG )
       return Math.acos( tmp_vectorA.dotProduct( tmp_vectorB ) );
     }
     
+    /**
+     * return real pixel distance with an other Vector2
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} other
+     * @returns {Int} distance result
+     */
     /****
      * getDistance@Int( other@Vector2 )
-      return real pixel distance with an other Vector2 
      */
     this.getDistance = function( other )
     {
@@ -205,9 +266,13 @@ function( Time, CONFIG )
       return Math.sqrt( x + y ) >> 0;
     }
     
-    /****
-     * isInRangeFrom@bool( other@Vector2, range@Int )
-      trigger a circle collision with an other Vector and a range
+    /**
+     * trigger a circle collision with an other Vector and a range
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} other
+     * @param {Float} range
+     * @returns {Boolean} isInRange result
      */
     this.isInRangeFrom = function( other, range )
     {
@@ -222,16 +287,19 @@ function( Time, CONFIG )
       return false;
     }
     
-    /****
-     * getHarmonics@harmonics( [rotation@radian] )
-      return the harmonics value
-      can pass a rotation to get harmonics with this rotation
+    /**
+     * return the harmonics value<br>
+     * can pass a rotation to get harmonics with this rotation
+     * @public
+     * @memberOf Vector2
+     * @param {Float} [rotation] used by gameObjects in getPos and other
+     * @returns {Harmonics} harmonics (cosinus and sinus)
      */
     this.getHarmonics = function( rotation )
     {
       if ( rotation )
-        return { cos: Math.cos( rotation )
-        , sin: Math.sin( rotation ) };
+        return { cos: Math.cos( rotation + this.rotation )
+        , sin: Math.sin( rotation + this.rotation ) };
       return { 'cos': _cosAngle, 'sin': _sinAngle };
     }
     

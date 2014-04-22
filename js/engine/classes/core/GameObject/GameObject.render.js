@@ -13,7 +13,8 @@ function( CONFIG, COLORS, Time )
 {
   function render( ctx, physicRatio, ratioz, position, sizes )
   {
-    if ( this.disable ){ return; }
+    if ( !this.enable )
+      return;
     physicRatio = physicRatio || 1;
     ratioz      = ratioz || 1;
     position    = position || { x:0, y:0 };

@@ -1,21 +1,31 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-* @constructor
-* FixedBoxCollider
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
+/**
+ * @constructor FixedBoxCollider
+ * @class Create a box collider (can't rotate)
+ * @augments Collider
+ * @param {int} width - box width
+ * @param {int} height - box height
+ * @param {object} params - Optional parameters (offets)
+ * @example // classic GameObject declaration
+ * var myObject = new DE.GameObject( {
+ *   x: 150, y: 200,
+ *   collider: new DE.FixedBoxCollider( 150, 100 )
+ * } );
+ * @example // adding a collider later
+ * myObject.collider = new DE.FixedBoxCollider( 150, 100 );
+ */
 define( [ 'DE.Collider', 'DE.COLORS', 'DE.CONFIG', 'DE.CanvasBuffer' ],
 function( Collider, COLORS, CONFIG, CanvasBuffer )
 {
-  function FixedBoxCollider( width, height, param )
+  function FixedBoxCollider( width, height, params )
   {
-    param = param || {};
-    param.type = CONFIG.COLLISION_TYPE.FIXED_BOX;
+    params = params || {};
+    params.type = CONFIG.COLLISION_TYPE.FIXED_BOX;
     
-    Collider.call( this, param );
+    Collider.call( this, params );
     
     var _points    = new Array();
     var _inCircles = new Array();

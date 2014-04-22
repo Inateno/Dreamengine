@@ -1,21 +1,30 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-* @constructor
-* CircleCollider
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
+/**
+ * @constructor CircleCollider
+ * @class create a circle collider
+ * @augments Collider
+ * @param {int} radius - circle size
+ * @param {object} params - Optional parameters (offets)
+ * @example // classic GameObject declaration
+ * var myObject = new DE.GameObject( {
+ *   x: 150, y: 200,
+ *   collider: new DE.CircleCollider( 100, { offsetY: 50 } )
+ * } );
+ * @example // adding a collider later
+ * myObject.collider = new DE.CircleCollider( 70 );
+ */
 define( [ 'DE.Collider', 'DE.CONFIG', 'DE.CanvasBuffer', 'DE.COLORS' ],
 function( Collider, CONFIG, CanvasBuffer, COLORS )
 {
-  function CircleCollider( radius, param )
+  function CircleCollider( radius, params )
   {
-    param = param || {};
-    param.type = CONFIG.COLLISION_TYPE.CIRCLE;
+    params = params || {};
+    params.type = CONFIG.COLLISION_TYPE.CIRCLE;
     
-    Collider.call( this , param );
+    Collider.call( this , params );
     
     this.radius = radius || 1;
     

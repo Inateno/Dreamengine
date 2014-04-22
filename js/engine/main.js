@@ -41,6 +41,8 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
   ***/
   DREAM_ENGINE.init = function( params )
   {
+    window.ENGINE_SETTING = window.ENGINE_SETTING || {}; // configuration trough html
+    
     // init about and localStorage
     DREAM_ENGINE.about.set( params.about );
     DREAM_ENGINE.SaveSystem.init( params.saveModel, params.saveIgnoreVersion );
@@ -59,7 +61,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     }, DREAM_ENGINE );
     // adapt to the screen
     DREAM_ENGINE.Screen.init( params.images );
-    DREAM_ENGINE.Screen.udpateScreenSizes();
+    DREAM_ENGINE.Screen.udpateScreenSizes( ENGINE_SETTING.quality );
     
     if ( !params.ignoreNotification )
       DREAM_ENGINE.Notifications.init( params );

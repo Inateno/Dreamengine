@@ -1,45 +1,59 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-*
-* TextRenderer
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
 /**
-** The TextRenderer is child of Renderer
-** It draws a colored square for the gameObject
-** need the GameObject to draw
-** list of params are the sames as Renderer
-**/
-
-define( [ 'DE.Renderer', 'DE.TextRenderer.render', 'DE.CONFIG', 'DE.Sizes', 'DE.CanvasBuffer' ],
-function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer )
+ * @constructor TextRenderer
+ * @augments Renderer
+ * @class draw a text<br>
+ * checkout Renderer for standard parameters
+ * @example var hello = new DE.GameObject( {
+ *   x: 500, y: 500,
+ *   renderer: new DE.TextRenderer( {
+ *     "fillColor": "white", "fontSize": "25",
+ *     "textAlign": "left", "font": "Calibri", // lol
+ *     "paddingX": 5, "backgroundColor": "blue",
+ *     "borderSize": 2, "borderColor": "white"
+ *   }, 800, 100, "hello" )
+ * } );
+ */
+define( [ 'DE.Renderer', 'DE.TextRenderer.render', 'DE.CONFIG', 'DE.Sizes', 'DE.CanvasBuffer', 'DE.ImageManager' ],
+function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
 {
-  function TextRenderer( param, width, height, text )
+  function TextRenderer( params, width, height, text )
   {
-    Renderer.call( this, param );
+    Renderer.call( this, params );
     
-    if ( !param || !width || !height || !text )
-      throw new Error( "TextRenderer :: Can't instantiate without param, width, height, text" );
+    if ( !params || !width || !height || text == undefined )
+      throw new Error( "TextRenderer :: Can't instantiate without params, width, height, text" );
     
-    this.text = text || undefined;
-    this.sizes = new Sizes( width, height, 1, 1 );
-    this.localPosition.x -= width * 0.5;
-    this.localPosition.y -= height * 0.5;
+    this.text         = text;
+    this.textAlign    = params.textAlign || "center";
+    this.textBaseline = params.textBaseline || "middle";
+    this.fontSize = params.fontSize || 20;
+    this.font     = params.font || 'Calibri';
     
-    if ( param.offsetX != undefined )
+    this.sizes = new Sizes( width, height, 1, 1, this );
+    this.sizes._center();
+    
+    this.paddingX = params.padding || params.paddingX || 0;
+    this.paddingY = params.padding || params.paddingY || 0;
+    
+    this.backgroundColor = params.backgroundColor;
+    this.borderColor     = params.borderColor;
+    this.borderSize      = params.borderSize || 1;
+    this.backgroundImage = params.backgroundImage;
+    
+    if ( this.backgroundImage && !ImageManager.images[ this.backgroundImage ] )
     {
-      this.localPosition.x = param.offsetX + ( param.x || 0 );
-    }
-    if ( param.offsetY != undefined )
-    {
-      this.localPosition.y = param.offsetY + ( param.y || 0 );
+      console.log( "TextRenderer :: %cCant find given backgroundImage - " + this.backgroundImage
+                  + " check your imagesDatas - ignore background"
+                  , "color: red" );
+      this.backgroundImage = undefined;
     }
     
-    this.fontSize = param.fontSize || 20;
-    this.font = param.font || 'Calibri';
+    if ( this.backgroundImage || this.backgroundColor || this.borderColor )
+      this.background = true;
     
     this.init = function()
     {
@@ -53,29 +67,50 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer )
     this.clearBuffer = function()
     {
       this.buffer.ctx.clearRect( 0, 0, this.sizes.width, this.sizes.height );
-      this.buffer.ctx.font = ( this.fontSize ) + 'pt ' + ( this.font );
-      this.buffer.ctx.textAlign = "center";
-      this.buffer.ctx.textBaseline = "middle";
+      this.buffer.ctx.font         = ( this.fontSize ) + 'pt ' + ( this.font );
+      this.buffer.ctx.textAlign    = this.textAlign;
+      this.buffer.ctx.textBaseline = this.textBaseline;
+      if ( this.background )
+      {
+        if ( this.backgroundImage )
+          this.buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ]
+                                    , 0, 0, this.sizes.width, this.sizes.height );
+        else if ( this.backgroundColor )
+        {
+          this.buffer.ctx.fillStyle = this.backgroundColor;
+          this.buffer.ctx.fillRect( 0, 0, this.sizes.width, this.sizes.height );
+        }
+        if ( this.borderColor )
+        {
+          this.buffer.ctx.lineWidth   = this.borderSize;
+          this.buffer.ctx.strokeStyle = this.borderColor;
+          this.buffer.ctx.strokeRect( 0, 0, this.sizes.width, this.sizes.height );
+          this.buffer.ctx.lineWidth = 1;
+        }
+      }
+      
+      var x = ( this.textAlign == "right" ? this.sizes.width - this.paddingX :
+             this.textAlign == "left" ? this.paddingX : this.sizes.width * 0.5 + this.paddingX >> 0 );
+      var y = ( this.textBaseline == "bottom" ? this.sizes.height - this.paddingY :
+             this.textBaseline == "top" ? this.paddingY : this.sizes.height * 0.5 + this.paddingY >> 0 );
       if ( this.fillColor )
       {
         this.buffer.ctx.fillStyle = this.fillColor;
         if ( this.forceWidth )
-          this.buffer.ctx.fillText( this.text, this.sizes.width * 0.5, this.sizes.height * 0.5, this.sizes.width );
+          this.buffer.ctx.fillText( this.text, x, y, this.sizes.width );
         else
-          this.buffer.ctx.fillText( this.text, this.sizes.width * 0.5, this.sizes.height * 0.5 );
+          this.buffer.ctx.fillText( this.text, x, y );
       }
       
       if ( this.strokeColor )
       {
         if ( this.fillColor )
-        {
           this.buffer.ctx.globalAlpha = 0.8;
-        }
         this.buffer.ctx.strokeStyle = this.strokeColor;
         if ( this.forceWidth )
-          this.buffer.ctx.strokeText( this.text, this.sizes.width * 0.5, this.sizes.height * 0.5, this.sizes.width );
+          this.buffer.ctx.strokeText( this.text, x, y, this.sizes.width );
         else
-          this.buffer.ctx.fillText( this.text, this.sizes.width * 0.5, this.sizes.height * 0.5 );
+          this.buffer.ctx.fillText( this.text, x, y );
       }
     }
     
@@ -91,20 +126,13 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer )
     /***
     * @changeSizes
     ***/
-    this.changeSizes = function( newWidth, newHeight )
+    this.setSizes = function( newWidth, newHeight )
     {
-      var deltaw = newWidth - this.sizes.width
-      this.sizes.width = newWidth;
-      
-      var deltah = newHeight - this.sizes.height
-      this.sizes.height = newHeight;
-      
-      this.localPosition.x -= ( deltaw * 0.5 );
-      this.localPosition.y -= ( deltah * 0.5 );
+      this.sizes.setSizes( newWidth, newHeight );
     }
     /* // */
     
-    this.init( param );
+    this.init( params );
   }
 
   TextRenderer.prototype = new Renderer();

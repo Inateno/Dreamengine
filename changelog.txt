@@ -1,3 +1,14 @@
+---- 0.1.0 ----
+Lot of refactoring about names to fit the most possible about what it's used for, fixes, and refactoring.
+I think I forgot a lot of points here, but checkout the diff
+* Documentation V1 (most important stuff is online documented)
+* Vector2 fixes and improves
+* GameObject.js refactoring and renaming, added globalEvents, fixes getPos
+* Camera.js renaming, added globalEvents, isDown in events, and propagation
+* CanvasBuffer.js returns added
+* Colliders classes renaming
+* Sizes.js add returns, center and uncenter if parent
+
 ---- 0.0.2 ----
 * Add shake on camera -> use camera.shake( xRange, yRange, duration)
 * Changed focus method on camera (now you give the target and it auto-focusing while you don't remove/change the target)

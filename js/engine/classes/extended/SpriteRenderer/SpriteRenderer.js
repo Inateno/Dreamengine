@@ -1,41 +1,41 @@
 ﻿/**
-* @ContributorsList
-* @Inateno / http://inateno.com / http://dreamirl.com
-*
-***
-*
-* SpriteRenderer
-**/
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
 /**
-** The SpriteRenderer is child of Renderer
-** It draws a sprite for the gameObject
-** need the GameObject to draw
-** list of params are the sames as Renderer
-**/
-
+ * @constructor SpriteRenderer
+ * @augments Renderer
+ * @class draw a sprite<br>
+ * if the given sprite is animated, it'll animate it automatically according to you imagesDatas file<br>
+ * checkout Renderer for standard parameters
+ * @example var ship = new DE.GameObject( {
+ *   x: 500, y: 500,
+ *   renderer: new DE.SpriteRenderer( { "spriteName": "ship", "scale": 0.7, "offsetY": -30 } )
+ * } );
+ */
 define( [ 'DE.Renderer', 'DE.ImageManager', 'DE.Sizes', 'DE.SpriteRenderer.render', 'DE.CONFIG', 'DE.Time', 'DE.Event' ],
 function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
 {
-  function SpriteRenderer( param )
+  function SpriteRenderer( params )
   {
-    if ( !param )
+    if ( !params )
       throw new Error( "SpriteRenderer :: You have to pass arguments object to instantiate -- see the doc" );
     
-    Renderer.call( this, param );
+    Renderer.call( this, params );
     
-    this.spriteName = param.spriteName || undefined;
+    this.spriteName = params.spriteName || undefined;
     if ( !this.spriteName )
       throw new Error( "SpriteRenderer :: No spriteName defined -- declaration canceled" );
     
     if ( !ImageManager.images[ this.spriteName ] )
       throw new Error( "SpriteRenderer :: Can't find image " + this.spriteName + " in imagesDatas" );
     
-    this.startFrame = param.startFrame || 0;
-    this.endFrame   = param.endFrame || ImageManager.images[ this.spriteName ].totalFrame || 0;
-    this.totalLine  = param.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
+    this.startFrame = params.startFrame || 0;
+    this.endFrame   = params.endFrame || ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.totalFrame = ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.totalLine  = params.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
     
-    this.eachAnim  = param.eachAnim || ImageManager.images[ this.spriteName ].eachAnim || 0;
+    this.eachAnim  = params.eachAnim || ImageManager.images[ this.spriteName ].eachAnim || 0;
     this.lastAnim  = Date.now();
     
     this.frameSizes = new Sizes( ImageManager.images[ this.spriteName ].widthFrame
@@ -43,74 +43,36 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
                     , 1, 1 );
     
     // need save given sizes, then:
-    // param.w * physicRatio to get real width to display (if there is a width)
+    // params.w * physicRatio to get real width to display (if there is a width)
     // and when the currentRatioIndex change, get the new ratio and made again the calcul with saved values
     /*
-    if ( param.w || param.width || param.Width || param.h || param.height || param.Height )
+    if ( params.w || params.width || params.Width || params.h || params.height || params.Height )
     {
-      this.savedSizes = { "w": param.width || param.w || param.Width || undefined
-                        , "h": param.height || param.h || param.Height || undefined };
+      this.savedSizes = { "w": params.width || params.w || params.Width || undefined
+                        , "h": params.height || params.h || params.Height || undefined };
       this.sizes = new Sizes( this.savedSizes.w * physicRatio || ImageManager.images[ this.spriteName ].widthFrame
                           , this.savedSizes.h * physicRatio || ImageManager.images[ this.spriteName ].heightFrame
-                          , param.scaleX, param.scaleY );
+                          , params.scaleX, params.scaleY );
     }
     */
     
-    param.scaleX = param.scale || param.scaleX || param.scalex || 1;
-    param.scaleY = param.scale || param.scaleY || param.scaley || 1;
-    this.sizes  = new Sizes( param.width || param.w || ImageManager.images[ this.spriteName ].widthFrame
-                  , param.height  || param.h || ImageManager.images[ this.spriteName ].heightFrame
-                  , param.scaleX, param.scaleY );
-
-    this.isAnimated = param.isAnimated || ImageManager.images[ this.spriteName ].isAnimated;
-    this.isPaused  = param.paused || param.isPaused
+    params.scaleX = params.scale || params.scaleX || params.scalex || 1;
+    params.scaleY = params.scale || params.scaleY || params.scaley || 1;
+    this.sizes  = new Sizes( params.width || params.w || ImageManager.images[ this.spriteName ].widthFrame
+                  , params.height  || params.h || ImageManager.images[ this.spriteName ].heightFrame
+                  , params.scaleX, params.scaleY, this );
+    
+    this.isAnimated = params.isAnimated || ImageManager.images[ this.spriteName ].isAnimated;
+    this.isPaused  = params.paused || params.isPaused
         ImageManager.images[ this.spriteName ].isPaused || false;
-    this.isReversed  = param.reversed || param.isreversed || param.isReversed
+    this.isReversed  = params.reversed || params.isreversed || params.isReversed
         || ImageManager.images[ this.spriteName ].isReversed || false;
     this.isOver = false;
-    this.isLoop = ( param.isLoop != undefined ) ? param.isLoop : ImageManager.images[ this.spriteName ].isLoop;
+    this.isLoop = ( params.isLoop != undefined ) ? params.isLoop : ImageManager.images[ this.spriteName ].isLoop;
     
-    this.currentFrame  = this.startFrame || 0;
-    this.currentLine  = param.startLine || 0;
-    
-    this.localPosition.x -= ( this.sizes.width * this.sizes.scaleX * 0.5 ) >> 0;
-    this.localPosition.y -= ( this.sizes.height * this.sizes.scaleY * 0.5 ) >> 0;
-    
-    this.setFrame = function( frame )
-    {
-      if ( frame+1 >= this.endFrame )
-      {
-        this.currentFrame = this.endFrame-1;
-      }
-      else if ( frame < this.startFrame )
-      {
-        this.currentFrame = this.startFrame;
-      }
-      else
-      {
-        this.currentFrame = frame;
-      }
-    }
-    
-    this.restartAnim = function()
-    {
-      this.isOver = false;
-      if ( !this.isReversed )
-        this.currentFrame = this.startFrame;
-      else
-        this.currentFrame = this.endFrame - 1;
-      this.lastAnim = Time.currentTime;
-    }
-    
-    this.setPause = function( val, disableAnimation )
-    {
-      this.isPaused = val;
-      if ( !val )
-      {
-        this.isAnimated = true;
-        this.lastAnim = Date.now();
-      }
-    }
+    this.currentFrame = this.startFrame || 0;
+    this.currentLine  = params.startLine || 0;
+    this.sizes._center();
     
     this.onAnimEnd = function(){}
     
@@ -119,18 +81,9 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
       if ( name != this.spriteName )
         return;
       
-      // replace at original decal
-      this.localPosition.x += ( this.sizes.width * this.sizes.scaleX * 0.5 ) >> 0;
-      this.localPosition.y += ( this.sizes.height * this.sizes.scaleY * 0.5 ) >> 0;
-      
       this.frameSizes.width  = ImageManager.images[ this.spriteName ].widthFrame;
       this.frameSizes.height = ImageManager.images[ this.spriteName ].heightFrame;
-      this.sizes.width = this.frameSizes.width;
-      this.sizes.height = this.frameSizes.height;
-      
-      // now recalc good change
-      this.localPosition.x -= ( this.sizes.width * this.sizes.scaleX * 0.5 ) >> 0;
-      this.localPosition.y -= ( this.sizes.height * this.sizes.scaleY * 0.5 ) >> 0;
+      this.sizes.setSizes( this.frameSizes );
     }, this );
   }
   SpriteRenderer.prototype = new Renderer();
@@ -139,6 +92,59 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
   SpriteRenderer.prototype.DEName      = "SpriteRenderer";
   
   SpriteRenderer.prototype.render = SpriteRender;
+  
+  SpriteRenderer.prototype.setFrame = function( frame )
+  {
+    if ( frame + 1 >= this.endFrame )
+      this.currentFrame = this.endFrame - 1;
+    else if ( frame < this.startFrame )
+      this.currentFrame = this.startFrame;
+    else
+      this.currentFrame = frame;
+  }
+  
+  SpriteRenderer.prototype.setLine = function( line )
+  {
+    if ( line + 1 >= this.totalLine )
+      this.currentLine = this.totalLine - 1;
+    else
+      this.currentLine = line;
+  }
+  
+  SpriteRenderer.prototype.restartAnim = function()
+  {
+    this.isOver = false;
+    if ( !this.isReversed )
+      this.currentFrame = this.startFrame;
+    else
+      this.currentFrame = this.endFrame - 1;
+    this.lastAnim = Time.currentTime;
+  }
+  
+  SpriteRenderer.prototype.setPause = function( val, disableAnimation )
+  {
+    this.isPaused = val;
+    if ( !val && !this.isAnimated )
+    {
+      this.isAnimated = true;
+      this.lastAnim = Date.now();
+    }
+  }
+  SpriteRenderer.prototype.setEndFrame = function( v )
+  {
+    if ( this.totalFrame <= v )
+      this.endFrame = this.totalFrame - 1;
+    else
+      this.endFrame = v;
+  }
+  SpriteRenderer.prototype.setDelay = function( delay )
+  {
+    this.eachAnim = delay;
+  }
+  SpriteRenderer.prototype.setLoop = function( bool )
+  {
+    this.isLoop = bool;
+  }
   
   CONFIG.debug.log( "SpriteRenderer loaded", 3 );
   return SpriteRenderer;

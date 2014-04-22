@@ -32,9 +32,9 @@ module.exports = function(grunt)
       src: {
         src: ['_dev/js/**/*.js']
       }
-    },
+    }
     
-    requirejs: { // requirejs compil
+    , requirejs: { // requirejs compil
       standalone: {
         options: {
           findNestedDependencies : true
@@ -61,6 +61,17 @@ module.exports = function(grunt)
           , closure              : requireClosure
           , inlineText           : true
           , useStrict            : false
+        }
+      }
+    }
+    
+    , jsdoc : {
+      dist : {
+        src: [ 'README.md', 'js/engine/**/*.js' ],
+        options: {
+          destination: 'doc',
+          template :  "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template",
+          configure : "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template/jsdoc.conf.json"
         }
       }
     }
@@ -95,28 +106,16 @@ module.exports = function(grunt)
             pattern: 'define("main",[],function(){}),',
             replacement: ""
           }, {
-            pattern: /define\(\"main\"\,([\s\S*?])\[\]\,function\(\)\{\}\)\,/,
+            pattern: 'define("main",[],function(',
             replacement: ""
           }, {
-            pattern: /define\(\"main\"\,\[\]\,([\s\S*?])function\(\)\{\}\)\,/,
+            pattern: '){}),',
             replacement: ""
           }, {
-            pattern: ',define("requirev",[],function(){});',
-            replacement: ";"
-          }, {
-            pattern: /,define\(\"requirev\"\,([\s\S*?])\[\]\,function\(\)\{\}\)\;/,
-            replacement: ";"
-          }, {
-            pattern: /,define\(\"requirev\"\,\[\]\,([\s\S*?])function\(\)\{\}\)\;/,
+            pattern: ',define("requirev",function(){});',
             replacement: ";"
           }, {
             pattern: ',define("standalonev",[],function(){});',
-            replacement: ";"
-          }, {
-            pattern: /,define\(\"standalonev\"\,([\s\S*?])\[\]\,function\(\)\{\}\)\;/,
-            replacement: ";"
-          }, {
-            pattern: /,define\(\"standalonev\"\,\[\]\,([\s\S*?])function\(\)\{\}\)\;/,
             replacement: ";"
           }]
         }
@@ -129,9 +128,11 @@ module.exports = function(grunt)
   // grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-string-replace');
+  grunt.loadNpmTasks('grunt-jsdoc');
   
   // Default task is the require version
   grunt.registerTask( 'default', [ 'requirejs:requireVersion', 'string-replace:requireVersion'
-                     , 'concat:requireVersion' ] );
-  grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone' ] );
+                     , 'concat:requireVersion', 'jsdoc' ] );
+  grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone', 'jsdoc' ] );
+  grunt.registerTask( 'doc', [ 'jsdoc' ] );
 };

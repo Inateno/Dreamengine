@@ -1,19 +1,19 @@
 ﻿/**
-* Author
- @Inateno / http://inateno.com / http://dreamirl.com
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
 
-* ContributorsList
- @Inateno
-
-***
-* Render( divId, params )
-**/
+/**
+ * @constructor Render
+ * @class this create the canvas, buffers, and manage resizing
+ * @example Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+ * Game.render.init();
+ */
 define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs', 'DE.CanvasBuffer' ],
 function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
 {
   function Render( divId, params )
   {
-    params       = params || {};
+    params      = params || {};
     this.id     = 0;
     this.divId  = divId || undefined;
     this.canvas = null;
@@ -147,6 +147,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
         return;
       
       var o = this;
+      var lastResize = undefined;
       var recallMethod = function()
       {
         o.fullScreenMethod.call( o );
@@ -155,14 +156,16 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       {
         window.addEventListener( "resize", function()
         {
-          window.setTimeout( recallMethod, 100 );
+          lastResize && window.clearTimeout( lastResize );
+          lastResize = window.setTimeout( recallMethod, 200 );
         }, false ); 
       }
       else if ( window.attachEvent )
       {
         window.attachEvent( "onresize", function()
         {
-          window.setTimeout( recallMethod, 100 ); 
+          lastResize && window.clearTimeout( lastResize );
+          lastResize = window.setTimeout( recallMethod, 200 ); 
         } );
       }
     }
@@ -348,7 +351,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
      */
     this.camerasMouseCollide = function( eventName, x, y, index )
     {
-      var mouse = getMouseCoords.call( this, x, y, index );
+      var mouse = _getMouseCoords.call( this, x, y, index );
       
       // custom events ? if return true stop propagation now
       if ( this[ 'on' + eventName ]( mouse ) || mouse.stopPropagation )
@@ -359,11 +362,14 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
         if ( cam.sleep )
           continue;
         
-        camPos = { 'x' : cam.position.x - ( cam.sizes.width * 0.5 * cam.sizes.scaleX )
-                  ,'y' : cam.position.y - ( cam.sizes.height * 0.5 * cam.sizes.scaleY )
-                  ,'width' : cam.sizes.width * cam.sizes.scaleX
-                  ,'height' : cam.sizes.height * cam.sizes.scaleY };
+        camPos = {
+          'x'      : cam.renderPosition.x - ( cam.renderSizes.width * 0.5 * cam.renderSizes.scaleX )
+          ,'y'     : cam.renderPosition.y - ( cam.renderSizes.height * 0.5 * cam.renderSizes.scaleY )
+          ,'width' : cam.renderSizes.width * cam.renderSizes.scaleX
+          ,'height': cam.renderSizes.height * cam.renderSizes.scaleY
+        };
         
+        // console.log( 'camPos', mouse );
         if ( CollisionSystem.pointFixedBoxCollision( mouse, camPos ) )
         {
           if ( !cam.indexMouseOver[ index ] && cam.oOnMouseEnter( mouse, this.physicRatio ) )
@@ -411,10 +417,10 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
      * @private
      */
       /****
-       * scrollPosition@Vector2
+       * _scrollPosition@Vector2
         return the scollPostion of the window
        **/
-      function scrollPosition()
+      function _scrollPosition()
       {
         return {
           x: document.scrollLeft || window.pageXOffset,
@@ -423,21 +429,24 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       }
       
       /****
-       * getMouseCoords@Mouse
+       * _getMouseCoords@Mouse
        */
-      function getMouseCoords( x, y, index )
+      function _getMouseCoords( x, y, index )
       {
         var pos = { "x": x, "y": y };
         var elem = this.canvas;
+        var offsetLeft = 0, offsetTop = 0;
         while( elem )
         {
-          pos.x -= elem.offsetLeft;
-          pos.y -= elem.offsetTop;
+          offsetLeft += elem.offsetLeft;
+          offsetTop += elem.offsetTop;
           elem = elem.parentElement;
         }
+        pos.x -= offsetLeft;
+        pos.y -= offsetTop;
         return {
-            'x': pos.x / _drawRatio + scrollPosition().x >> 0
-          , 'y': pos.y / _drawRatio + scrollPosition().y >> 0
+            'x': pos.x / _drawRatio + _scrollPosition().x >> 0
+          , 'y': pos.y / _drawRatio + _scrollPosition().y >> 0
           , 'index': index
         };
       }

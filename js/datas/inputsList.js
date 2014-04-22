@@ -18,7 +18,7 @@ function( CONFIG )
     ,"right":{"keycodes":[ "K.d", "K.right" ] }
     ,"up":{"keycodes":[ "K.z", "K.up" ] }
     ,"down":{"keycodes":[ "K.s", "K.down" ] }
-    ,"fire":{"keycodes":[ "K.space" , 'G0.B.A'], "interval": 266 }
+    ,"fire":{"keycodes":[ "K.space" , 'G0.B.A'], "interval": 50 }
   };
   CONFIG.debug.log( "inputsList loaded", 3 );
   return inputsList;

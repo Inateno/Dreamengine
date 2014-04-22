@@ -1,16 +1,16 @@
-HTML5 Games Dreamengine - What is it
-===========
-
-The Dreamengine is a library to create HTML5 games. It's not a "button click software" or "quick code" or things like that, you have to programming everytime with it (but it's very easy to create editors, I made one simple and I will push soon). Dreamengine is more "how to make games fast, cross-platform, with good perfs, and without doing boring stuff".
-
-I tried to focus on the main engine, with tools (like inputs, renderers), and now it's very simple to create plugins, advanced tools, editors...
-
-So I don't say it's the best HTML5 engine, I know that I can write a complex prototype in few hours, and it'll work well everywhere.
-
 By Rogliano Antoine, [Dreamirl](http://dreamirl.com) - [Inateno](http://inateno.com)
 The official website [HTML5-Dreamengine](http://dreamengine.dreamirl.com)
 Follow on [Twitter](http://twitter.com/dreamirlgames)
 Or [Facebook](https://www.facebook.com/Dreamirl)
+
+HTML5 Games Dream-Engine - What is it
+===========
+
+The Dream-Engine is a library to create HTML5 games. It's not a "button click software" or "quick code" or things like that, you have to programming everytime with it (but it's very easy to create editors, I made one simple and I will push soon). Dreamengine is more "how to make games fast, cross-platform, with good perfs, and without doing boring stuff".
+
+I tried to focus on the main engine, with tools (like inputs, renderers), and now it's very simple to create plugins, advanced tools, editors...
+
+So I don't say it's the best HTML5 engine, I know that I can write a complex prototype in few hours, and it'll work well everywhere.
 
 
 A little word about "story" (and why I did it)

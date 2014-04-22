@@ -21,6 +21,6 @@ The Dreamengine use:
 - buzz (audio lib)          by Jay Salvat   -->    buzz.jaysalvat.com
 - hand (mouse & touch)      by David Catuhe -->    handjs.codeplex.com
 
-DreamEngine version 0.0.2
+DreamEngine version 0.1.0
 
 */
