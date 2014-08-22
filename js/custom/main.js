@@ -23,6 +23,7 @@ require.config( {
     ,'DE.inputsList'  : 'datas/inputsList'
     ,'DE.audiosList'  : 'datas/audiosList'
     ,'DE.dictionary'  : 'datas/dictionary'
+    ,'DE.achievements': 'datas/achievements'
     
     ,'gameLoop'       : 'custom/gameLoop'
     ,'Game'           : 'custom/Game'
@@ -31,8 +32,8 @@ require.config( {
 } );
 
 // init here your game with your code by using the Engine (as DE)
-require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.dictionary' ],
-function( files, gameLoop, Game, images, audios, inputs, dictionary )
+require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.achievements', 'DE.dictionary' ],
+function( files, gameLoop, Game, images, audios, inputs, achievements, dictionary )
 {
   console.log( "My Custom loads - stress test" );
   var DE = DreamEngine;
@@ -42,8 +43,10 @@ function( files, gameLoop, Game, images, audios, inputs, dictionary )
     , 'onStart': Game.start, 'loader': { "scale": 2 }
     , 'images': images, 'audios': audios
     , 'inputs': inputs, 'dictionary': dictionary
-    , 'about': { 'gameName': "StressTest", 'author': "Dreamirl", 'gameVersion': "0.1" }
+    , 'about': { 'gameName': "StressTest", "namespace": "ztech", 'author': "Dreamirl", 'gameVersion': "0.1" }
     , 'saveModel': {}, 'saveIgnoreVersion': true
+    , 'achievements': achievements
+    , 'ignoreNebula': true
   } );
   window.DREAM_E = DE;
 } );

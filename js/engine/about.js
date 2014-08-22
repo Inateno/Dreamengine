@@ -26,6 +26,7 @@ function( CONFIG )
     about.gameName    = values.gameName || about.gameName;
     about.gameVersion = values.gameVersion || about.gameVersion;
     about.gameAuthor  = values.gameAuthor || about.gameAuthor;
+    about.namespace   = values.namespace || null;
   };
   
   CONFIG.debug.log( "about loaded", 3 );

@@ -99,6 +99,15 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     this.zindex = params.zindex || 0;
     
     /**
+     * set true will automatically change cursor to pointer on over, and remove it on not over
+     * the GameObject must have a collider
+     * @public
+     * @memberOf GameObject
+     * @type {Bool}
+     */
+    this.cursorOnOver = params.cursorOnOver || false;
+    
+    /**
      * @protected
      * @memberOf GameObject
      * @type {Array-GameObject}
@@ -174,9 +183,9 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
      * @memberOf GameObject
      * @type {Collider}
      */
-    this.collider = params.collider || null;
-    if ( this.collider !== null )
-      this.collider.gameObject = this;
+    this.collider = null;
+    if ( params.collider )
+      this.setCollider( params.collider )
     
     /**
      * @protected
@@ -187,6 +196,12 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     if ( this.rigidbody && this.rigidbody.gameObject != this )
       this.rigidbody.gameObject = this;
     
+    if ( params.create )
+    {
+      for ( var i in params.create )
+        if ( !this[ i ] )
+          this[ i ] = params.create[ i ];
+    }
     Event.addEventComponents( this );
   };
   
@@ -309,19 +324,49 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     {
       var pos = this.getPos();
       this.position.setRotation( -Math.atan2( vector2.x - ( pos.x )
-                                , vector2.y - ( pos.y ) ) - this.parent.getRotation() );
+                                , vector2.y - ( pos.y ) ) - ( this.parent.getRotation() - Math.PI ) );
       return;
     }
     this.position.setRotation( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) + PI );
   };
   
   /**
-   * add a GameObject as child
+   * add all given gameObjects as children's, if you add only one gameObject, call addOne
+   * you can call this method with array, single object, or multi arguments objects, look at examples.
    * @public
    * @memberOf GameObject
-   * @param {GameObject} object
+   * @param {GameObject} gameObject gameObject to add
+   * @example myObject.add( car ); // just one object, you should call addOne instead
+   * @example myObject.add( car, car2, car3, banana, turtle ); // using multi arguments
+   * @example var myArray = [ object1, object2, object3 ]; // declare an array with object inside as you wish
+   * myObject.add( myArray ); // then call add with array directly
+   * @example var myArray = [ object1, object2, object3 ]; // declare an array with object inside as you wish
+   * var myArray2 = [ object4, object5, object6 ]; // declare a second array with object inside as you wish
+   * myObject.add( myArray, myArray2 ); // then call add with array and multi arguments
    */
-  GameObject.prototype.add = function( object )
+  GameObject.prototype.add = function()
+  {
+    var args = Array.prototype.slice.call( arguments );
+    for ( var i = 0; i < args.length; ++i )
+    {
+      if ( args[ i ].length )
+      {
+        for ( var o = 0, m = args[ i ].length || 1; o < m; ++o )
+          this.addOne( args[ i ][ o ] );
+      }
+      else
+        this.addOne( args[ i ] );
+    }
+  };
+  
+  /**
+   * add one gameObject as child, call this one if you have only 1 gameObject to add, it's faster
+   * @public
+   * @memberOf GameObject
+   * @param {GameObject} gameObject gameObject to add
+   * @example myObject.addOne( car );
+   */
+  GameObject.prototype.addOne = function( object )
   {
     if ( !( object instanceof GameObject ) )
     {
@@ -465,18 +510,48 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     
     if ( renderer.sizes )
     {
-      if ( renderer.sizes.width > this.biggerOffset.width )
-        this.biggerOffset.width = renderer.sizes.width;
+      if ( renderer.sizes.width * renderer.sizes.scaleX + renderer.localPosition.x > this.biggerOffset.width )
+        this.biggerOffset.width = renderer.sizes.width * renderer.sizes.scaleX + renderer.localPosition.x;
       
-      if ( renderer.sizes.height > this.biggerOffset.height )
-        this.biggerOffset.height = renderer.sizes.height;
+      if ( renderer.sizes.height * renderer.sizes.scaleY + renderer.localPosition.y > this.biggerOffset.height )
+        this.biggerOffset.height = renderer.sizes.height * renderer.sizes.scaleY + renderer.localPosition.y;
     }
     else if ( renderer.radius )
     {
-      if ( renderer.radius > this.biggerOffset.width )
-        this.biggerOffset.width = renderer.radius;
-      if ( renderer.radius > this.biggerOffset.height )
-        this.biggerOffset.height = renderer.radius;
+      if ( renderer.radius + renderer.localPosition.x > this.biggerOffset.width )
+        this.biggerOffset.width = renderer.radius + renderer.localPosition.x;
+      if ( renderer.radius + renderer.localPosition.y > this.biggerOffset.height )
+        this.biggerOffset.height = renderer.radius + renderer.localPosition.y;
+    }
+    return this;
+  };
+  
+  /**
+   * set given Collider to this GameObject and return current GameObject instance
+   * @public
+   * @memberOf GameObject
+   * @param {Collider} collider
+   * @example myObject.setCollider( new DE.FixedBoxCollider( 100, 200 ) );
+   */
+  GameObject.prototype.setCollider = function( collider )
+  {
+    collider.gameObject = this;
+    this.collider = collider;
+    
+    if ( collider.radius )
+    {
+      if ( collider.radius > this.biggerOffset.width )
+        this.biggerOffset.width = collider.radius + collider.localPosition.x;
+      
+      if ( collider.radius > this.biggerOffset.height )
+        this.biggerOffset.height = collider.radius + collider.localPosition.y;
+    }
+    else if ( collider.width && collider.height )
+    {
+      if ( collider.width + collider.localPosition.x > this.biggerOffset.width )
+        this.biggerOffset.width = collider.width + collider.localPosition.x;
+      if ( collider.height + collider.localPosition.y > this.biggerOffset.height )
+        this.biggerOffset.height = collider.height + collider.localPosition.y;
     }
     return this;
   };
@@ -540,8 +615,8 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
    * supported Collider (actually, FixedBoxCollider and CircleCollider)<br>
    * here is the full events list (so override with this name) ordered by call order:<br>
    * - onMouseDown<br>
-   * - onMouseMove<br>
    * - onMouseEnter<br>
+   * - onMouseMove<br>
    * - onMouseLeave<br>
    * - onMouseClick<br>
    * - onMouseUp<br>
@@ -572,8 +647,8 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
    * };
    */
   GameObject.prototype.onMouseDown  = undefined;
-  GameObject.prototype.onMouseMove  = undefined;
   GameObject.prototype.onMouseEnter = undefined;
+  GameObject.prototype.onMouseMove  = undefined;
   GameObject.prototype.onMouseLeave = undefined;
   GameObject.prototype.onMouseClick = undefined;
   GameObject.prototype.onMouseUp    = undefined;

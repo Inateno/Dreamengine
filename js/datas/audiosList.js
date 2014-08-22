@@ -14,10 +14,14 @@ function( CONFIG )
 {
   var audioList = [
     // MUSICS
-    //[ "game_music", "audio/Game_Music", [ 'ogg', 'mp3' ], { "preload": true, "loop": true, "isMusic": true } ]
+    [ "game_music", "audio/music", [ 'mp3' ], { "preload": true, "loop": true, "isMusic": true
+      , "sprite": {
+        first: [ 0, 23000 ]
+        ,second: [ 23000, 46000 ]
+      } } ]
     
     // FX
-    //[ "game_fx", "audio/Game_FX", [ 'ogg', 'mp3' ], { "preload": true, "loop": false, "isMusic": false } ]
+    ,[ "achievement-unlocked", "audio/achievement-unlocked", [ 'mp3' ], { "preload": true, "loop": false } ]
   ];
   CONFIG.debug.log( "audioList loaded", 3 );
   return audioList;

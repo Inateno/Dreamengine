@@ -52,10 +52,10 @@ function( Renderer, ImageManager, Vector2, Sizes, TileRender, CONFIG )
     params.sizes = params.sizes || {};
     this.sizes  = new Sizes( params.sizes.width || params.width || params.w || params.tilesizes.width || 10
                   , params.sizes.height || params.height || params.h || params.tilesizes.height || 10
-                  , params.scaleX, params.scaleY );
-    
-    this.localPosition.x -= ( this.sizes.width * this.sizes.scaleX * 0.5 );
-    this.localPosition.y -= ( this.sizes.height * this.sizes.scaleY * 0.5 );
+                  , params.scaleX, params.scaleY, this );
+    this.preventCenter = params.preventCenter || false;
+    if ( !this.preventCenter )
+      this.sizes._center();
   }
 
   TileRenderer.prototype = new Renderer();

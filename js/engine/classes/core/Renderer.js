@@ -24,10 +24,19 @@ function( COLORS, Vector2, CONFIG )
     params = params || {};
     this.gameObject  = params.gameObject || undefined;
     
-    this.alpha       = params.alpha || 1;
+    this.alpha       = params.alpha !== undefined ? params.alpha : 1;
     this.fillColor   = params.fillColor  || COLORS.defaultColor;
     this.strokeColor = params.strokeColor  || COLORS.defaultColor;
     this.method      = params.method || "fill";
+    this.lineWidth   = params.lineWidth || 1;
+    
+    if ( this.fillColor != COLORS.defaultColor && this.strokeColor != COLORS.defaultColor
+        && !params.method )
+      this.method = "fillAndStroke";
+    if ( this.fillColor == COLORS.defaultColor && this.strokeColor != COLORS.defaultColor
+        && !params.method )
+      this.method = "stroke";
+    
     this.localPosition = params.localPosition ||
       new Vector2( params.offsetx || params.offsetX || params.left || params.x || params.offsetLeft || 0
                   , params.offsety || params.offsetY || params.top || params.y || params.offsetTop || 0 );
@@ -41,12 +50,7 @@ function( COLORS, Vector2, CONFIG )
       if ( !this.sizes )
         return;
       y = y || x;
-      
-      this.localPosition.x += ( this.sizes.width * this.sizes.scaleX * 0.5 ) >> 0;
-      this.localPosition.y += ( this.sizes.height * this.sizes.scaleY * 0.5 ) >> 0;
       this.sizes.setScale( x, y );
-      this.localPosition.x -= ( this.sizes.width * this.sizes.scaleX * 0.5 ) >> 0;
-      this.localPosition.y -= ( this.sizes.height * this.sizes.scaleY * 0.5 ) >> 0;
     }
     
     /****

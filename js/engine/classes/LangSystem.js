@@ -37,7 +37,7 @@ function( CONFIG )
      */
     this.get = function( what )
     {
-      return this.dictionary[ this.currentLang ][ what ] || null;
+      return this.dictionary[ this.currentLang ][ what ] || this.dictionary[ "en" ][ what ] || null;
     }
     
     /****
@@ -59,7 +59,7 @@ function( CONFIG )
     {
       this.currentLang = this.avalaibleLang[ 0 ];
       if ( !lang )
-        lang = navigator.language || navigator.browserLanguage || "en";
+        lang = navigator.language || navigator.browserLanguage || navigator.userLanguage || "en";
       
       for ( var i in this.dictionary )
       {

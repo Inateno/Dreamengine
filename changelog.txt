@@ -1,3 +1,35 @@
+---- 0.2.0 ---- This update is not cleaned - some samples could not work
+* Engine stop the loop if you change tab / reduce window / lock session, so when the user come back on the game, the engine don't count frame missed from long time ago (example if you leave the page for 5minutes, it deduce that you missed 21428.5 frames and will apply 21428 update on each scene enable)
+* Fixed a bug with collider using an offset
+* Fixed a bad calculation of the real position with BoxCollider (that us a decal to create a center like circles)
+* add a middle ware in SpriteRenderer to change current sprite (changeSprite)
+* CircleRenderer and BoxRenderer can now use lineWidth and canvasBuffer is set to good size
+* AchievementsSystem you can now define achievements in a data file, it provide simples methods to unlock achievement, binded on Notifications handler. It's binded on Nebula to
+* Nebula V1, if you want to make games for Dreamirl's plate-form.
+* add option preventCenter on default renderer classes
+* fix lookAt on childs
+* improve on AudioManager, added fades synchronized on gameLoop and Time
+* improve touch and mouse Events for "laggy" devices
+* Camera change focus args, now use a params object, can apply offsets on focus target
+* Camera shake is now sync on Time and on scaleDelta
+* create fade, fadeOut, fadeIn and fadeTo on Camera
+* GameObject rendering use now perfectly the z (if you use it) it calculate the 2D position with a 3D perspective, 3D perspective is not applied to children's due to performances optimizations
+* Scene and GameObject add method provide now support with arguments or array, and created a addOne method to improve performances for single add
+* adjust bigger offsets in GameObject to push more performances on Camera rendering
+* loader display percent loaded and can customize text
+* GameObject property cursorOnOver - if true will made cursor pointer auto
+* Camera have now alpha and bufferAlpha
+* Fix on AudioManager
+* Added Plugins: Popups, MessageBoxes, Lightboxs, Button
+* Now CSS is in one file for each group (engine, Nebula, plugins)
+* in GameObject now you have to use setCollider to set a collider (no change if you instantiate/give collider when create the gameObject)
+* Fix mistake in Vector2
+* improve the biggerOffset calculation in GameObject
+* added additionalModules in MainLoop (used to bind other stuff on the gameLoop without coding in gameLoop, used for plugin MessageBoxes)
+* new Gui V1 ok (use it in the same way as a scene, with gameObjects and add method, but it's binded on a Camera)
+* improved alpha calculation trough render -> camera -> gameObject renderer and childrens
+* added system files for WP8 - WP8.1 - Tizen
+
 ---- 0.1.0 ----
 Lot of refactoring about names to fit the most possible about what it's used for, fixes, and refactoring.
 I think I forgot a lot of points here, but checkout the diff

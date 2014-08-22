@@ -15,12 +15,14 @@
 define( [ 'DE.Renderer', 'DE.BoxRenderer.render', 'DE.CONFIG', 'DE.Sizes' ],
 function( Renderer, BoxRender, CONFIG, Sizes )
 {
-  function BoxRenderer( param, width, height )
+  function BoxRenderer( params, width, height )
   {
-    Renderer.call( this, param );
+    Renderer.call( this, params );
     
-    this.sizes = new Sizes( width, height, 1, 1, this );
-    this.sizes._center();
+    this.sizes = new Sizes( width, height, params.scaleX || params.scale || 1, params.scaleY || params.scale || 1, this );
+    this.preventCenter = params.preventCenter || false;
+    if ( !this.preventCenter )
+      this.sizes._center();
     
     /***
     * @fillIt
@@ -28,10 +30,10 @@ function( Renderer, BoxRender, CONFIG, Sizes )
     this.fillIt = function( ctx, physicRatio, ratioz )
     {
       ctx.fillStyle = this.fillColor;
-      ctx.fillRect( this.localPosition.x * physicRatio >> 0
-                    , this.localPosition.y * physicRatio >> 0
-                    , this.sizes.width * physicRatio * ratioz >> 0
-                    , this.sizes.height * physicRatio * ratioz >> 0 );
+      ctx.fillRect( this.localPosition.x * physicRatio * ratioz >> 0
+                    , this.localPosition.y * physicRatio * ratioz >> 0
+                    , this.sizes.width * this.sizes.scaleX * physicRatio * ratioz >> 0
+                    , this.sizes.height * this.sizes.scaleY * physicRatio * ratioz >> 0 );
     }
     
     /***
@@ -39,11 +41,12 @@ function( Renderer, BoxRender, CONFIG, Sizes )
     ***/
     this.strokeIt = function( ctx, physicRatio, ratioz )
     {
-      ctx.strokeStyle  = this.strokeColor;
-      ctx.strokeRect( this.localPosition.x * physicRatio >> 0
-                     , this.localPosition.y * physicRatio >> 0
-                     , this.sizes.width * physicRatio * ratioz >> 0
-                     , this.sizes.height * physicRatio * ratioz >> 0 );
+      ctx.lineWidth   = this.lineWidth;
+      ctx.strokeStyle = this.strokeColor;
+      ctx.strokeRect( this.localPosition.x * physicRatio * ratioz >> 0
+                     , this.localPosition.y * physicRatio * ratioz >> 0
+                     , this.sizes.width * this.sizes.scaleX * physicRatio * ratioz >> 0
+                     , this.sizes.height * this.sizes.scaleY * physicRatio * ratioz >> 0 );
     }
     
     /***

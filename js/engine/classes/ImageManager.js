@@ -71,6 +71,7 @@ function( CONFIG, States, Event, CanvasBuffer )
       img.isAnimated = params.isAnimated || false;
       img.isPaused   = params.isPaused || false;
       img.isLoop     = ( params.isLoop != undefined ) ? params.isLoop : true;
+      img.notRatio   = params.notRatio || false;
       if ( img.totalFrame <= 1 )
       {
         img.isAnimated = false;
@@ -97,7 +98,7 @@ function( CONFIG, States, Event, CanvasBuffer )
         , cvs = buff.canvas
         , ctx = buff.ctx;
       
-      if ( this.imageNotRatio )
+      if ( this.imageNotRatio || img.notRatio )
       {
         cvs.width  = cvs.width * this.ratioToConception;
         cvs.height = cvs.height * this.ratioToConception;
@@ -121,7 +122,7 @@ function( CONFIG, States, Event, CanvasBuffer )
       {
         States.down( 'isLoadingImages' );
       }
-      Event.emit( "imageLoaded", this.imagesLoaded, this.imagesRequested, img.name );
+      Event.trigger( "imageLoaded", this.imagesLoaded, this.imagesRequested, img.name );
     }
   };
   

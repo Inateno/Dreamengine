@@ -19,7 +19,8 @@ function( ImageManager, CONFIG, Time )
 {
   function TileRender( ctx, physicRatio, ratioz )
   {
-    ctx.globalAlpha = this.alpha;
+    var oldAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = this.alpha * oldAlpha;
     if ( ImageManager.imageNotRatio )
     {
       ctx.drawImage( ImageManager.images[ this.imageName ]
@@ -40,7 +41,7 @@ function( ImageManager, CONFIG, Time )
               , this.sizes.width * this.sizes.scaleX * ratioz >> 0
               , this.sizes.height * this.sizes.scaleY * ratioz >> 0 );
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = oldAlpha;
   };
   
   CONFIG.debug.log( "TileRenderer.render loaded", 3 );

@@ -63,14 +63,15 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     this.init = function()
     {
       // Update chrome
-      if ( detectBrowser( "chrome" ) )
+      if ( detectBrowser( "chrome" ) || navigator.getGamepads )
       {
         if ( CONFIG.notifications.gamepadEnable )
           Notifications.create( LangSystem.get( "gamepadAvalaible" ) || CONFIG.notifications.gamepadAvalaible );
         _updateChange = function( cTime )
         {
           // [] fallback if there is not gamepads API
-          var gamePads = ( navigator.webkitGetGamepads && navigator.webkitGetGamepads() ) || [];
+          var gamePads = ( navigator.getGamepads && navigator.getGamepads() )
+            || ( navigator.webkitGetGamepads && navigator.webkitGetGamepads() ) || [];
           for ( var i = 0; i < gamePads.length; ++i )
           {
             if ( gamePads[ i ] )
@@ -90,7 +91,8 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
         
         _updateRate = function( cTime )
         {
-          var gamePads = ( navigator.webkitGetGamepads && navigator.webkitGetGamepads() ) || [];
+          var gamePads = ( navigator.getGamepads && navigator.getGamepads() )
+            || ( navigator.webkitGetGamepads && navigator.webkitGetGamepads() ) || [];
           for ( var i = 0; i < gamePads.length; ++i )
           {
             var gamepad = gamePads[ i ];
@@ -246,11 +248,15 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     //Firefox handler
     function gamepadConnected( e )
     {
-        _gamePads[ e.gamepad.index ] = e.gamepad;
-        _gamePads.length++;
+      Notifications.create( LangSystem.get( "onGamepadConnect" )
+                               || ( "Gamepad " + ( index + 1 ) + " connected" ) );
+      _gamePads[ e.gamepad.index ] = e.gamepad;
+      _gamePads.length++;
     }
     
     window.addEventListener( "MozGamepadConnected", gamepadConnected, false );
+    window.addEventListener( "gamepadconnected", gamepadConnected, false );
+    // window.addEventListener( "gamepaddisconnected", gamepadDisconnected, false ); // TODO
     
     //Utilities
     this.connectToGameLoop = function( gameLoop )
@@ -280,7 +286,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
           Notifications.create( LangSystem.get( "onGamepadConnect" )
                                || ( "Gamepad " + ( index + 1 ) + " connected" ) );
         }
-        Event.emit( "connectGamepad", index );
+        Event.trigger( "connectGamepad", index );
         gamepadAvalaible[ index ] = true;
       }
     }
@@ -307,7 +313,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
           Notifications.create( LangSystem.get( "onGamepadDisconnect" )
                                || "Gamepad " + ( index + 1 ) + " disconnected" );
         }
-        Event.emit( "disconnectGamepad", index );
+        Event.trigger( "disconnectGamepad", index );
         gamepadAvalaible[ index ] = false;
       }
     }
@@ -324,7 +330,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     {
       if ( overSensibility( elemForce ) && !listener.active )
       {
-        eventBus.emit( "down" + i, elemForce, i );
+        eventBus.trigger( "down" + i, elemForce, i );
         listener.active = true;
       }
     }
@@ -338,7 +344,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
       {
         if ( !listener.active )
         {
-          eventBus.emit( "down"+i, elemForce, i );
+          eventBus.trigger( "down"+i, elemForce, i );
           listener.active    = true;
           listener.timesTamp = cTime;
           listener.diffTime  = _firstRate;
@@ -350,7 +356,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
         
         if ( listener.timesTamp + listener.diffTime < cTime )
         {
-          eventBus.emit( "down" + i, elemForce, i );
+          eventBus.trigger( "down" + i, elemForce, i );
           listener.timesTamp = cTime;
           listener.diffTime  = _rate;
           return true;
@@ -363,18 +369,17 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     {
       for ( var i in arrayListeners[ index ].listeners )
       {
-        var elemForce = gamePadInterface[ i ];
+        var elemForce = elemForce = gamePadInterface[ i ].value !== undefined ? gamePadInterface[ i ].value : gamePadInterface[ i ];
         var eventBus = arrayListeners[ index ];
         var listener = arrayListeners[ index ].listeners[ i ];
-
-
+        
         if ( ( elemForce < 0.3 && elemForce > 0 ) || ( elemForce > -0.3 && elemForce < 0 ) )
         {
           elemForce = 0;
         }
         if ( elemForce != listener.force )
         {
-          eventBus.emit( "move"+i, elemForce, i );
+          eventBus.trigger( "move"+i, elemForce, i );
         }
         listener.force = elemForce;
         
@@ -385,7 +390,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
         
         if ( !overSensibility( elemForce ) && listener.active )
         {
-          eventBus.emit( "up" + i, elemForce, i );
+          eventBus.trigger( "up" + i, elemForce, i );
           listener.active = false;
           listener.count  = 0;
         }
@@ -400,7 +405,7 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
       {
         if ( gamepad.axes[ i ] > 0 && !_axesListeners[ gamepad.index ].listeners[ i ] )
         {
-          _btnsListeners[ gamepad.index ].emit( "down" + i );
+          _btnsListeners[ gamepad.index ].trigger( "down" + i );
           _btnsListeners[ gamepad.index ].listeners[ i ] = true;
           continue;
         }

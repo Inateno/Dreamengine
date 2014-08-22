@@ -11,8 +11,8 @@
  
  !! there is no all KEYBOARD keys, but you can easily add some, and share it if you want, I will add them
 **/
-define( [ 'DE.CONFIG', 'DE.GamePad', 'handjs' ],
-function( CONFIG, gamePad )
+define( [ 'DE.CONFIG', 'DE.Event', 'DE.GamePad', 'handjs' ],
+function( CONFIG, Event, gamePad )
 {
   var Inputs = new function()
   {
@@ -52,6 +52,7 @@ function( CONFIG, gamePad )
         ,"enter":13,"return":8
         ,"PAD+":107, "PAD-":109, "PAD*":106, "PAD/":111, "PAD0":96, "PAD1":97, "PAD2":98, "PAD3":99, "PAD4":100
         ,"PAD5":101, "PAD6":102, "PAD7":103, "PAD8":104, "PAD9":105
+        ,"F5":116,"F11":122,"F12":123
       }
       ,"GAMEPADBUTTONS":{
         "A" : 0
@@ -78,6 +79,8 @@ function( CONFIG, gamePad )
         ,'RVertical' : 3
       }
     };
+    this.debugKeys = [ 123 ];
+    this.ignoreKeys = [ 116, 122, 123 ];
     
     this.queue = {
       'keyDown': {}
@@ -302,10 +305,28 @@ function( CONFIG, gamePad )
      */
     this.keyDown = function( event )
     {
-      if ( Inputs.keyLocked )
-        return false;
       var e = event || window.event;
       var code = e.which || e.keyCode;
+      if ( Inputs.ignoreKeys.indexOf( code ) != -1 )
+      {
+        if ( Inputs.debugKeys.indexOf( code ) != -1 )
+        {
+          if ( CONFIG.DEBUG )
+            return;
+          e.preventDefault();
+        }
+        return;
+      }
+      if ( code == Inputs.dbInputs.KEYBOARD.shift )
+        Inputs.isShiftDown = true;
+      else if ( Inputs.isShiftDown && code == Inputs.dbInputs.KEYBOARD.tab )
+        Event.trigger( "toggle-nebula" );
+      if ( Inputs.keyLocked )
+      {
+        if ( code == Inputs.dbInputs.KEYBOARD.escape )
+          Event.trigger( "close-nebula" );
+        return false;
+      }
       /*
        * TODO - need add an "on" keydown event handler here
        */
@@ -326,8 +347,8 @@ function( CONFIG, gamePad )
           Inputs.usedInputs[ isDown ].isDown = true;
         }
         Inputs.usedInputs[ isDown ].numberPress++;
-        // e.preventDefault();
       }
+      e.preventDefault();
       // return false;
     }
     /***
@@ -337,10 +358,12 @@ function( CONFIG, gamePad )
      */
     this.keyUp = function( event )
     {
-      if ( Inputs.keyLocked )
-        return false;
       var e = event || window.event;
       var code = e.which || e.keyCode;
+      if ( code == Inputs.dbInputs.KEYBOARD.shift )
+        Inputs.isShiftDown = false;
+      if ( Inputs.keyLocked )
+        return false;
       /*
        * TODO - need add a "on" keyup event handler here (no precise case)
        */
@@ -455,9 +478,8 @@ function( CONFIG, gamePad )
     {
       event.pointerId = event.pointerId || 0;
       if ( !Inputs.mouse[ event.pointerId ] )
-      {
         Inputs.mouse[ event.pointerId ] = { isDown: false, x: 0, y: 0, index: event.pointerId };
-      }
+      
       Inputs.mouse[ event.pointerId ].isDown = true;
       Inputs.mouse[ event.pointerId ].x = event.clientX;
       Inputs.mouse[ event.pointerId ].y = event.clientY;
@@ -570,9 +592,7 @@ function( CONFIG, gamePad )
       canvas.onmousewheel = Inputs.mouseWheel; // that work, sure
       // Lol IE
       if ( window.attachEvent )
-      {
-        canvas.attachEvent("onmousewheel", Inputs.mouseWheel);
-      }
+        canvas.attachEvent( "onmousewheel", Inputs.mouseWheel );
     }
     
     /****
@@ -616,6 +636,16 @@ function( CONFIG, gamePad )
         Inputs.trigger( 'axeMoved', 'wheelDown' );
     }
   };
+  
+  window.onbeforeunload = function( e )
+  {
+    if ( !window.leavePage )
+      return "En quittant la page vous allez perdre toute progression non sauvegardé.";
+  };
+  window.onunload = function( e )
+  {
+    Event.trigger( "unload-game" );
+  }
   
   CONFIG.debug.log( "Inputs loaded", 3 );
   return Inputs;

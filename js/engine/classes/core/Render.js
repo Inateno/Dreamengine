@@ -24,11 +24,21 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
     
     var _drawRatio   = 1;
     this.physicRatio = 1;
+    this.alpha       = params.alpha || 1;
     
     this.conserveSizes  = params.conserveSizes || false;
     this.fullScreenMode = params.fullScreen || null;
     this.cameras        = new Array();
     this.maxCameras     = 0;
+    
+    this.events = {};
+    /**
+     * flag if you use HTML5 Fullscreen API
+     * @protected
+     * @memberOf Render
+     * @type {Boolean}
+     */
+    this.isFullscreen = false;
     
     this.freeze = false;
 
@@ -66,6 +76,50 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       this.buffer = new CanvasBuffer( this.sizes.width, this.sizes.height );
       this.inited = true;
       this.updateSizes();
+      
+      var self = this;
+      this.div.addEventListener( "fullscreenchange", function( e )
+      {
+        self.isFullscreen = document.fullscreenElement;
+      }, false );
+      this.div.addEventListener( "msfullscreenchange", function( e )
+      {
+        self.isFullscreen = document.msFullscreenElement;
+      }, false );
+      this.div.addEventListener( "mozfullscreenchange", function( e )
+      {
+        self.isFullscreen = document.mozFullScreen;
+      }, false );
+      this.div.addEventListener( "webkitfullscreenchange", function( e )
+      {
+        self.isFullscreen = document.webkitIsFullScreen;
+      }, false );
+    };
+    
+    this.goFullscreen = function()
+    {
+      if ( !this.isFullscreen )
+      {
+        if ( this.div.requestFullscreen )
+          this.div.requestFullscreen();
+        else if ( this.div.msRequestFullscreen )
+          this.div.msRequestFullscreen();
+        else if ( this.div.mozRequestFullScreen )
+          this.div.mozRequestFullScreen();
+        else if ( this.div.webkitRequestFullscreen )
+          this.div.webkitRequestFullscreen();
+      }
+      else
+      {
+        if ( document.exitFullscreen )
+          document.exitFullscreen();
+        else if ( document.msExitFullscreen )
+          document.msExitFullscreen();
+        else if ( document.mozCancelFullScreen )
+          document.mozCancelFullScreen();
+        else if ( document.webkitCancelFullScreen )
+          document.webkitCancelFullScreen();
+      }
     }
     
     /****
@@ -189,9 +243,16 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       var newH = calcRatio * baseH >> 0;
       this.resize( newW, newH, stretch );
       
-      this.div.style.marginLeft = ( ( w - newW ) / 2 ) + "px";
-      this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
-      this.canvas.style.top = 0;
+      if ( this.isFullscreen )
+      {
+        this.div.style.marginLeft = 0;
+        this.div.style.marginTop  = 0;
+      }
+      else
+      {
+        this.div.style.marginLeft = ( ( w - newW ) / 2 ) + "px";
+        this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
+      }
       
       _drawRatio = newW / this.savedSizes.width;
     }
@@ -289,20 +350,18 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
     this.render = function()
     {
       if ( this.freeze )
-      {
         return;
-      }
       
+      this.ctx.globalAlpha = this.alpha;
       this.ctx.fillStyle = "black";
       this.ctx.fillRect( 0, 0, this.sizes.width, this.sizes.height );
       
       for ( var i = 0, camera; camera = this.cameras[ i ]; ++i )
-      {
         camera.render( this.ctx, _drawRatio, this.physicRatio );
-      }
       
       if ( CONFIG.DEBUG_LEVEL > 0 )
       {
+        this.ctx.globalAlpha = 1;
         this.ctx.font = "24px Arial";
         this.ctx.fillStyle = "white";
         this.ctx.fillText( "DeltaTime: " + Time.deltaTime
@@ -317,6 +376,18 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       }
     }
     
+    this.update = function()
+    {
+      if ( this.freeze )
+        return;
+      
+      for ( var i in this.events )
+      {
+        this.camerasMouseCollide.apply( this, this.events[ i ] );
+        delete this.events[ i ];
+      }
+    }
+    
     /****
      * add@void( camera@Camera )
       add a camera on this render
@@ -324,6 +395,10 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
     this.add = function( camera )
     {
       this.cameras.push( camera );
+      camera.on( "changeCursor", function( cursor )
+      {
+        this.canvas.style.cursor = cursor;
+      }, this );
       this.maxScenes++;
       camera.screenChangedSizeIndex( this.physicRatio, this.savedSizes );
     }
@@ -367,6 +442,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
           ,'y'     : cam.renderPosition.y - ( cam.renderSizes.height * 0.5 * cam.renderSizes.scaleY )
           ,'width' : cam.renderSizes.width * cam.renderSizes.scaleX
           ,'height': cam.renderSizes.height * cam.renderSizes.scaleY
+          ,'enable': true
         };
         
         // console.log( 'camPos', mouse );
@@ -402,15 +478,18 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
     
     this.oOnMouseDown = function( mouse )
     {
-      this.camerasMouseCollide( "MouseDown", mouse.x, mouse.y, mouse.index );
+      this.events[ Date.now() + "down" ] = [ "MouseDown", mouse.x, mouse.y, mouse.index ];
+      // this.camerasMouseCollide( "MouseDown", mouse.x, mouse.y, mouse.index );
     }
     this.oOnMouseUp = function( mouse )
     {
-      this.camerasMouseCollide( "MouseUp", mouse.x, mouse.y, mouse.index );
+      this.events[ Date.now() + "up" ] = [ "MouseUp", mouse.x, mouse.y, mouse.index ];
+      // this.camerasMouseCollide( "MouseUp", mouse.x, mouse.y, mouse.index );
     }
     this.oOnMouseMove = function( mouse )
     {
-      this.camerasMouseCollide( "MouseMove", mouse.x, mouse.y, mouse.index );
+      this.events[ Date.now() + "move" ] = [ "MouseMove", mouse.x, mouse.y, mouse.index ];
+      // this.camerasMouseCollide( "MouseMove", mouse.x, mouse.y, mouse.index );
     }
     
     /****

@@ -16,6 +16,8 @@ function( Vector2, CONFIG )
   {
     params    = params || {};
     this.type = params.type || undefined;
+    
+    this.enable = true;
     // a collider without gameObject should provide bug if you use it
     
     /**
@@ -39,9 +41,10 @@ function( Vector2, CONFIG )
     this.getRealPosition = function()
     {
       var pos = this.gameObject.getPos();
-      pos.x += this.localPosition.x;
-      pos.y += this.localPosition.y;
-      return pos;
+      var harmonics = this.gameObject.getHarmonics();
+      return { x: -(-this.localPosition.x * harmonics.cos + this.localPosition.y * harmonics.sin) + pos.x
+        , y: -(-this.localPosition.x * harmonics.sin + this.localPosition.y * -harmonics.cos) + pos.y
+      };
     }
     
     /****

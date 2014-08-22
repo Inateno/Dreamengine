@@ -44,63 +44,65 @@ function( DE )
   
   function addEnemy( object, x, y, player )
   {
-      // STEP 1 enemy and components
-      var enemy = new DE.GameObject( {
-       'x': x, 'y': y
-        , 'collider': new DE.CircleCollider( 30 )
-        , "renderer":new DE.BoxRenderer( { "fillColor": "rgb(20,20,20)" }, 50, 80 )
-      } );
-      enemy.onMouseDown = function(){ console.log( "enemy down" ); }
-      enemy.onMouseEnter = function(){ console.log( "enemy enter" ); }
-      enemy.onMouseLeave = function(){ console.log( "enemy leave" ); }
-      object.scene.add( enemy );
-      object.enemies.push( enemy );
-      
-      
-      enemy.arm = new DE.GameObject( {
-        "name": "arm", "tag":"time", "x": 0, "y": 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "green", "offsetY": 0 }, 120, 20 )
-      } );
-      var canon = new DE.GameObject( { 'x': 50, 'y': 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
-      } );
-      var gatling = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 200 )
-      } );
-      gatling.onMouseDown = function(){ console.log( "%cgatling gun down", "color:orange" ); }
-      gatling.onMouseEnter = function(){ console.log( "%cgatling gun enter", "color:orange" ); }
-      gatling.onMouseLeave = function(){ console.log( "%cgatling gun leave", "color:orange" ); }
-      canon.add( gatling );
-      
-      var canon2 = new DE.GameObject( { 'x': -50, 'y': 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
-      } );
-      var rocketo = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 300 )
-      } );
-      canon2.add( rocketo );
-      
-      enemy.arm.add( canon2 );
-      enemy.arm.add( canon );
-      enemy.add( enemy.arm );
-      
-      enemy.target = player;
-      // STEP 2
-      enemy.move = function()
-      {
-        this.translateY( 4 );
-        this.rotate( 0.01 );
-        // this.arm.lookAt( this.target.position );
-        this.arm.lookAt( this.target.position );
-      }
-      enemy.addAutomatism( "gameLogic", "move" );
-      
-      // STEP 3
-      addFire( gatling );
-      gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-      addFire( rocketo );
-      rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-      rocketo.bulletSpeed = 7;
+    // STEP 1 enemy and components
+    var enemy = new DE.GameObject( {
+     'x': x, 'y': y
+      , 'collider': new DE.CircleCollider( 30 )
+      , "renderer":new DE.BoxRenderer( { "fillColor": "rgb(20,20,20)" }, 50, 80 )
+    } );
+    enemy.onMouseDown = function(){ console.log( "enemy down" ); }
+    enemy.onMouseEnter = function(){ console.log( "enemy enter" ); }
+    enemy.onMouseLeave = function(){ console.log( "enemy leave" ); }
+    object.scene.add( enemy );
+    object.enemies.push( enemy );
+    
+    
+    enemy.arm = new DE.GameObject( {
+      "name": "arm", "tag":"time", "x": 00, "y": 40
+      , "renderer":new DE.BoxRenderer( { "fillColor": "green", "offsetY": 0 }, 120, 20 )
+    } );
+    var canon = new DE.GameObject( { 'x': 50, 'y': 0
+      , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
+    } );
+    var gatling = new DE.GameObject( { 'x': 0, 'y': 50
+      , 'collider': new DE.CircleCollider( 200 )
+    } );
+    gatling.onMouseDown = function(){ console.log( "%cgatling gun down", "color:orange" ); }
+    gatling.onMouseEnter = function(){ console.log( "%cgatling gun enter", "color:orange" ); }
+    gatling.onMouseLeave = function(){ console.log( "%cgatling gun leave", "color:orange" ); }
+    canon.add( gatling );
+    
+    var canon2 = new DE.GameObject( { 'x': -50, 'y': 0
+      , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
+    } );
+    var rocketo = new DE.GameObject( { 'x': 0, 'y': 50
+      , 'collider': new DE.CircleCollider( 300 )
+    } );
+    canon2.add( rocketo );
+    
+    enemy.arm.add( canon2 );
+    enemy.arm.add( canon );
+    enemy.add( enemy.arm );
+    
+    enemy.target = player;
+    // STEP 2
+    enemy.move = function()
+    {
+      this.translateY( 4 );
+      this.rotate( 0.01 );
+      // this.arm.lookAt( this.target.position );
+      // this.lookAt( this.target.position );
+      this.arm.lookAt( this.target.position );
+    }
+    enemy.addAutomatism( "gameLogic", "move" );
+    
+    // STEP 3
+    addFire( gatling );
+    // gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+    addFire( rocketo );
+    // rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+    rocketo.bulletSpeed = 7;
+    return enemy;
   }
   
   // init
@@ -127,14 +129,15 @@ function( DE )
       var shipRender = new DE.SpriteRenderer( { "spriteName": "ship", "scaleX":0.2, "scaleY":0.2 } );
       var collider = new DE.CircleCollider( 50 );
       Game.ship = new DE.GameObject( { "name":"Ayera", "tag":"Player"
-                                        , "x": 980, "y":500, "z": 0
+                                        , "cursorOnOver": true
+                                        , "x": 980, "y":500, "z": 0, "zindex": 1
                                         , "renderer": shipRender
                                         , "collider":collider } );
       Game.ship.onMouseUp= function(){this.fire();};
       
       // add a children
       var reactorfx = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.4, "scaleY":0.4 } );
-      var reactor = new DE.GameObject( { "name":"Reactor", "tag":"FX", "y":108, "renderer": reactorfx } );
+      var reactor = new DE.GameObject( { "name":"Reactor", "tag":"FX", "z": 0, "y":108, "renderer": reactorfx } );
       Game.ship.add( reactor );
       reactor.position.setRotation( Math.PI );
       
@@ -150,38 +153,54 @@ function( DE )
     Game.camera.scene = Game.scene;
     Game.camera.gui = new DE.Gui( Game.camera, { 'id': "Test" } );
     
-    // for ( var i = 1900; i > 0; i -= 100 )
-    //   Game.scene.add( new DE.GameObject( { "x": i, "y": 300 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 760 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 1580, "y": 750 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 1580, "y": 10 } ) );
-    
-    var rotateCol = new DE.GameObject( { "x": 1080, "y": 0, "collider": new DE.OrientedBoxCollider( 200, 100, {} ) } );
-    Game.scene.add( rotateCol );
-    
-    Game.pp = new DE.GameObject( { "x": 500, "y": 500, "renderer": new DE.BoxRenderer( { "fillColor": "pink" }, 50, 50 ) } );
-    Game.scene.add( Game.pp );
-    Game.camera.onMouseMove = function( e )
-    {
-      Game.pp.position.x = e.x;
-      Game.pp.position.y = e.y;
-    }
-    Game.camera.onMouseUp = Game.camera.onMouseMove;
-    Game.camera.onMouseDown = Game.camera.onMouseMove;
+    // Game.camera.gui.add( new DE.GameObject( {
+    //   "x": 1160, "y": 740
+    //   , "renderer": new DE.SpriteRenderer( { spriteName: "reactor" } )
+    //   , "collider": new DE.CircleCollider( 30 )
+    // } ) );
+    // Game.camera.gui.gameObjects[ 0 ].onMouseUp = function(){ console.log( "coucou" ); return true }
     
     Game.render.add( Game.camera );
     
     // Create Enemies
     Game.enemies = new Array();
-    var n = 22;
-    addEnemy( Game, 1000, 500, Game.ship );
+    var n = 5;
+    // for ( var i = 0, e; i < n; ++i )
+    // {
+    //   e = addEnemy( Game, 900, 500, Game.ship );
+    //   e.position.z = i;
+    // }
+    var container = new DE.GameObject( { z: 10 });
+    var bg =new DE.GameObject( {
+      "x": 960, "y": 540, "z": 20
+      ,"renderer": new DE.SpriteRenderer( { spriteName: "bg", scale: 3 } )
+    } );
+    for ( var i = 0, grass, canyon, canyon2, c3; i < 4; ++i )
+    {
+      canyon =new DE.GameObject( {
+        "x": 1800 * i, "y": 580, "z": 10
+        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
+      } );
+      canyon2 =new DE.GameObject( {
+        "x": 1800 * i + 100, "y": 580, "z": 15
+        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
+      } );
+      c3 =new DE.GameObject( {
+        "x": 1800 * i - 100, "y": 580, "z": 18
+        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
+      } );
+      grass =new DE.GameObject( {
+      "x": 1900 * i, "y": 640, "z": 1, "zindex": -1
+      ,"renderer": new DE.SpriteRenderer( { spriteName: "grass", scale: 1 } )
+    } );
+      Game.scene.add( canyon, canyon2, c3, grass );
+    }
+    Game.scene.add( bg );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 0+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 200+i%2*100, Game.ship );
-    for ( var i = 0; i < n; ++i )
+    // for ( var i = 0; i < n; ++i )
       // addEnemy( Game, 180 + i*80, 400+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 600+i%2*100, Game.ship );
@@ -190,34 +209,25 @@ function( DE )
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 1000+i%2*100, Game.ship );
     
-    Game.camera.gui.add( new DE.GuiLabel( { 'id': "hello", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Hello world" ) );
-    Game.camera.gui.add( new DE.GuiButton( { 'id': "Click me plz", 'x': 450, 'y': 600, "w": 100, "h": 100, 'fillColor': "white", "enable": false } ) );
-    Game.camera.gui.add( new DE.GuiImage( { 'id': 'simpleImage', 'spriteName': "reactor", "x": 200, "y": 600, "w": 100, "h": 100, "paused": true } ) );
-    
-    Game.camera.gui.components[ 'hello' ].onMouseUp = function()
-    {
-      Game.camera.gui.components[ 'Click me plz' ].toggle();
-    }
-    Game.camera.gui.components[ 'simpleImage' ].onMouseUp = function()
-    {
-      Game.camera.gui.components[ 'Click me plz' ].toggle();
-    }
-    Game.camera.gui.components[ 'Click me plz' ].onMouseUp = function()
-    {
-      console.log( "clickcik" );
-      Game.camera.renderPosition.rotate( Math.PI*0.1 );
-    }
-    // Game.camera.position.rotate( Math.PI );
+    Game.camera.focus( Game.ship );
+    Game.camera.limits.minY = 0;
+    Game.camera.limits.maxY = 1080;
+    // Game.camera.limits.minX = -500;
+    // Game.camera.limits.maxX = 2400;
     
     //add Fire on the ship
-    Game.ship.fire = function()
+    Game.ship.fire = function( dir )
     {
-      var pos = this.getPos();
-      var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-      var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
-      bullet.position.setRotation( this.position.rotation );
-      bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
-      Game.scene.add( bullet );
+      dir = dir || 1;
+      this.position.z += 0.1 * dir;
+      Game.camera.scenePosition.z += 0.1 * dir;
+      // Game.scene.sortGameObjects();
+      // var pos = this.getPos();
+      // var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
+      // var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
+      // bullet.position.setRotation( this.position.rotation );
+      // bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
+      // Game.scene.add( bullet );
     }
     //
     // DE.Inputs.addActionInput( "fire", "launchMissile", function(){Game.ship.fire();}, "up" )

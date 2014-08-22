@@ -23,19 +23,6 @@ function( DE, customizeW8 )
       _self = this;
       if ( !WinJS )
         throw new Error( "WinJS is not defined, a Windows8App need it !" );
-      var settingsPane = Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
-      settingsPane.addEventListener( "commandsrequested", function (e)
-      {
-        var customButton = new Windows.UI.ApplicationSettings.SettingsCommand(
-          "Options", DE.LangSystem.get( 'settings' ) || 'Settings'
-          , function( e )
-          {
-            // go on settings menu
-            _self.onSettings();
-          }
-        );
-        e.request.applicationCommands.append(customButton);
-      } );
       
       WinJS.Application.onsettings = function(e)
       {
@@ -52,7 +39,37 @@ function( DE, customizeW8 )
       window.addEventListener( "resize", function(){ _self.checkResize(); }, false );
       
       customizeW8( this );
-    }
+      
+      var cmds = {};
+      if ( this.useSettingsCharm )
+      {
+        cmds[ "options" ] = new Windows.UI.ApplicationSettings.SettingsCommand(
+          "Settings", DE.LangSystem.get( 'settings' ) || 'Settings'
+          , function( e )
+          {
+            // go on settings menu
+            _self.onSettings();
+          } );
+      }
+      if ( this.usePrivacyCharm )
+      {
+        var privacyLink = this.privacyLink;
+        cmds[ "privacy" ] = new Windows.UI.ApplicationSettings.SettingsCommand(
+          "Privacy", DE.LangSystem.get( 'privacyLink' ) || 'Privacy Statement'
+          , function( e )
+          {
+            Windows.System.Launcher.launchUriAsync(
+              new Windows.Foundation.Uri( privacyLink )
+            );
+          } );
+      }
+      var settingsPane = Windows.UI.ApplicationSettings.SettingsPane.getForCurrentView();
+      settingsPane.addEventListener( "commandsrequested", function (e)
+      {
+        for ( var c in cmds )
+          e.request.applicationCommands.append( cmds[ c ] );
+      } );
+    };
     
     this.onSettingsPanel = function(e){}
     this.onSettings = function(e){}
@@ -63,7 +80,6 @@ function( DE, customizeW8 )
     {
       if ( document.documentElement.offsetWidth < 330 )
       {
-        // display my render and hide others
         for ( var i = 0, j; j = DE.MainLoop.renders[ i ]; i++ )
         {
           j.canvas.parentElement.previousState = j.canvas.parentElement.style.display;
@@ -71,6 +87,7 @@ function( DE, customizeW8 )
           j.canvas.previousState = j.canvas.style.display;
           j.canvas.style.display = "none";
         }
+        // display my render and hide others
         if ( this.render )
         {
           this.render.canvas.parentElement.style.display = "block";
@@ -101,12 +118,15 @@ function( DE, customizeW8 )
         this.onResize( false );
         this.isOverridingMainLoop = false;
       }
-    }
+    };
     
     this.plugToGamePadLib = function()
     {
       if ( !DE.GamePad )
+      {
+        console.log( "%c[WARNING] Can't find DE.GamePad component, gamepad configuration aborted", "color:orange" );
         return;
+      }
       if ( !window[ 'GameController' ] )
       {
         console.log( "%c[WARNING] Can't find W8 Gamepad component, gamepad configuration aborted", "color:orange" );
@@ -117,7 +137,7 @@ function( DE, customizeW8 )
       if ( DE.CONFIG.notifications.gamepadEnable )
         DE.Notifications.create( DE.LangSystem.get( "gamepadAvalaible" )
                                 || DE.CONFIG.notifications.gamepadAvalaible );
-    }
+    };
     
     // sample to see your application rated
     this.askToRateIf = "playedOnce";
@@ -125,7 +145,7 @@ function( DE, customizeW8 )
     {
       var lang = DE.LangSystem.currentLang;
       var askToRateIf = ( this.askToRateIf != null ) ? DE.SaveSystem.get( this.askToRateIf ) : true;
-      if ( askToRateIf && !DE.SaveSystem.get( 'rated' ) )
+      if ( askToRateIf && !DE.SaveSystem.get( 'platformRated' ) )
       {
         var md = new Windows.UI.Popups.MessageDialog( DE.LangSystem.get( 'askToRate' )
                                                       || "Don't forget rate this game if you like it !" );
@@ -147,7 +167,7 @@ function( DE, customizeW8 )
         }
         
         // var _self = this;
-        md.showAsync().then( function( c )
+        md.showAsync().done( function( c )
         {
           if ( result == 1 )
             return;
@@ -157,10 +177,11 @@ function( DE, customizeW8 )
               new Windows.Foundation.Uri("ms-windows-store:REVIEW?PFN=" + _self.appLinkKey )
             );
           }
-          DE.SaveSystem.save( 'rated', true );
+          DE.SaveSystem.save( 'platformRated', true );
         } );
       }
-    }
+    };
+    DE.Event.on( "askToRate", this.askToRate, this );
   };
   
   return Windows8App;

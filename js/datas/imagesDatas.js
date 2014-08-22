@@ -24,7 +24,7 @@ function( CONFIG )
     // avalaible images sizes (engine will load optimisest images depends on user resolution)
     screenSizes: [
       { "w": 1920, "h": 1080, "path": "" }
-      // { "w": 1280, "h": 720, "path": "" }
+      // ,{ "w": 1280, "h": 720, "path": "", "notRatio": true }
       // , { "w": 640, "h": 360, "path": "", "notRatio": true }
       // , { "w": 480, "h": 270, "path": "sd/" }
     ]
@@ -40,6 +40,9 @@ function( CONFIG )
       // [ "example", "example", "png", { "load": true, "totalFrame": 4, "totalLine": 2, "eachAnim": 50, "isAnimated":true, "isReversed": false } ]
       [ "ship", "ayera/ship", "png", { "load": true, "totalFrame": 10, "totalLine": 1, "eachAnim": 100, "isAnimated":false, "isReversed": false } ]
       ,[ "reactor", "ayera/reactor", "png", { "load": true, "totalFrame": 4, "eachAnim": 40, "isAnimated":true, "isReversed": false } ]
+      ,[ "bg", "ayera/bg", "jpg", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+      ,[ "canyon", "ayera/canyon", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+      ,[ "grass", "ayera/grass", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
     ]
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );

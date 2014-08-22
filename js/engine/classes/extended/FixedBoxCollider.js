@@ -33,7 +33,8 @@ function( Collider, COLORS, CONFIG, CanvasBuffer )
     
     this.width  = width || 1;
     this.height = height || 1;
-
+    this.preventRotation = true;
+    
     this.localPosition.x -= this.width * 0.5;
     this.localPosition.y -= this.height * 0.5;
     
@@ -45,15 +46,29 @@ function( Collider, COLORS, CONFIG, CanvasBuffer )
       this.debugBuffer.ctx.strokeRect( 0, 0, this.width, this.height );
     }
     
-    // only for fixed box collider
-    this.getColliderPoints = function()
+    // only for fixed box collider because we prevent rotate
+    this.debugRender = function( ctx, physicRatio, ratioz )
+    {
+      if ( !this.debugBuffer )
+        return;
+      ctx.rotate( -this.gameObject.position.rotation );
+      ctx.drawImage( this.debugBuffer.canvas
+                      , this.localPosition.x * physicRatio * ratioz >> 0
+                      , this.localPosition.y * physicRatio * ratioz >> 0
+                      , this.debugBuffer.canvas.width * physicRatio * ratioz >> 0
+                      , this.debugBuffer.canvas.height * physicRatio * ratioz >> 0 );
+      ctx.rotate( this.gameObject.position.rotation );
+    }
+    
+    // overrides for box collider because we have to subtract width and height
+    this.getRealPosition = function()
     {
       var pos = this.gameObject.getPos();
-      return {
-        'top': pos.y + this.localPosition.y
-        ,'left': pos.x + this.localPosition.x
-        ,'right': pos.x + this.localPosition.x + this.width
-        ,'bottom': pos.y + this.localPosition.y + this.height
+      var harmonics = this.gameObject.getHarmonics();
+      var offsetX = this.localPosition.x + this.width * 0.5;
+      var offsetY = this.localPosition.y + this.height * 0.5;
+      return { x: -(-offsetX * harmonics.cos + offsetY * harmonics.sin) + pos.x - this.width * 0.5
+        , y: -(-offsetX * harmonics.sin + offsetY * -harmonics.cos) + pos.y - this.height * 0.5
       };
     }
     

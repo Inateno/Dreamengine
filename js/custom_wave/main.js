@@ -44,6 +44,7 @@ function( files, gameLoop, Game, images, audios, inputs, dictionary )
     , 'inputs': inputs, 'dictionary': dictionary
     , 'about': { 'gameName': "StressTest", 'author': "Dreamirl", 'gameVersion': "0.1" }
     , 'saveModel': {}, 'saveIgnoreVersion': true
+    , 'ignoreNebula': true
   } );
   window.DREAM_E = DE;
 } );

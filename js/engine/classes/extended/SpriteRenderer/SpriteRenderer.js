@@ -71,8 +71,12 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
     this.isLoop = ( params.isLoop != undefined ) ? params.isLoop : ImageManager.images[ this.spriteName ].isLoop;
     
     this.currentFrame = this.startFrame || 0;
+    this.startLine    = params.startLine || 0;
     this.currentLine  = params.startLine || 0;
-    this.sizes._center();
+    // this.isRatio      = params.isRatio != undefined ? params.isRatio : true;
+    this.preventCenter = params.preventCenter || false;
+    if ( !this.preventCenter )
+      this.sizes._center();
     
     this.onAnimEnd = function(){}
     
@@ -101,7 +105,7 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
       this.currentFrame = this.startFrame;
     else
       this.currentFrame = frame;
-  }
+  };
   
   SpriteRenderer.prototype.setLine = function( line )
   {
@@ -109,7 +113,7 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
       this.currentLine = this.totalLine - 1;
     else
       this.currentLine = line;
-  }
+  };
   
   SpriteRenderer.prototype.restartAnim = function()
   {
@@ -119,7 +123,7 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
     else
       this.currentFrame = this.endFrame - 1;
     this.lastAnim = Time.currentTime;
-  }
+  };
   
   SpriteRenderer.prototype.setPause = function( val, disableAnimation )
   {
@@ -129,22 +133,46 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
       this.isAnimated = true;
       this.lastAnim = Date.now();
     }
-  }
+  };
   SpriteRenderer.prototype.setEndFrame = function( v )
   {
     if ( this.totalFrame <= v )
       this.endFrame = this.totalFrame - 1;
     else
       this.endFrame = v;
-  }
+  };
   SpriteRenderer.prototype.setDelay = function( delay )
   {
     this.eachAnim = delay;
-  }
+  };
   SpriteRenderer.prototype.setLoop = function( bool )
   {
     this.isLoop = bool;
-  }
+  };
+  
+  SpriteRenderer.prototype.changeSprite = function( spriteName, params )
+  {
+    params = params || {};
+    this.spriteName = spriteName;
+    this.startFrame = params.startFrame || 0;
+    this.endFrame   = params.endFrame || ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.totalFrame = ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.totalLine  = params.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
+    
+    this.eachAnim  = params.eachAnim || ImageManager.images[ this.spriteName ].eachAnim || 0;
+    this.lastAnim  = Date.now();
+    
+    this.frameSizes = new Sizes( ImageManager.images[ this.spriteName ].widthFrame
+                    , ImageManager.images[ this.spriteName ].heightFrame
+                    , 1, 1 );
+    params.scaleX = params.scale || params.scaleX || params.scalex || 1;
+    params.scaleY = params.scale || params.scaleY || params.scaley || 1;
+    this.sizes._uncenter();
+    this.sizes  = new Sizes( params.width || params.w || ImageManager.images[ this.spriteName ].widthFrame
+                  , params.height  || params.h || ImageManager.images[ this.spriteName ].heightFrame
+                  , params.scaleX, params.scaleY, this );
+    this.sizes._center();
+  };
   
   CONFIG.debug.log( "SpriteRenderer loaded", 3 );
   return SpriteRenderer;

@@ -29,6 +29,10 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="AchievementSystem.html">AchievementSystem</a>
+						</li>
+						
+						<li>
 							<a href="Notifications.html">Notifications</a>
 						</li>
 						
@@ -170,8 +174,10 @@
  * @property {String} [tag="none"] assign tags if it's can be useful for you
  * @property {Scene} [scene=null] you can give a scene on creation, or later
 **/
-define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Vector2', 'DE.CanvasBuffer', 'DE.CollisionSystem', 'DE.ImageManager', 'DE.Event' ],
-function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, Event )
+define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Vector2', 'DE.CanvasBuffer', 'DE.Mid.gameObjectMouseEvent'
+        , 'DE.ImageManager', 'DE.Event', 'DE.Time' ],
+function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
+        , ImageManager, Event, Time )
 {
   function Camera( width, height, x, y, params )
   {
@@ -180,7 +186,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     this.name   = params.name || "";
     this.tag    = params.tag || "";
     this.scene  = params.scene || null;
-    this.gui    = undefined;
+    this.gui    = params.gui || undefined;
     
     this.renderSizes = new Sizes( width, height, params.scale || params.scaleX || 1
                                 , params.scale || params.scaleY || 1 );
@@ -191,7 +197,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     this.savedPosition = new Vector2( x + width * 0.5, y + height * 0.5, params.z || -10 );
     
     // position inside the sceneworld
-    this.scenePosition = new Vector2( params.realx || x, params.realy || y
+    this.scenePosition = new Vector2( params.realx || 0, params.realy || 0
                                     , params.realz || params.z || -10 );
     this.limits = {
       minX: params.minX != undefined ? params.minX : undefined
@@ -200,10 +206,23 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       ,maxY: params.maxY != undefined ? params.maxY : undefined
     };
     
-    this.opacity = params.opacity || 1;
+    /**
+     * applied on final rendering, this will display the camera with transparency in the Render
+     * @public
+     * @memberOf Camera
+     */
+    this.alpha = params.alpha || 1;
+    
+    /**
+     * applied before rendering, all gameObjects and gui will inherits from the bufferAlpha
+     * @public
+     * @memberOf Camera
+     */
+    this.bufferAlpha = params.bufferAlpha || 1;
+    
     this.backgroundColor = params.backgroundColor || null;
     this.backgroundImage = params.backgroundImage || null;
-    
+    this.useTransparency = params.useTransparency || params.transparent || false;
     this.cameras    = new Array();
     this.maxCameras = 0;
     
@@ -216,51 +235,76 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     // this._gameObjects = []; // sotre last active objects 
     this._visibleGameObjects = [];
     
-    this.indexMouseOver  = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]; // 20 touches max ?
+    this.indexMouseOver  = {}; //[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]; // 20 touches max ?
     this.lastPointersPos = {};
     /****
      * store between two event types if you asked to prevent some events
      * @private
      */
-    this._propagationEvent = [ {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ];
+    this._propagationEvent = {}; //[ {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ];
+    
+    /**
+     * object used to apply fade on final Camera rendering
+     * @protected
+     * @memberOf Camera
+     * @type {Object}
+     */
+    this.fadeData = {
+      "from"     : 1
+      ,"to"      : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    /**
+     * object used to apply fade before rendering
+     * @protected
+     * @memberOf Camera
+     * @type {Object}
+     */
+    this.fadeBufferData = {
+      "from"      : 1
+      ,"to"       : 0
+      ,"duration" : 500
+      ,"done"     : true
+    };
     
     // add Events components on camera
     Event.addEventComponents( this );
   }
   
-  /****
-   * getBuffer@void
-    previously the _buffer was private - let to maximise retro-version
-    (but I'll disapear, don't user it)
-    you shouldn't get this buffer and do action on, but it's usefull for the engine
-   */
-  Camera.prototype.getBuffer = function(){ return this._buffer; }
-  
-  /****
-   * render@void( ctx@CanvasContext, drawRatio@float, physicRatio@float )
-   renderise the camera inside the given ctx
-   you shouldn't change this method
+  /**
+   * render the camera, called by renders that contain this camera (can be contained by two or more render)
+   * You touch this method at your own risks
+   * @protected
+   * @param {Context2D} ctx
+   * @param {Float} drawRatio
+   * @param {Float} physicRatio
+   * @memberOf Camera
    */
   Camera.prototype.render = function( ctx, drawRatio, physicRatio )
   {
     if ( this.sleep )
-    {
       return;
-    }
     
+    var oldAlpha = ctx.globalAlpha;
     var _buffer = this._buffer;
     if ( !this.freeze )
     {
-      _buffer.ctx.globalAlpha  = this.opacity;
+      this.applyFocus();
+      this.checkLimits();
+      this.applyShake();
       
-      if ( this.backgroundColor != null )
+      _buffer.ctx.globalAlpha = this.bufferAlpha * oldAlpha;
+      
+      if ( this.useTransparency )
+        _buffer.ctx.clearRect( 0, 0, this.renderSizes.width, this.renderSizes.height );
+      
+      if ( this.backgroundImage != null )
+        _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0, this.renderSizes.width, this.renderSizes.height );
+      else if ( this.backgroundColor != null )
       {
         _buffer.ctx.fillStyle = this.backgroundColor;
         _buffer.ctx.fillRect( 0, 0, this.renderSizes.width, this.renderSizes.height );
-      }
-      if ( this.backgroundImage != null )
-      {
-        _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0, this.renderSizes.width, this.renderSizes.height );
       }
       
       _buffer.ctx.save();
@@ -269,21 +313,27 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       {
         var _gameObjects /*= this._gameObjects*/ = this.scene.gameObjects;
         this._visibleGameObjects = [];
-        for ( var i = 0, t = _gameObjects.length, g,ratioz; i &lt; t; i++ )
+        for ( var i = 0, t = _gameObjects.length, g, rpx, rpy, ratioz; i &lt; t; i++ )
         {
           g = _gameObjects[ i ];
+          ratioz  = ( 10 / ( g.position.z - this.scenePosition.z ) );
+          rpx = g.position.x;
+          rpy = g.position.y;
+          // calculate real position only if ratioz isn't 1, otherwise the result is simply g.position.x
+          if ( ratioz != 1 )
+          {
+            rpx = ( g.position.x - ( this.scenePosition.x + this.fieldSizes.width * 0.5 ) ) * ratioz + ( this.scenePosition.x + this.fieldSizes.width * 0.5 );
+            rpy = ( g.position.y - ( this.scenePosition.y + this.fieldSizes.height * 0.5 ) ) * ratioz + ( this.scenePosition.y + this.fieldSizes.height * 0.5 );
+          }
           if ( g && g.enable
             && g.position.z > this.scenePosition.z
-            && ( g.position.x + g.biggerOffset.width >= this.scenePosition.x
-              && g.position.x - g.biggerOffset.width &lt;= this.scenePosition.x + this.fieldSizes.width )
-            && ( g.position.y + g.biggerOffset.height >= this.scenePosition.y
-              && g.position.y - g.biggerOffset.height &lt;= this.scenePosition.y + this.fieldSizes.height )
-          )
+            && rpx + g.biggerOffset.width >= this.scenePosition.x
+            && rpx - g.biggerOffset.width &lt;= this.scenePosition.x + this.fieldSizes.width
+            && rpy + g.biggerOffset.height >= this.scenePosition.y
+            && rpy - g.biggerOffset.height &lt;= this.scenePosition.y + this.fieldSizes.height )
           {
             this._visibleGameObjects.push( g );
-            // distance from 10 between object and camera is ratio 1
-            ratioz = 10 / ( g.position.z - this.scenePosition.z );
-            g.render( _buffer.ctx, physicRatio, ratioz, this.scenePosition, this.renderSizes );
+            g.render( _buffer.ctx, physicRatio, this.scenePosition, this.fieldSizes );
           }
         }
       }
@@ -295,7 +345,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       }
       
       _buffer.ctx.restore();
-      _buffer.ctx.globalAlpha = this.opacity;
+      _buffer.ctx.globalAlpha = this.alpha * oldAlpha;
       
       // debuging - display name and stroke the camera
       if ( CONFIG.DEBUG )
@@ -321,16 +371,16 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
                             ,this.renderSizes.height * 0.5
                             , 5, 20 );
       }
-      
-      this.getFocus();
-      this.checkLimits();
-      this.applyShake();
+      this.applyFade();
     }
     
     ctx.translate( this.renderPosition.x * drawRatio >> 0
                   , this.renderPosition.y * drawRatio >> 0 );
     ctx.rotate( this.renderPosition.rotation );
     
+    if ( this.gui )
+      this.gui.render( _buffer.ctx, drawRatio, physicRatio, this.renderSizes );
+    ctx.globalAlpha = this.alpha;
     ctx.drawImage( _buffer.canvas
           , -this.renderSizes.width * this.renderSizes.scaleX * drawRatio * 0.5 >> 0
           , -this.renderSizes.height * this.renderSizes.scaleY * drawRatio * 0.5 >> 0
@@ -339,19 +389,19 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     
     // the GUI will totally change with DOM components, try to not use it
     // prefer using GameObjects in your scene
-    if ( this.gui )
-    {
-      this.gui.render( ctx, this.renderPosition, this.renderSizes, drawRatio, physicRatio );
-    }
     
     ctx.rotate( -this.renderPosition.rotation );
     ctx.translate( -this.renderPosition.x * drawRatio >> 0
                   , -this.renderPosition.y * drawRatio >> 0 );
-    
-  }
+    ctx.globalAlpha = oldAlpha;
+  };
   
-  /****
-   * check camera limits
+  /**
+   * Check camera limits fixed by limits object you set in camera previously.
+   * It's usefull to setup worlds limits, or in a plate-former limit the Y axis (then your camera will stop at the floor, for example)
+   * You touch this method at your own risks
+   * @protected
+   * @memberOf Camera
    */
   Camera.prototype.checkLimits = function()
   {
@@ -364,14 +414,17 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       this.scenePosition.y = limits.minY;
     else if ( limits.maxY != undefined && this.scenePosition.y + this.renderSizes.height > limits.maxY )
       this.scenePosition.y = limits.maxY - this.renderSizes.height;
-  }
+  };
   
-  /***
-   * screenChangedSizeIndex@void( physicRatio@float )
-   when the engine, or you change quality
-   TODO - remove newSizes if this isn't used / useful
+  /**
+   * when the engine, or you change quality setting
+   * TODO - remove newSizes if this isn't used / useful
+   * You touch this method at your own risks
+   * @protected
+   * @memberOf Camera
+   * @param {Float} physicRatio is the new physical ratio to go to the "native" size
    */
-  Camera.prototype.screenChangedSizeIndex = function( physicRatio, newSizes )
+  Camera.prototype.screenChangedSizeIndex = function( physicRatio/*, newSizes*/ )
   {
     this.renderSizes.width  = this.fieldSizes.width * physicRatio >> 0;
     this.renderSizes.height = this.fieldSizes.height * physicRatio >> 0;
@@ -379,21 +432,26 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     this.renderPosition.y = this.savedPosition.y * physicRatio >> 0;
     this._buffer.canvas.width = this.renderSizes.width;
     this._buffer.canvas.height = this.renderSizes.height;
-  }
-  /****
-   * add@void( camera@Camera )
-   childs possible with camera, not often usefull but could be
-   TODO - I think there is problems with this, I just tried it quickly
+  };
+  
+  /**
+   * add a Camera to your camera
+   * TODO - I think there is problems with this, I just tried it quickly
+   * @public
+   * @memberOf Camera
+   * @param {Camera} camera
    */
   Camera.prototype.add = function( camera )
   {
     this.cameras.push( camera );
     ++this.maxCameras;
-  }
+  };
   
-  /****
-   * remove@void( camera@Camera )
-   remove a camera affilied in this one
+  /**
+   * remove a camera affilied in this one
+   * @public
+   * @memberOf Camera
+   * @param {Camera} camera
    */
   Camera.prototype.remove = function( camera )
   {
@@ -406,26 +464,177 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     
     this.cameras.splice( pos, 1 );
     this.maxCameras--;
-  }
+  };
   
-  /****
+  /**
+   * apply the current fade
+   * @protected
+   * @memberOf Camera
+   */
+  Camera.prototype.applyFade = function()
+  {
+    if ( !this.fadeData.done )
+    {
+      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration * Time.scaleDelta
+                              * this.fadeData.dir * this.fadeData.fadeScale;
+      this.alpha += this.fadeData.stepVal * Time.scaleDelta;
+      this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+      if ( ( this.fadeData.dir &lt; 0 && this.alpha &lt;= this.fadeData.to )
+          || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
+          || this.alpha &lt; 0 || this.alpha > 1 )
+      {
+        this.alpha = this.fadeData.to;
+      }
+      if ( this.fadeData.duration &lt;= 0 )
+      {
+        this.trigger( "fadeEnd" );
+        this.fadeData.done = true;
+        if ( this.alpha == 1 || this.alpha == 0 )
+        {
+          if ( this.alpha == 0 )
+            this.sleep = true;
+        }
+      }
+    }
+    if ( !this.fadeBufferData.done )
+    {
+      this.fadeBufferData.stepVal = Time.timeSinceLastFrame / this.fadeBufferData.oDuration * Time.scaleDelta
+                              * this.fadeBufferData.dir * this.fadeBufferData.fadeScale;
+      this.bufferAlpha += this.fadeBufferData.stepVal * Time.scaleDelta;
+      this.fadeBufferData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+      if ( ( this.fadeBufferData.dir &lt; 0 && this.bufferAlpha &lt;= this.fadeBufferData.to )
+          || ( this.fadeBufferData.dir > 0 && this.bufferAlpha >= this.fadeBufferData.to )
+          || this.bufferAlpha &lt; 0 || this.bufferAlpha > 1 )
+      {
+        this.bufferAlpha = this.fadeBufferData.to;
+      }
+      if ( this.fadeBufferData.duration &lt;= 0 )
+      {
+        this.trigger( "fadeBufferEnd" );
+        this.fadeBufferData.done = true;
+        if ( this.bufferAlpha == 1 || this.bufferAlpha == 0 )
+        {
+          if ( this.bufferAlpha == 0 )
+            this.sleep = true;
+          this.useTransparency = this.oUseTransparency;
+        }
+      }
+    }
+  };
+  
+  /**
+   * create a fade from val, to val, with given duration time
+   * @public
+   * @memberOf Camera
+   * @param {Float} from start value
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
+   * @example myCamera.fade( 0.5, 1, 850 );
+   */
+  Camera.prototype.fade = function( from, to, duration, bufferApply )
+  {
+    if ( ( bufferApply && to == this.bufferAlpha ) || to == this.alpha
+      || ( this.alpha == 0 && bufferApply ) )
+      return;
+    
+    this.sleep = false;
+    var data = {
+      from      : from || 1
+      ,to       : to != undefined ? to : 0
+      ,duration : duration || 500
+      ,oDuration: duration || 500
+      ,fadeScale: Math.abs( from - to )
+      ,done     : false
+    };
+    data.dir = data.from > to ? -1 : 1;
+    if ( !bufferApply )
+    {
+      this.alpha = from;
+      this.fadeData = data;
+    }
+    else
+    {
+      this.fadeBufferData = data;
+      this.oUseTransparency = this.useTransparency;
+      this.useTransparency  = true;
+    }
+  };
+  
+  /**
+   * create a fade to val, from current alpha value with given duration time
+   * @public
+   * @memberOf Camera
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
+   * @example myCamera.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
+   */
+  Camera.prototype.fadeTo = function( to, duration, bufferApply )
+  {
+    this.sleep = false;
+    this.fade( this.alpha, to, duration, bufferApply );
+  };
+  
+  /**
+   * fade the camera to alpha 0 with given duration time
+   * fade start to the current alpha
+   * @public
+   * @memberOf Camera
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
+   * @example // alpha = 0 in 850ms
+   * myCamera.fadeOut( 850 );
+   */
+  Camera.prototype.fadeOut = function( duration, bufferApply )
+  {
+    this.fade( this.alpha, 0, duration, bufferApply );
+  };
+  
+  /**
+   * fade the camera to alpha 1 with given duration time
+   * fade start to the current alpha
+   * @public
+   * @memberOf Camera
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
+   * @example // alpha = 1 in 850ms
+   * myCamera.fadeIn( 850 );
+   */
+  Camera.prototype.fadeIn = function( duration, bufferApply )
+  {
+    this.fade( this.alpha, 1, duration, bufferApply );
+  };
+  
+  /**
    * create a shake with given range
-    you can only have one at a time
+   * you can only have one at a time
+   * @public
+   * @memberOf Camera
+   * @param {Int} xRange max X camera will move to shake
+   * @param {Int} yRange max Y camera will move to shake
+   * @param {Int} [duration=500] time duration
+   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
+   * @example // shake with 10-10 force during 1sec
+   * myCamera.shake( 10, 10, 1000 );
    */
   Camera.prototype.shake = function( xRange, yRange, duration )
   {
     this.shakeData = {
-      "startedAt" : Date.now()
-      ,"duration" : duration
+      // "startedAt" : Date.now()
+      "duration"  : duration || 500
       ,"xRange"   : xRange
       ,"yRange"   : yRange
       ,"prevX"    : this.shakeData ? this.shakeData.prevX : 0
       ,"prevY"    : this.shakeData ? this.shakeData.prevY : 0
     };
-  }
+  };
   
-  /****
-   * make the shake happen
+  /**
+   * apply the shake each frame
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
    */
   Camera.prototype.applyShake = function()
   {
@@ -436,7 +645,9 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     // restore previous shake
     this.scenePosition.x -= shake.prevX;
     this.scenePosition.y -= shake.prevY;
-    if ( Date.now() - this.shakeData.startedAt > this.shakeData.duration )
+    this.shakeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    // old way - Date.now() - this.shakeData.startedAt > this.shakeData.duration )
+    if ( this.shakeData.duration &lt;= 0 )
     {
       delete this.shakeData;
       return;
@@ -447,41 +658,53 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     
     this.scenePosition.x += shake.prevX;
     this.scenePosition.y += shake.prevY;
-  }
+  };
   
-  /****
-   * focus@void( gameObject@GameObject, offsets@Vector2 )
-    give a target to this camera, then camera will focus it until you changed or removed it
-    you can lock independent axes
+  /**
+   * give a target to this camera, then camera will focus it until you changed or removed it
+   * you can lock independent axes, or set offsets
+   * @public
+   * @memberOf Camera
+   * @param {GameObject} gameObject is the target to focus on
+   * @param {Object} [params] optional parameters, set offsets or lock
+   * @example // focus the player, decal a little on right, and lock y
+   * myCamera.focus( player, { lock: { y: true }, offsets: { x: 200, y: 0 } } );
    */
-  Camera.prototype.focus = function( gameObject, lock )
+  Camera.prototype.focus = function( gameObject, params )
   {
+    params = params || {};
     this.target = gameObject;
-    this.focusLocks = lock;
-  }
+    this.focusLock  = params.lock || {};
+    this.focusOffset= params.offsets || { x: 0, y: 0 };
+  };
   
-  /****
-   * getFocus@void
-    apply focus on target if there is one
+  /**
+   * apply focus on target if there is one
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
    */
-  Camera.prototype.getFocus = function()
+  Camera.prototype.applyFocus = function()
   {
     if ( !this.target )
       return;
     var pos = this.target.getPos();
-    var ratioz = ( Math.abs( this.scenePosition.z + pos.z ) - 10 ) * 0.1 + 1;
-    if ( !this.focusLocks.x )
-      this.scenePosition.x = pos.x - ( this.fieldSizes.width * 0.5 ) / ratioz;
-    if ( !this.focusLocks.y )
-      this.scenePosition.y = pos.y - ( this.fieldSizes.height * 0.5 ) / ratioz;
-  }
+    if ( !this.focusLock.x )
+      this.scenePosition.x = pos.x - this.fieldSizes.width * 0.5;
+    if ( !this.focusLock.y )
+      this.scenePosition.y = pos.y - this.fieldSizes.height * 0.5;
+  };
   
-  /****
-   convertMousePos@MouseVector2( mouse@MouseVector2, physicRatio@float )
+  /**
    * convert mouse pos with harmonics and ratio
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
    */
   Camera.prototype.convertMousePos = function( mouse, physicRatio )
   {
+    mouse.x -= ( this.renderPosition.x - this.renderSizes.width * 0.5 ) >> 0;
+    mouse.y -= ( this.renderPosition.y - this.renderSizes.height * 0.5 ) >> 0;
     var harmonics = this.renderPosition.getHarmonics();
     if ( harmonics.sin == 0 && harmonics.cos == 0 )
     {
@@ -513,52 +736,87 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       , "y": ( (x * harmonics.sin + y * -harmonics.cos ) + this.renderSizes.height / 2 ) / physicRatio >> 0
       , "index": mouse.index, "isDown": mouse.isDown
     };
-  }
+  };
   
-  /***
-  * custom events
-   return true inside these functions if you want stop propagation (not propaging in GameObjects)
-  */
+  /**
+   * onMouse[type] event, override it with the own Camera's method&lt;br>
+   * empty as default&lt;br>
+   * here is the full events list (so override with this name) ordered by call order:&lt;br>
+   * - onMouseDown&lt;br>
+   * - onMouseEnter&lt;br>
+   * - onMouseMove&lt;br>
+   * - onMouseLeave&lt;br>
+   * - onMouseClick&lt;br>
+   * - onMouseUp&lt;br>
+   * @public
+   * @memberOf Camera
+   * @function
+   * @param {MouseEvent} mouse
+   * is an engine custom mouse event
+   * @config {Int} [x] x position
+   * @config {Int} [y] y position
+   * @config {Boolean} [isDown] if current cursor is down
+   * @config {Int} [index] cursor id (for multi-touch)
+   * @param {PropagationEvent} propagation
+   * can kill event that append further current event
+   * @example // simple event
+   * myCamera.onMouseDown = function( event, propagation )
+   * {
+   *   console.log( event, propagation ); // event contain x, y, isDown, index (touchId)
+   * };
+   * @example // here I want to catch the Click event, but I want to kill prevent propagation in gui and scene
+   * myCamera.onMouseClick = function( event, propagation )
+   * {
+   *   // do stuff here
+   *   return true; // prevent Gui and GameObjects calls
+   * };
+   */
   Camera.prototype.onMouseDown  = function(){};
-  Camera.prototype.onMouseUp    = function(){};
-  Camera.prototype.onMouseMove  = function(){};
   Camera.prototype.onMouseEnter = function(){};
+  Camera.prototype.onMouseMove  = function(){};
   Camera.prototype.onMouseLeave = function(){};
+  Camera.prototype.onMouseUp    = function(){};
   Camera.prototype.onMouseClick = function(){};
   
-  /* last event, called after all
-   very usefull when you want to do something only if you didn't click on anything (just stopPropagation and this won't be called)  */
+  /**
+   * It works like onMouseDown but it's called after Gui, Scene globals, and GameObjects last event, called after all.&lt;br>
+   * Very usefull when you want to do something only if you didn't click on anything (just stopPropagation before and this one won't be called)&lt;br>
+   * Here is the full events list (so override with this name) ordered by call order:&lt;br>
+   * - onMouseDown&lt;br>
+   * - onMouseMove&lt;br>
+   * - onMouseClick&lt;br>
+   * - onMouseUp&lt;br>
+   * @public
+   * @memberOf Camera
+   */
   Camera.prototype.onLastMouseMove  = function(){};
   Camera.prototype.onLastMouseDown  = function(){};
   Camera.prototype.onLastMouseUp    = function(){};
   Camera.prototype.onLastMouseClick = function(){};
   
-  /***
-  * onMouseDown@void( mouse@MouseVector2, physicRatio@float )
-  */
+  /**
+   * original mouseDown event, called by the Render, exist for mouseUp, mouseMove, mouseEnter and mouseLeave
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
+   */
   Camera.prototype.oOnMouseDown = function( mouse, physicRatio )
   {
     mouse.isDown = true;
     mouse.date   = Date.now();
     this._propagationEvent[ mouse.index ] = mouse;
     this.mouseDetectorHandler( "Down", mouse, physicRatio );
-  }
-  
-  /***
-  * onMouseUp@void( mouse@MouseVector2, physicRatio@float )
-  */
+    this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
+  };
   Camera.prototype.oOnMouseUp = function( mouse, physicRatio )
   {
     if ( Date.now() &lt; this._propagationEvent[ mouse.index ].date + CONFIG.CLICK_DELAY )
       this.mouseDetectorHandler( "Click", mouse, physicRatio );
     
     this.mouseDetectorHandler( "Up", mouse, physicRatio );
+    this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
     this._propagationEvent[ mouse.index ] = {};
-  }
-  
-  /***
-   * onMouseMove@void( mouse@MouseVector2, physicRatio@float )
-   */
+  };
   Camera.prototype.oOnMouseMove = function( mouse, physicRatio )
   {
     if ( !this._propagationEvent[ mouse.index ].index )
@@ -567,33 +825,28 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
     this.lastPointersPos[ mouse.index ] = mouse;
     this.indexMouseOver[ mouse.index ]  = true;
     this.mouseDetectorHandler( "Move", mouse, physicRatio );
-  }
-  
-  /****
-   * onMouseEnter@void( mouse@MouseVector2, physicRatio@float )
-   * when the mouse enter in the camera field
-   this isn't called by the main mouse handler because it's a custom event over the native
-   */
+    this._propagationEvent[ mouse.index ] = this._propagationEvent[ mouse.index ] || {};
+    this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
+  };
   Camera.prototype.oOnMouseEnter = function( mouse, physicRatio )
   {
     mouse = this.convertMousePos( mouse, physicRatio );
     this.onMouseEnter( mouse );
-  }
-  
-  /****
-   * onMouseLeave@void( mouse@MouseVector2, physicRatio@float )
-   * when the mouse leave the camera field (same than previously)
-   */
+    this._propagationEvent[ mouse.index ] = this._propagationEvent[ mouse.index ] || {};
+    this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
+  };
   Camera.prototype.oOnMouseLeave = function( mouse, physicRatio )
   {
     this.indexMouseOver[ mouse.index ] = false;
     mouse = this.convertMousePos( mouse, physicRatio );
     this.onMouseLeave( mouse );
-  }
+    this._propagationEvent[ mouse.index ] = this._propagationEvent[ mouse.index ] || {};
+    this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
+  };
   
-  /****
-   * mouseDetectorHandler@bool( eventType@string, mouse@MouseVector2, physicRatio@float )
-   main mouse handler
+  /**
+   * mouseDetectorHandler
+   * main mouse handler
    */
   Camera.prototype.mouseDetectorHandler = function( eventType, mouse, physicRatio )
   {
@@ -601,79 +854,51 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
       return;
     
     mouse = this.convertMousePos( mouse, physicRatio );
-    
-    for ( var i in this.scene[ "onGlobalMouse" + eventType ] )
-    {
-      if ( this.scene[ "onGlobalMouse" + eventType ][ i ].enable )
-        if ( this.scene[ "onGlobalMouse" + eventType ][ i ][ "onGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) )
-          return;
-    }
-    
     this.trigger( "mouse" + eventType, mouse );
     if ( this[ "onMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
-    if ( this.gui && this.gui[ "onMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
+    if ( this.gui && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
     
-    mouse.x += this.scenePosition.x;
-    mouse.y += this.scenePosition.y;
-    for ( var i = this._visibleGameObjects.length - 1, g; i >= 0; --i )
+    if ( !this.scene.sleep )
     {
-      g = this._visibleGameObjects[ i ];
-      
-      if ( _gameObjectMouseEvent( eventType, g, mouse, this._propagationEvent[ mouse.index ] ) )
-        return;
+      mouse.x += this.scenePosition.x;
+      mouse.y += this.scenePosition.y;
+      for ( var i in this.scene[ "onGlobalMouse" + eventType ] )
+      {
+        if ( this.scene[ "onGlobalMouse" + eventType ][ i ].enable )
+          if ( this.scene[ "onGlobalMouse" + eventType ][ i ][ "onGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) )
+            return;
+      }
+      for ( var i = this._visibleGameObjects.length - 1, g; i >= 0; --i )
+      {
+        g = this._visibleGameObjects[ i ];
+        
+        if ( gameObjectMouseEvent( eventType, g, mouse, this._propagationEvent[ mouse.index ] ) )
+          return;
+      }
     }
     
     if ( !mouse.stopPropagation && !this._propagationEvent[ mouse.index ][ "preventLast" + eventType ] )
     {
-      this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
-      this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
+      if ( !this.scene.sleep )
+      {
+        for ( var i in this.scene[ "onLastGlobalMouse" + eventType ] )
+        {
+          if ( this.scene[ "onLastGlobalMouse" + eventType ][ i ].enable )
+            this.scene[ "onLastGlobalMouse" + eventType ][ i ][ "onLastGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
+        }
+        mouse.x -= this.scenePosition.x;
+        mouse.y -= this.scenePosition.y;
+      }
       
-      for ( var i in this.scene[ "onLastGlobalMouse" + eventType ] )
-      {
-        if ( this.scene[ "onLastGlobalMouse" + eventType ][ i ].enable )
-          this.scene[ "onLastGlobalMouse" + eventType ][ i ][ "onLastGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
-      }
+      this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
+      if ( this.gui )
+        this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] )
+      this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
     }
-    
-  }
+  };
   
-  /****
-   * _gameObjectMouseEvent@bool( eventType@string, g@GameObject, mouse@MouseVector2 )
-   */
-  function _gameObjectMouseEvent( eventType, g, mouse, propagationEvent )
-  {
-    if ( !g.enable )
-      return false;
-    
-    if ( g.collider && ( g[ "onMouse" + eventType ] || g.onMouseLeave || g.onMouseEnter ) )
-    {
-      var wasOver = g.indexMouseOver[ mouse.index ];
-      if ( CollisionSystem.checkCollisionWith( mouse, g.collider ) )
-      {
-        // mouseEnter event occurs here
-        g.indexMouseOver[ mouse.index ] = true;
-        if ( !wasOver && g.onMouseEnter && g.onMouseEnter( mouse, propagationEvent ) )
-          return true;
-        if ( g[ "onMouse" + eventType ] && g[ "onMouse" + eventType ]( mouse, propagationEvent ) )
-          return true;
-      }
-      // no collision but was over last frame, there is a leave event
-      else if ( wasOver && g.onMouseLeave )
-      {
-        g.indexMouseOver[ mouse.index ] = false;
-        if ( g.onMouseLeave( mouse, propagationEvent ) )
-          return true;
-      }
-    }
-    
-    for ( var c = g.childrens.length - 1, co; c >= 0; --c )
-    {
-      if ( _gameObjectMouseEvent( eventType, g.childrens[ c ], mouse, propagationEvent ) )
-        return true;
-    }
-  }
   Event.addEventCapabilities( Camera );
   Camera.prototype.DEName = "Camera";
   
@@ -700,7 +925,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, CollisionSystem, ImageManager, E
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Tue Apr 22 2014 13:45:34 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Aug 22 2014 21:00:35 GMT+0200 (CEST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

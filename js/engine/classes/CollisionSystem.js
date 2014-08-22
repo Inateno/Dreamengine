@@ -23,6 +23,8 @@ function( CONFIG )
      */
     this.pointFixedBoxCollision = function( point, box )
     {
+      if ( !box.enable )
+        return false;
       var boxpoints = ( box.getRealPosition ) ? box.getRealPosition() : { x: box.x, y: box.y };
       if ( point.x >= boxpoints.x
         && point.x < boxpoints.x + box.width
@@ -39,6 +41,8 @@ function( CONFIG )
      */
     this.fixedBoxCollision = function( boxA, boxB )
     {
+      if ( !boxA.enable || !boxB.enable )
+        return false;
       var boxAPoints = ( boxA.getRealPosition ) ? boxA.getRealPosition() : { x: boxA.x, y: boxA.y };
       var boxBPoints = ( boxB.getRealPosition ) ? boxB.getRealPosition() : { x: boxB.x, y: boxB.y };
       if ( ( boxBPoints.x >= boxAPoints.x + boxA.width )
@@ -56,6 +60,8 @@ function( CONFIG )
      */
     this.pointCircleCollision = function( point, C )
     {
+      if ( !C.enable )
+        return false;
       var Cpoints = C.getRealPosition();
       var d2 = ( point.x - Cpoints.x ) * ( point.x - Cpoints.x )
              + ( point.y - Cpoints.y ) * ( point.y - Cpoints.y );
@@ -70,6 +76,8 @@ function( CONFIG )
      */
     this.circleCollision = function( circleA, circleB )
     {
+      if ( !circleA.enable || !circleB.enable )
+        return false;
       var allowedDistance = ( circleB.radius + circleA.radius ) * ( circleB.radius + circleA.radius );
       
       var realPosA = circleA.getRealPosition()
@@ -87,6 +95,8 @@ function( CONFIG )
      */
     this.orientedBoxCollision = function( boxA, boxB )
     {
+      if ( !boxA.enable || !boxB.enable )
+        return false;
       var aExtCircle = boxA.getExternCircle()
         , bExtCircle = boxB.getExternCircle();
       

@@ -13,16 +13,24 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
        , 'DE.CanvasBuffer', 'DE.GameObject', 'DE.FixedBoxCollider', 'DE.OrientedBoxCollider'
        , 'DE.CircleCollider', 'DE.BoxRenderer', 'DE.CircleRenderer', 'DE.SpriteRenderer'
        , 'DE.Render', 'DE.MainLoop', 'DE.Event', 'DE.States', 'DE.Inputs', 'DE.Camera'
-       , 'DE.TextRenderer', 'DE.TileRenderer', 'DE.AudioManager', 'DE.Gui', 'DE.BaseGui'
-       , 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage', 'DE.LangSystem', 'DE.SystemDetection'
-       , 'DE.GamePad', 'DE.Screen', 'DE.about', 'DE.SaveSystem', 'DE.Notifications' ]
+       , 'DE.TextRenderer', 'DE.TileRenderer', 'DE.AudioManager', 'DE.Gui'
+       // , 'DE.BaseGui', 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage'
+       , 'DE.LangSystem', 'DE.SystemDetection'
+       , 'DE.GamePad', 'DE.Screen', 'DE.about', 'DE.SaveSystem', 'DE.Notifications'
+       , 'NebulaOffline', 'DE.AchievementSystem' ]
 , function()
 {
   var DREAM_ENGINE = {};
+  var NebulaOffline = null;
   
   var _startedAt = Date.now();
   for ( var a in arguments )
   {
+    if ( arguments[ a ].isNebula )
+    {
+      NebulaOffline = arguments[ a ];
+      continue;
+    }
     var arg = arguments[ a ];
     var name = arg.DEName;
     if ( !name && arg.prototype )
@@ -41,33 +49,6 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
   ***/
   DREAM_ENGINE.init = function( params )
   {
-    window.ENGINE_SETTING = window.ENGINE_SETTING || {}; // configuration trough html
-    
-    // init about and localStorage
-    DREAM_ENGINE.about.set( params.about );
-    DREAM_ENGINE.SaveSystem.init( params.saveModel, params.saveIgnoreVersion );
-    
-    // init lang and system
-    DREAM_ENGINE.LangSystem.init( params.dictionary );
-    DREAM_ENGINE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
-    
-    DREAM_ENGINE.on( 'udpateScreenSizes', function( ratioToConception, sizes )
-    {
-      this.ImageManager.pathPrefix        = sizes.path;
-      this.ImageManager.imageNotRatio     = sizes.notRatio || false;
-      this.ImageManager.ratioToConception = ratioToConception;
-      this.ImageManager.arrayLoader( params.images.imagesList );
-      this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
-    }, DREAM_ENGINE );
-    // adapt to the screen
-    DREAM_ENGINE.Screen.init( params.images );
-    DREAM_ENGINE.Screen.udpateScreenSizes( ENGINE_SETTING.quality );
-    
-    if ( !params.ignoreNotification )
-      DREAM_ENGINE.Notifications.init( params );
-    
-    DREAM_ENGINE.GamePad.init();
-    
     params = params || {};
     
     params.loader            = params.loader || {};
@@ -79,9 +60,84 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     params.loader.isAnimated = true;
     params.loader.scale      = params.loader.scale || 1;
     
-    DREAM_ENGINE.Event.on( 'notisLoadingImages', function()
+    window.ENGINE_SETTING = window.ENGINE_SETTING || {}; // configuration trough html
+    
+    // init about and localStorage
+    DREAM_ENGINE.about.set( params.about );
+    DREAM_ENGINE.SaveSystem.init( params.saveModel, params.saveIgnoreVersion );
+    
+    // init lang and system
+    DREAM_ENGINE.LangSystem.init( params.dictionary || {} );
+    DREAM_ENGINE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
+    
+    DREAM_ENGINE.AchievementSystem.init( params.achievements || [] );
+    DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
     {
-      DREAM_ENGINE.MainLoop.loader = new DREAM_ENGINE.SpriteRenderer( { "spriteName": "loader", "scale": params.loader.scale } );
+      this.ImageManager.pathPrefix        = sizes.path;
+      this.ImageManager.imageNotRatio     = sizes.notRatio || false;
+      this.ImageManager.ratioToConception = ratioToConception;
+      this.ImageManager.arrayLoader( params.images.imagesList );
+      this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
+    }, DREAM_ENGINE );
+    
+    DREAM_ENGINE.on( 'updateScreenSizes', function()
+    {
+      this.ImageManager.folderName = params.images.folderName;
+      this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
+    }, DREAM_ENGINE, false );
+    
+    if ( !params.ignoreNotification )
+      DREAM_ENGINE.Notifications.init( params );
+    
+    DREAM_ENGINE.GamePad.init();
+    
+    DREAM_ENGINE.pause = function()
+    {
+      this.on( 'isReady', function()
+      {
+        this.MainLoop.launched = true;
+        this.MainLoop.loop();
+        if ( this.paused )
+        {
+          this.MainLoop.launched = false;
+          this.Inputs.keyLocked = true;
+        }
+      }, this );
+      this.MainLoop.launched = false;
+      this.Inputs.keyLocked = true;
+      this.paused = true;
+    };
+    DREAM_ENGINE.unPause = function()
+    {
+      this.Inputs.keyLocked = false;
+      this.paused = false;
+      this.Time.lastCalcul = Date.now();
+      this.MainLoop.launched = true;
+      this.MainLoop.loop();
+    };
+    
+    DREAM_ENGINE.on( 'notisLoadingImages', function()
+    {
+      if ( !params.ignoreNebula )
+      {
+        this.on( "nebula-hide", this.unPause, this );
+        this.on( "nebula-show", this.pause, this );
+        NebulaOffline.init( params.nebulaElementId );
+      }
+      DREAM_ENGINE.MainLoop.loader = new DREAM_ENGINE.GameObject( {
+        renderers: [
+          new DREAM_ENGINE.SpriteRenderer( { "spriteName": "loader", "scale": params.loader.scale } )
+          ,new DREAM_ENGINE.TextRenderer( {
+            "fillColor"    : params.loader.fillColor || "#FFFFFF"
+            , "strokeColor": params.loader.strokeColor || "#FBC989"
+            , "fontSize"   : params.loader.fontSize || 32
+            , "lineWidth"  : params.loader.lineWidth || 2
+            , "offsetY"    : 220 + ( params.loader.offsetY || 0 )
+            , "offsetX"    : 0 + ( params.loader.offsetX || 0 )
+            , "font"       : params.loader.font || "Helvetica"
+          }, 400, 100, "100%" )
+        ]
+      } );
       if ( params.onReady )
         params.onReady();
       else
@@ -120,8 +176,10 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
         DREAM_ENGINE.MainLoop.customLoop = params.customLoop;
       }
     }, DREAM_ENGINE, false );
-    this.ImageManager.folderName = params.images.folderName;
-    this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
+    
+    // adapt to the screen
+    DREAM_ENGINE.Screen.init( params.images );
+    DREAM_ENGINE.Screen.updateScreenSizes( ENGINE_SETTING.quality );
   };
   
   /***
@@ -136,7 +194,14 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
   };
   
   // Supprimer le Event et le state du DREAM_ENGINE pour qu'il reste privé ( à confirmer )
-  DREAM_ENGINE.on = DREAM_ENGINE.Event.on;
+  DREAM_ENGINE.on = function()
+  {
+    this.Event.on.apply( this.Event, arguments );
+  };
+  DREAM_ENGINE.trigger = function()
+  {
+    this.Event.trigger.apply( this.Event, arguments );
+  };
   DREAM_ENGINE.deltaTime = DREAM_ENGINE.Time.getDelta();
   
   // requestAnimationFrame declaration

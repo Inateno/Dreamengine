@@ -45,10 +45,9 @@ function( CONFIG )
   };
   
   /****
-   * emit@void( [ eventName,... ] )
     trigger eventName
    */
-  Event.emit = function()
+  Event.trigger = function()
   {
     var args = Array.prototype.slice.call( arguments );
     var eventName = args.shift();
@@ -72,7 +71,6 @@ function( CONFIG )
       }
     }
   };
-  Event.trigger = Event.emit; // will be trigger in the future
   
   CONFIG.debug.log( "Event loaded", 3 );
   
@@ -98,14 +96,12 @@ function( CONFIG )
       object.callbacks  = {};
       object.contexts   = {};
       object.on         = onFunc;
-      object.emit       = triggerFunc;
       object.trigger    = triggerFunc;
       object.stopListen = stopListeningFunc;
     }
     else
     {
       object.prototype.on         = onFunc;
-      object.prototype.emit       = triggerFunc;
       object.prototype.trigger    = triggerFunc;
       object.prototype.stopListen = stopListeningFunc;
     }

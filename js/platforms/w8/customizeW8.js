@@ -15,15 +15,20 @@ function( Game )
   {
     W8Plugin.onSettings = function()
     {
-      // when W8 settings button in charm bar is clicked, what to do ?
-      // Game.launchMenu( "settings" ); // in my case I do this
-    }
-    // override gamepads detection, bind it manually (if you don't need it, remove it)
-    //W8Plugin.plugToGamePadLib();
+      // screens.launchMenu( "settings" ); // in my case I do this
+    };
+    
+    W8Plugin.onUnload = function( e )
+    {
+    };
     
     // you can create a Dreamengine render with object inside etc... if you prefer :)
-    W8Plugin.elem = document.getElementById( "snapped" );
-    W8Plugin.appLinkKey = "_your_link_key_here_";
+    // W8Plugin.elem = document.getElementById( "snapped" );
+    W8Plugin.appLinkKey = "";
+    
+    // W8Plugin.privacyLink = "http://dreamirl.com/#privacy";
+    W8Plugin.useSettingsCharm = false;
+    W8Plugin.usePrivacyCharm = true;
   }
   
   return customizeW8;

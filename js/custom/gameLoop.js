@@ -43,7 +43,11 @@ function( DE, Game )
     
     if ( DE.Inputs.key( 'fire' ) )
     {
-      Game.ship.fire();
+      Game.ship.fire( 1 );
+    }
+    if ( DE.Inputs.key( 'deep' ) )
+    {
+      Game.ship.fire( -1 );
     }
     
     // Game.camera.position.rotate( 0.001 );

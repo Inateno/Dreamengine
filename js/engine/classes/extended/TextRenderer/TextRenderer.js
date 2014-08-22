@@ -34,7 +34,9 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
     this.font     = params.font || 'Calibri';
     
     this.sizes = new Sizes( width, height, 1, 1, this );
-    this.sizes._center();
+    this.preventCenter = params.preventCenter || false;
+    if ( !this.preventCenter )
+      this.sizes._center();
     
     this.paddingX = params.padding || params.paddingX || 0;
     this.paddingY = params.padding || params.paddingY || 0;
@@ -93,7 +95,7 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
              this.textAlign == "left" ? this.paddingX : this.sizes.width * 0.5 + this.paddingX >> 0 );
       var y = ( this.textBaseline == "bottom" ? this.sizes.height - this.paddingY :
              this.textBaseline == "top" ? this.paddingY : this.sizes.height * 0.5 + this.paddingY >> 0 );
-      if ( this.fillColor )
+      if ( this.method == "fill" || this.method == "fillAndStroke" )
       {
         this.buffer.ctx.fillStyle = this.fillColor;
         if ( this.forceWidth )
@@ -102,15 +104,16 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
           this.buffer.ctx.fillText( this.text, x, y );
       }
       
-      if ( this.strokeColor )
+      if ( this.method == "stroke" || this.method == "fillAndStroke" )
       {
+        this.buffer.ctx.lineWidth   = this.lineWidth;
         if ( this.fillColor )
           this.buffer.ctx.globalAlpha = 0.8;
         this.buffer.ctx.strokeStyle = this.strokeColor;
         if ( this.forceWidth )
           this.buffer.ctx.strokeText( this.text, x, y, this.sizes.width );
         else
-          this.buffer.ctx.fillText( this.text, x, y );
+          this.buffer.ctx.strokeText( this.text, x, y );
       }
     }
     

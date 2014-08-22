@@ -3,6 +3,11 @@ The official website [HTML5-Dreamengine](http://dreamengine.dreamirl.com)
 Follow on [Twitter](http://twitter.com/dreamirlgames)
 Or [Facebook](https://www.facebook.com/Dreamirl)
 
+Update 0.2.0
+===========
+I made this update fast, maybe some samples aren't working and maybe doc isn't up to date with this last version (on few points) but this version work (I use it) I'll clean all the little things / doc soon after the LD.
+Tweet me if you found a problem.
+
 HTML5 Games Dream-Engine - What is it
 ===========
 

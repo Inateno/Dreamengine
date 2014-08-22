@@ -62,7 +62,7 @@ function( CONFIG )
      */
     this._center = function()
     {
-      if ( this.parent )
+      if ( this.parent && !this.parent.preventCenter )
       {
         this.parent.localPosition.x -= ( this.width * this.scaleX * 0.5 ) >> 0;
         this.parent.localPosition.y -= ( this.height * this.scaleY * 0.5 ) >> 0;
@@ -78,7 +78,7 @@ function( CONFIG )
      */
     this._uncenter = function()
     {
-      if ( this.parent )
+      if ( this.parent && !this.parent.preventCenter )
       {
         this.parent.localPosition.x += ( this.width * this.scaleX * 0.5 ) >> 0;
         this.parent.localPosition.y += ( this.height * this.scaleY * 0.5 ) >> 0;

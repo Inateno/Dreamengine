@@ -17,8 +17,8 @@
 
 * if you want to ignore backup olds version when saving, add saveIgnoreVersion = true on Engine Initialisation
 **/
-define( [ 'stash', 'DE.CONFIG', 'DE.about' ],
-function( stash, CONFIG, about )
+define( [ 'stash', 'DE.CONFIG', 'DE.about', 'DE.Event' ],
+function( stash, CONFIG, about, Event )
 {
   var SaveSystem = new function()
   {
@@ -26,6 +26,8 @@ function( stash, CONFIG, about )
     
     this.saveModel = {};
     this.namespace = "DreamGame";
+    
+    this.useLocalStorage = true;
     
     /****
      * init@void
@@ -38,30 +40,52 @@ function( stash, CONFIG, about )
       if ( !saveModel.settings )
         saveModel.settings = {};
       
-      this.namespace = about.gameName;
+      this.namespace = about.namespace;
       
       this.version = about.version;
       if ( ignoreVersion )
-      {
         this.version = stash.get( this.namespace );
-      }
       
       this.saveModel = saveModel;
+      
+      // load save from storage
       for ( var i in this.saveModel )
-      {
         this.saveModel[ i ] = stash.get( this.namespace + this.version + i ) || this.saveModel[ i ];
-        // clean the localStorage to prevent zombie storage because upgraded version
+      
+      this.loadSave( this.saveModel, true );
+    };
+    
+    this.updateSave = function()
+    {
+      if ( !this.useLocalStorage )
+        return;
+      // clean the localStorage to prevent zombie storage because upgraded version
+      for ( var i in this.saveModel )
         stash.cut( this.namespace + this.version + i );
-      }
       
       // setup the last version of the game, and rewrite datas
       this.version = about.version;
       stash.set( this.namespace, this.version );
       for ( var i in this.saveModel )
-      {
         stash.set( this.namespace + this.version + i, this.saveModel[ i ] );
+    };
+    
+    this.loadSave = function( attrs, useLocalStorage )
+    {
+      this.useLocalStorage = useLocalStorage;
+      
+      for ( var i in attrs )
+      {
+        if ( !this.saveModel[ i ] && this.saveModel[ i ] !== false && this.saveModel[ i ] !== 0 )
+        {
+          Event.trigger( "savesystem-attr-not-found", i );
+          console.log( "Seems your game version is to old, we send a report", i );
+        }
+        this.saveModel[ i ] = attrs[ i ];
       }
-    }
+      this.updateSave();
+      Event.trigger( "savesystem-loaded", this.saveModel );
+    };
     
     /****
      * get@Value( key@String )
@@ -70,11 +94,10 @@ function( stash, CONFIG, about )
     this.get = function( key )
     {
       if ( !( key in this.saveModel ) )
-      {
-        this.saveModel[ key ] = stash.get( this.namespace + this.version + key ) || this.saveModel[ key ];
-      }
+        this.saveModel[ key ] = stash.get( this.namespace + this.version + key )
+          || this.saveModel[ key ];
       return this.saveModel[ key ];
-    }
+    };
     
     /****
      * save@void( key@String, value@Value )
@@ -88,9 +111,11 @@ function( stash, CONFIG, about )
       }
       if ( !value )
         value = this.get( key );
-      stash.set( this.namespace + this.version + key, value );
+      if ( this.useLocalStorage )
+        stash.set( this.namespace + this.version + key, value );
       this.saveModel[ key ] = value;
-    }
+      Event.trigger( "savesystem-save", this.saveModel );
+    };
     
     /****
      * saveAll@void
@@ -99,11 +124,25 @@ function( stash, CONFIG, about )
      */
     this.saveAll = function()
     {
+      if ( !this.useLocalStorage )
+        return;
       for ( var i in this.saveModel )
       {
-        stash.set( this.gameName + this.version + i, this.saveModel[ i ] );
+        stash.set( this.namespace + this.version + i, this.saveModel[ i ] );
       }
-    }
+    };
+    
+    this.saveAchievements = function( userAchievements )
+    {
+      if ( !this.useLocalStorage )
+        return;
+      stash.set( this.namespace + "achievements", userAchievements );
+    };
+    
+    this.loadAchievements = function()
+    {
+      return stash.get( this.namespace + "achievements" ) || {};
+    };
   }
   
   CONFIG.debug.log( "SaveSystem loaded", 3 );

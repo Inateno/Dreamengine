@@ -57,8 +57,8 @@ function( ImageManager, CONFIG, Time )
       }
     }
     
-    ctx.globalAlpha = this.alpha;
-    
+    var oldAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = this.alpha * oldAlpha;
     ctx.drawImage( ImageManager.images[ this.spriteName ]
             , this.frameSizes.width * this.currentFrame, this.frameSizes.height * this.currentLine
             , this.frameSizes.width, this.frameSizes.height
@@ -66,7 +66,7 @@ function( ImageManager, CONFIG, Time )
             , this.localPosition.y * ratioz >> 0
             , this.sizes.width * this.sizes.scaleX * ratioz >> 0
             , this.sizes.height * this.sizes.scaleY * ratioz >> 0 );
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = oldAlpha;
   };
   
   CONFIG.debug.log( "SpriteRender.render loaded", 3 );

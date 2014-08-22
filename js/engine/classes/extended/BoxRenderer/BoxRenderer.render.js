@@ -17,7 +17,7 @@ function( CONFIG )
   function BoxRender( ctx, physicRatio, ratioz )
   {
     var oldAlpha = ctx.globalAlpha;
-    ctx.globalAlpha = this.alpha;
+    ctx.globalAlpha = this.alpha * oldAlpha;
     switch ( this.method )
     {
       case "fill":

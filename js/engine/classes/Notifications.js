@@ -6,7 +6,6 @@
  * Don't use margins on "notification" element directly, that's why I use a div inside<br>
  * (and set padding on the parent to simulate a margin)</b>
  * @namespace Notifications
- * @author Inateno
  */
 define( [],
 function()

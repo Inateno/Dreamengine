@@ -37,10 +37,15 @@ function( CONFIG, SaveSystem, Event )
     this.ratioToConception = 1;
     // current config sizes index
     this.currentSizeIndex = 0;
+    this.activeScreenWidth = 0; // quick access used by MainLoop for loader rendering
+    
+    // ratio from current real size to used size (in screenSizes, with currentSizeIndex) - TODO usage needed or not ?
+    // this.screenRatioToConception = 1;
     
     // current screen size
     this.screenSize = { "w": 0, "h": 0 };
-    this.screenSizeRatio = { "w": 0, "h": 0 };
+    // ratio with DPI - TODO - use this to create responsive GUI
+    this.dpiSizeRatio = { "w": 0, "h": 0 };
     this.dpi = 1;
     
     this.init = function( imgDatas )
@@ -57,7 +62,7 @@ function( CONFIG, SaveSystem, Event )
       this.conceptionSizeIndex = imgDatas.conceptionSizeIndex || 0;
     }
     
-    this.udpateScreenSizes = function( index )
+    this.updateScreenSizes = function( index )
     {
       this.dpi = 1;
       var devicePixelRatio = devicePixelRatio || 1;
@@ -69,8 +74,8 @@ function( CONFIG, SaveSystem, Event )
       this.currentSizeIndex = 0;
       this.screenSize.w = ( window.innerWidth || document.documentElement.clientWidth );
       this.screenSize.h = ( window.innerHeight || document.documentElement.clientHeight );
-      this.screenSizeRatio.w = ( window.innerWidth || document.documentElement.clientWidth ) / this.dpi >> 0;
-      this.screenSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight ) / this.dpi >> 0;
+      this.dpiSizeRatio.w = ( window.innerWidth || document.documentElement.clientWidth ) / this.dpi >> 0;
+      this.dpiSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight ) / this.dpi >> 0;
       
       if ( sizes[ index ] || ( !isNaN( savedQuality ) && sizes[ savedQuality ] ) )
       {
@@ -112,6 +117,8 @@ function( CONFIG, SaveSystem, Event )
         SaveSystem.save( "settings", SaveSystem.get( "settings" ) );
       }
       
+      this.activeScreenWidth = sizes[ this.conceptionSizeIndex ].w;
+      
       CONFIG.debug.log( "Choosen screen size index is " + this.currentSizeIndex + " - screenSize: "
                     + JSON.stringify( this.screenSize ) + " - choosedSize: "
                     + JSON.stringify( sizes[ this.currentSizeIndex ] ) + " - dpi: " + this.dpi, 2 );
@@ -119,7 +126,7 @@ function( CONFIG, SaveSystem, Event )
       this.ratioToConception = sizes[ this.currentSizeIndex ].w / sizes[ this.conceptionSizeIndex ].w;
       CONFIG.debug.log( "Physical ratio is :: " + this.ratioToConception, 2 );
       
-      Event.emit( "udpateScreenSizes", this.ratioToConception, sizes[ this.currentSizeIndex ] );
+      Event.trigger( "updateScreenSizes", this.ratioToConception, sizes[ this.currentSizeIndex ] );
     }
   }
   

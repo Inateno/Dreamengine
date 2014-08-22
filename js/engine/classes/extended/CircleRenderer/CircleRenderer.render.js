@@ -14,6 +14,7 @@ function( CONFIG )
   {
     var oldAlpha = ctx.globalAlpha;
     
+    ctx.globalAlpha = this.alpha * oldAlpha;
     ctx.drawImage( this.buffer.canvas
                   , this.localPosition.x * physicRatio * ratioz >> 0
                   , this.localPosition.y * physicRatio * ratioz >> 0

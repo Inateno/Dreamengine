@@ -8,10 +8,10 @@
 ***
 * singleton@MainLoop
 **/
-define( [ 'DE.Time', 'DE.CONFIG', 'DE.States', "DE.Inputs", "DE.GamePad"
-        , "DE.SystemDetection", "DE.Screen", 'DE.Event' ],
-function( Time, CONFIG, States, Inputs, GamePad
-        , SystemDetection, Screen, Event )
+define( [ 'DE.Time', 'DE.CONFIG', 'DE.States', 'DE.Inputs', 'DE.GamePad', 'DE.ImageManager'
+        , 'DE.SystemDetection', 'DE.Screen', 'DE.Event', 'DE.AudioManager' ],
+function( Time, CONFIG, States, Inputs, GamePad, ImageManager
+        , SystemDetection, Screen, Event, AudioManager )
 {
   var MainLoop = new function()
   {
@@ -24,6 +24,7 @@ function( Time, CONFIG, States, Inputs, GamePad
     this.maxRenders = 1;
     this.loader     = null;
     
+    this.additionalModules = {};
     /****
      * loop@void
      */
@@ -39,10 +40,14 @@ function( Time, CONFIG, States, Inputs, GamePad
       {
         if ( !MainLoop.loader )
           return;
+        var percent = ( ( ImageManager.imagesLoaded / ImageManager.imagesRequested * 1000 ) >> 0 ) / 10;
+        if ( percent.toString().length > 4 )
+          percent = percent.slice( 0, 4 );
         for ( var i = 0, j; j = MainLoop.renders[ i ]; i++ )
         {
           j.ctx.translate( j.sizes.width * 0.5, j.sizes.height * 0.5 );
-          MainLoop.loader.render( j.ctx, 1, 1 );
+          MainLoop.loader.renderers[ 1 ].setText( percent + "%" );
+          MainLoop.loader.render( j.ctx, Screen.ratioToConception, { x: 0, y: 0, z: -10 }, { width: 0, height: 0 }, j.sizes.width / Screen.activeScreenWidth );
           j.ctx.translate( -j.sizes.width * 0.5, -j.sizes.height * 0.5 );
         }
         return;
@@ -60,20 +65,23 @@ function( Time, CONFIG, States, Inputs, GamePad
         for ( var i = 0, j; j = MainLoop.renders[ i ]; i++ )
         {
           j.render();
-          //j.update(); // call waiting input here
+          j.update(); // call waiting input here
         }
+        
+        AudioManager.applyFades();
         
         while( Time.missedFrame >= 0 )
         {
           GamePad.update( Time.currentTime );
           MainLoop.customLoop( Time.currentTime );
-         
+          
+          for ( var r in MainLoop.additionalModules )
+            MainLoop.additionalModules[ r ].update( Time.currentTime );
+          
           for ( var i = 0, j; j = MainLoop.scenes[ i ]; i++ )
           {
-            if ( !j.freeze && !j.sleep )
-            {
+            if ( !j.sleep )
               j.update();
-            }
           }
           Time.deltaTime = 1;
           --Time.missedFrame;

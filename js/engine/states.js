@@ -30,7 +30,7 @@ function( Event, CONFIG )
     {
       CONFIG.debug.log( "State up " + who, 3 );
       checkIsReady( who, true );
-      Event.emit( who, true );
+      Event.trigger( who, true );
       states[ who ] = true;
     }
     
@@ -38,7 +38,7 @@ function( Event, CONFIG )
     {
       CONFIG.debug.log( "State down " + who, 3 );
       checkIsReady( who, false );
-      Event.emit( "not" + who, false );
+      Event.trigger( "not" + who, false );
       states[ who ] = false;
     }
     

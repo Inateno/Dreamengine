@@ -17,9 +17,9 @@
 define( [ 'DE.Renderer', 'DE.CircleRenderer.render', 'DE.CONFIG', 'DE.CanvasBuffer' ],
 function( Renderer, CircleRender, CONFIG, CanvasBuffer )
 {
-  function CircleRenderer( param, radius, angleStart, angleEnd, clockRotation )
+  function CircleRenderer( params, radius, angleStart, angleEnd, clockRotation )
   {
-    Renderer.call( this, param );
+    Renderer.call( this, params );
     
     this.radius = radius || 1;
     
@@ -29,19 +29,29 @@ function( Renderer, CircleRender, CONFIG, CanvasBuffer )
     this.clockRotation = clockRotation || false;
     
     this.buffer = null;
-    this.localPosition.x -= this.radius;
-    this.localPosition.y -= this.radius;
+    this.preventCenter = params.preventCenter || false;
+    if ( !this.preventCenter )
+    {
+      this.localPosition.x -= this.radius;
+      this.localPosition.y -= this.radius;
+    }
     this.initCircle = function()
     {
-      this.buffer = new CanvasBuffer( this.radius * 2, this.radius * 2 );
-      
+      this.buffer = new CanvasBuffer( this.radius * 2 + this.lineWidth, this.radius * 2 + this.lineWidth );
+      this.redraw();
+    }
+    
+    this.redraw = function()
+    {
       var ctx = this.buffer.ctx;
-      ctx.fillStyle  = this.fillColor;
-      ctx.strokeStyle  = this.strokeColor;
+      ctx.clearRect( 0, 0, this.radius * 2 + this.lineWidth, this.radius * 2 + this.lineWidth );
+      ctx.fillStyle   = this.fillColor;
+      ctx.lineWidth   = this.lineWidth;
+      ctx.strokeStyle = this.strokeColor;
       ctx.globalAlpha = this.alpha;
       
       ctx.beginPath();
-      ctx.arc( this.radius, this.radius,
+      ctx.arc( this.radius + this.lineWidth / 2 >> 0, this.radius + this.lineWidth / 2 >> 0,
             this.radius, this.angleStart, this.angleEnd, this.clockRotation );
       switch ( this.method )
       {

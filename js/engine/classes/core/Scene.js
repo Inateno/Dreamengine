@@ -16,24 +16,57 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
 {
   function Scene( name )
   {
-    this.name  = name || "NoName-" + ( Date.now() + Math.random() * Date.now() >> 0 );
+    /**
+     * @public
+     * @memberOf Scene
+     * @type {String}
+     */
+    this.name = name || "NoName-" + ( Date.now() + Math.random() * Date.now() >> 0 );
     
-    this.gameObjects= new Array();
+    /**
+     * store GameObjects
+     * @protected
+     * @memberOf Scene
+     * @type {Array}
+     */
+    this.gameObjects = new Array();
     
-    // physics attributes by using an octree with colliders inside
-    /*this.colliders = new Array();
-    this.maxObjectsPerGrid = 5;
-    this.grid     = new Array(); // TODO - octree for collisions ? WIP
-    this.maxGrids = 1*/
+    // TODO - include default physic
+      /*this.colliders = new Array();
+        //physics attributes by using an octree with colliders inside
+        this.maxObjectsPerGrid = 5;
+        this.grid     = new Array(); // TODO - octree for collisions ? WIP
+        this.maxGrids = 1
+        this.gravity  = { x: 0, y: 1 };
+        this.airFrictions = 0.97;
+        */
     
-    /*this.cameras    = new Array();
-    this.maxCameras = 0;*/
+    /**
+     * if this world is sleeping, update will be ignored
+     * @public
+     * @memberOf Scene
+     * @type {Boolean}
+     */
+    this.sleep = false;
     
-    // if this world is sleeping, update will be ignored
-    this.sleep      = false;
-    this.maxObjects = 0;
-    this.tickers    = new Array(); // tickers can be stored in the world directly
+    // TODO - used or not ?
+      // actually not useful (simply a quick access to gameObjects.length) but I want to this to create octree
+      this.maxObjects = 0;
     
+    /**
+     * store timers
+     * @public
+     * @memberOf Scene
+     * @type {Array}
+     */
+    this.timers = new Array();
+    
+    /**
+     * store global events, exist for Down, Move, Up and Click with all versions of Last
+     * @private
+     * @memberOf Scene
+     * @type {Object}
+     */
     this.onGlobalMouseDown      = {};
     this.onLastGlobalMouseDown  = {};
     this.onGlobalMouseMove      = {};
@@ -43,18 +76,20 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     this.onGlobalMouseClick     = {};
     this.onLastGlobalMouseClick = {};
     
-    /****
-     * init@void
-      add this scene in the MainLoop
+    /**
+     * add the scene in the MainLoop
+     * @private
+     * @memberOf Scene
      */
-    this.init = function()
+    this._init = function()
     {
       MainLoop.addScene( this );
-    }
+    };
     
-    /****
-     * update@void
-      call update from all objects
+    /**
+     * scene update
+     * @protected
+     * @memberOf Scene
      */
     this.update = function()
     {
@@ -81,39 +116,75 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
         g.update( Time.currentTime/*, this.gameObjects*/ );
       }
       
-      // independant ticker for time counting
-      for ( var i = 0, t = this.tickers.length; i < t; ++tk )
-      {
-        this.tickers[ i ].update();
-      }
+      for ( var i = 0, t = this.timers.length; i < t; ++tk )
+        this.timers[ i ].update();
       
       if ( this.waitSortGameObjects )
         this.sortGameObjects();
-    }
+    };
     
-    /****
-     * sortGameObjects@void
-      sort gameObjects in the world depend on z axe and z-index
+    /**
+     * Sort gameObjects in the scene along z axis or using z-index for objects on the same same plan.
+     * If z and z-index are same, objects are sorted from lower x to higher.
+     * You shouldn't call this method directly because engine do it for you, but in some case it's useful to do
+     * @protected
+     * @memberOf Scene
      */
     this.sortGameObjects = function()
     {
       this.gameObjects.sort( function( a, b )
       {
         if ( b.position.z == a.position.z )
-          return a.zindex - b.zindex;
-        return b.position.z - a.position.z;
+          if ( b.zindex == a.zindex )
+            return b.position.x - a.position.x;
+          else
+            return a.zindex - b.zindex;
+        else
+          return b.position.z - a.position.z;
       } );
       
       for ( var i = 0, go; go = this.gameObjects[ i ]; ++i )
         go.sortChildrens();
       this.waitSortGameObjects = false;
-    }
+    };
     
-    /****
-     * add@void
-      add an object in this scene
+    /**
+     * add all given gameObjects inside the scene, if you add only one gameObject, call addOne
+     * you can call this method with array, single object, or multi arguments objects, look at examples.
+     * @public
+     * @memberOf Scene
+     * @param {GameObject} gameObject gameObject to add
+     * @example myScene.add( car ); // just one object, you should call addOne instead
+     * @example myScene.add( car, car2, car3, banana, turtle ); // using multi arguments
+     * @example var myArray = [ object1, object2, object3 ]; // declare an array with object inside as you wish
+     * myScene.add( myArray ); // then call add with array directly
+     * @example var myArray = [ object1, object2, object3 ]; // declare an array with object inside as you wish
+     * var myArray2 = [ object4, object5, object6 ]; // declare a second array with object inside as you wish
+     * myScene.add( myArray, myArray2 ); // then call add with array and multi arguments
      */
     this.add = function( gameObject )
+    {
+      var args = Array.prototype.slice.call( arguments );
+      for ( var i = 0; i < args.length; ++i )
+      {
+        if ( args[ i ].length )
+        {
+          for ( var o = 0, m = args[ i ].length || 1; o < m; ++o )
+            this.addOne( args[ i ][ o ] );
+        }
+        else
+          this.addOne( args[ i ] );
+      }
+    };
+    
+    /**
+     * add one gameObject inside the scene, call this one if you have only 1 gameObject to add, it's faster
+     * @public
+     * @memberOf Scene
+     * @param {GameObject} gameObject gameObject to add
+     * @example myScene.addOne( car );
+     */
+    this.addOne = function( gameObject )
     {
       if ( !( gameObject instanceof GameObject ) )
       {
@@ -128,10 +199,10 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
       
       ++this.maxObjects;
       this.waitSortGameObjects = true;
-    }
+    };
     
     Event.addEventComponents( this );
-    this.init();
+    this._init();
   }
   
   Scene.prototype = Scene.prototype || {};
@@ -153,9 +224,11 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     delete this.onLastGlobalMouseUp[ object.id ];
   };
   
-  /****
-   * remove@void
-    remove an object on this scene ( not deleted ! )
+  /**
+   * Remove an object on this scene (it is not deleted !).
+   * @public
+   * @memberOf Scene
+   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
    */
   Scene.prototype.remove = function( object )
   {
@@ -176,11 +249,14 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
       // this.gameObjects.splice( object.sceneIndex, 1 ); // nope sceneIndex can change
     }
     this.maxObjects--;
-  }
+  };
   
-  /****
-   * delete@void
-    delete and remove an object in the scene
+  /**
+   * Delete and remove an object in the scene.
+   * You should prefer askToKill GameObject's method because it's safer (if you know what you do go crazy).
+   * @public
+   * @memberOf Scene
+   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
    */
   Scene.prototype.delete = function( object )
   {
@@ -190,11 +266,12 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     else
       object.killMePlease();
     this.remove( object );
-  }
+  };
   
-  /****
-   * deleteAll@void
-    delete and remove all gameObjects in the scene
+  /**
+   * Delete and remove all gameObjects in the scene
+   * @public
+   * @memberOf Scene
    */
   Scene.prototype.deleteAll = function()
   {
@@ -202,7 +279,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     while ( objs.length > 0 )
       this.delete( 0 );
     this.maxObjects = 0;
-  }
+  };
   Scene.prototype.DEName = "Scene";
   
   CONFIG.debug.log( "Scene loaded", 3 );

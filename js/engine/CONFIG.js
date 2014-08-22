@@ -58,6 +58,7 @@ function()
     gamepadEnable     : true
     ,gamepadAvalaible : "Gamepad avalaible !"
     ,gamepadChange    : true
+    ,achievementUnlockDuration: 8000
   };
   
   CONFIG.debug.log( "CONFIG loaded", 3 );

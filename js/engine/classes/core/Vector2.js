@@ -94,14 +94,14 @@ function( Time, CONFIG )
      */
     this.setPosition = function( first, y )
     {
-      if ( first.x && first.y )
+      if ( first.x !== undefined && first.y !== undefined )
       {
         this.x = first.x;
         this.y = first.y;
         return this;
       }
       this.x = first;
-      this.y = y;
+      this.y = y || 0;
       return this;
     }
 

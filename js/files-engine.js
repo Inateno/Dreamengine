@@ -20,6 +20,7 @@ require.config( {
   baseUrl: "./js/"
   , paths: {
     'DREAM_ENGINE': 'engine/main'
+    ,'NebulaOffline': 'engine/classes/NebulaOffline'
     
     // engine core datas
     , 'DE.about'           : 'engine/about'
@@ -28,17 +29,18 @@ require.config( {
     , 'DE.States'          : 'engine/states'
     
     // core engine classes
-    , 'DE.Event'           : 'engine/classes/Event'
-    , 'DE.Time'            : 'engine/classes/Time'
-    , 'DE.ImageManager'    : 'engine/classes/ImageManager'
-    , 'DE.AudioManager'    : 'engine/classes/AudioManager'
-    , 'DE.CollisionSystem' : 'engine/classes/CollisionSystem'
-    , 'DE.MainLoop'        : 'engine/classes/MainLoop'
-    , 'DE.SystemDetection' : 'engine/classes/SystemDetection'
-    , 'DE.LangSystem'      : 'engine/classes/LangSystem'
-    , 'DE.Screen'          : 'engine/classes/Screen'
-    , 'DE.SaveSystem'      : 'engine/classes/SaveSystem'
-    , 'DE.Notifications'   : 'engine/classes/Notifications'
+    , 'DE.Event'             : 'engine/classes/Event'
+    , 'DE.Time'              : 'engine/classes/Time'
+    , 'DE.ImageManager'      : 'engine/classes/ImageManager'
+    , 'DE.AudioManager'      : 'engine/classes/AudioManager'
+    , 'DE.CollisionSystem'   : 'engine/classes/CollisionSystem'
+    , 'DE.MainLoop'          : 'engine/classes/MainLoop'
+    , 'DE.SystemDetection'   : 'engine/classes/SystemDetection'
+    , 'DE.LangSystem'        : 'engine/classes/LangSystem'
+    , 'DE.Screen'            : 'engine/classes/Screen'
+    , 'DE.SaveSystem'        : 'engine/classes/SaveSystem'
+    , 'DE.Notifications'     : 'engine/classes/Notifications'
+    , 'DE.AchievementSystem' : 'engine/classes/AchievementSystem'
     
     , 'DE.Sizes'        : 'engine/classes/core/Sizes'
     , 'DE.Vector2'      : 'engine/classes/core/Vector2'
@@ -52,10 +54,10 @@ require.config( {
     , 'DE.GamePad'      : 'engine/classes/gamepad'
     , 'DE.Inputs'       : 'engine/classes/Inputs'
     , 'DE.Gui'          : 'engine/classes/core/Gui'
-    , 'DE.BaseGui'      : 'engine/classes/core/Gui/BaseGui' // BaseGui need extend
-    , 'DE.GuiButton'    : 'engine/classes/core/Gui/Button'
-    , 'DE.GuiImage'     : 'engine/classes/core/Gui/Image'
-    , 'DE.GuiLabel'     : 'engine/classes/core/Gui/Label'
+    // , 'DE.BaseGui'      : 'engine/classes/core/Gui/BaseGui' // BaseGui need extend
+    // , 'DE.GuiButton'    : 'engine/classes/core/Gui/Button'
+    // , 'DE.GuiImage'     : 'engine/classes/core/Gui/Image'
+    // , 'DE.GuiLabel'     : 'engine/classes/core/Gui/Label'
 
     // GameObject
     , 'DE.GameObject': 'engine/classes/core/GameObject/GameObject'
@@ -79,8 +81,11 @@ require.config( {
     , 'DE.TileRenderer'          : 'engine/classes/extended/TileRenderer/TileRenderer'
     , 'DE.TileRenderer.render'   : 'engine/classes/extended/TileRenderer/TileRenderer.render'
     
+    , 'DE.Mid.gameObjectMouseEvent': 'engine/middlewares/gameObjectMouseEvent'
+    
     // libz get some little change to work with Require without using a "shim"
     , 'buzz'          : 'ext_libs/buzz-require'
+    , 'HowlLib'       : 'ext_libs/howler'
     , 'stash'         : 'ext_libs/stash-require'
     , 'handjs'        : 'ext_libs/hand-require'
     

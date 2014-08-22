@@ -55,6 +55,12 @@ module.exports = function(grunt)
         ],
         dest: 'release/w8/game.js'
       }
+      , css: {
+        src: [
+          '_dev/css/**/*.css'
+        ],
+        dest: 'release/_common/style.css'
+      }
     }
     
     // move prod files to prod dir
@@ -63,7 +69,7 @@ module.exports = function(grunt)
         expand: true,
         flatten: false,
         cwd: '_dev',
-        src: [ 'audio/**/*', 'style.css', 'img/**/*' ],
+        src: [ 'audio/**/*', 'img/**/*' ],
         dest: 'release/_common/'
       }
       , require: {
@@ -90,7 +96,7 @@ module.exports = function(grunt)
   
   // Default task.
   grunt.registerTask( 'default', [ 'assets', 'web', 'win8' ] );
-  grunt.registerTask( 'assets', [ 'clean:assets', 'copy' ] );
+  grunt.registerTask( 'assets', [ 'clean:assets', 'copy', 'concat:css' ] );
   grunt.registerTask( 'web', [ 'requirejs', 'concat:web' ] );
   grunt.registerTask( 'win8', [  'string-replace:setupW8', 'requirejs', 'concat:w8', 'string-replace:cleanW8' ] );
 };
