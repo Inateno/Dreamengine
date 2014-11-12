@@ -37,7 +37,8 @@ function( CONFIG )
      */
     this.get = function( what )
     {
-      return this.dictionary[ this.currentLang ][ what ] || this.dictionary[ "en" ][ what ] || null;
+      return this.dictionary[ this.currentLang ][ what ] ||
+        ( this.dictionary[ "en" ] && this.dictionary[ "en" ][ what ] ) || null;
     }
     
     /****

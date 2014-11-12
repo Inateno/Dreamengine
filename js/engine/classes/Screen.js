@@ -28,7 +28,7 @@
 define( [ 'DE.CONFIG', 'DE.SaveSystem', 'DE.Event' ],
 function( CONFIG, SaveSystem, Event )
 {
-  var Screen = new function()
+  var ScreenSize = new function()
   {
     this.DEName = "Screen";
     
@@ -60,7 +60,7 @@ function( CONFIG, SaveSystem, Event )
       /* game conception size index
         (if you make the game with HD graphics and sizes, the ratio will be based on this) */
       this.conceptionSizeIndex = imgDatas.conceptionSizeIndex || 0;
-    }
+    };
     
     this.updateScreenSizes = function( index )
     {
@@ -127,9 +127,9 @@ function( CONFIG, SaveSystem, Event )
       CONFIG.debug.log( "Physical ratio is :: " + this.ratioToConception, 2 );
       
       Event.trigger( "updateScreenSizes", this.ratioToConception, sizes[ this.currentSizeIndex ] );
-    }
+    };
   }
   
   CONFIG.debug.log( "Screens loaded", 3 );
-  return Screen;
+  return ScreenSize;
 } );

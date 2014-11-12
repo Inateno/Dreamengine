@@ -9,8 +9,8 @@
 simple Game class declaration example
 **/
 
-define( [ 'DREAM_ENGINE', 'DE.GuiLabel', 'DE.GuiImage' ],
-function( DE, GuiLabel, GuiImage )
+define( [ 'DREAM_ENGINE' ],
+function( DE )
 {
   var Game = {};
   
@@ -18,7 +18,7 @@ function( DE, GuiLabel, GuiImage )
   Game.scene  = null;
   var _counter = null;
   var _timer = null;
-  var screenW = 1280, screenH = 720;
+  var screenW = 1920, screenH = 1080;
   
   // init
   Game.init = function()
@@ -26,7 +26,7 @@ function( DE, GuiLabel, GuiImage )
     console.log( "init Engine" );
     DE.CONFIG.DEBUG_LEVEL = 5;
     // render
-    Game.render = new DE.Render( "render", { width: screenW, height: screenH , fullScreen: "ratioStretch"} );
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
     Game.render.init();
     
     DE.start();
@@ -41,7 +41,7 @@ function( DE, GuiLabel, GuiImage )
     // camera
     Game.camera = new DE.Camera( screenW, screenH, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );
     Game.camera.scene = Game.scene;
-    Game.camera.gui = new DE.Gui( Game.camera, { 'id': "Test" } );
+    Game.camera.gui = new DE.Gui();
     
     Game.render.add( Game.camera );
     Game.camera.lastOnMouseDown = function( e )
@@ -51,13 +51,16 @@ function( DE, GuiLabel, GuiImage )
     }
     // Create Balls
     Game.enemies = 0;
-    _counter = new DE.GuiLabel( { 'id': "counter", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Balls" );
-    _counter.onSetText = function( txt )
+    _counter = new DE.GameObject( {
+      "x"         : 50
+      , "y"       : 100
+      , "renderer": new DE.TextRenderer( {}, 200, 100, "Balls" )
+    } );
+    _counter.renderer.onSetText = function( txt )
     {
       if ( txt == 0 )
         console.log( "winner" );
-    }
-    
+    };
     Game.camera.gui.add( _counter );
     
     var n = 25;
@@ -85,20 +88,20 @@ function( DE, GuiLabel, GuiImage )
       this.translateX( this.speedx );
       this.translateY( this.speedy );
       
-      if ( this.position.x > 1260 )
+      if ( this.position.x > screenW - 20 )
       {
         this.speedx = -this.speedx * ( 0.5 + Math.random() * 1 );
-        this.position.x = 1260;
+        this.position.x = screenW - 20;
       }
       if ( this.position.x < 20 )
       {
         this.speedx = -this.speedx * ( 0.5 + Math.random() * 1 );
         this.position.x = 20;
       }
-      if ( this.position.y > 700 )
+      if ( this.position.y > screenH - 20 )
       {
         this.speedy = -this.speedy * ( 0.5 + Math.random() * 1 );
-        this.position.y = 700;
+        this.position.y = screenH - 20;
       }
       if ( this.position.y < 20 )
       {
@@ -125,10 +128,10 @@ function( DE, GuiLabel, GuiImage )
     ball.onKill = function()
     {
       Game.enemies--;
-      _counter.setText( Game.enemies );
+      _counter.renderer.setText( Game.enemies );
     }
     Game.enemies++;
-    _counter.setText( Game.enemies );
+    _counter.renderer.setText( Game.enemies );
     object.scene.add( ball );
   }
   window.Game = Game; // debug

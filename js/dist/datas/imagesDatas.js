@@ -17,7 +17,6 @@ parameters: load:Bool, totalFrame:Int, totalLine:Int, eachAnim:Int (ms), isAnima
 
 All parameters are optionnal but at least an empty object need to be set
 **/
-1.7
 define( [ 'DE.CONFIG' ],
 function( CONFIG )
 {

@@ -167,6 +167,10 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
         for ( var i = 0, t = _gameObjects.length, g, rpx, rpy, ratioz; i < t; i++ )
         {
           g = _gameObjects[ i ];
+          
+          if ( g.position.z < this.scenePosition.z )
+            continue;
+          
           ratioz  = ( 10 / ( g.position.z - this.scenePosition.z ) );
           rpx = g.position.x;
           rpy = g.position.y;
@@ -177,11 +181,10 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
             rpy = ( g.position.y - ( this.scenePosition.y + this.fieldSizes.height * 0.5 ) ) * ratioz + ( this.scenePosition.y + this.fieldSizes.height * 0.5 );
           }
           if ( g && g.enable
-            && g.position.z > this.scenePosition.z
-            && rpx + g.biggerOffset.width >= this.scenePosition.x
-            && rpx - g.biggerOffset.width <= this.scenePosition.x + this.fieldSizes.width
-            && rpy + g.biggerOffset.height >= this.scenePosition.y
-            && rpy - g.biggerOffset.height <= this.scenePosition.y + this.fieldSizes.height )
+            && rpx + g.biggerOffset.width * ratioz >= this.scenePosition.x
+            && rpx - g.biggerOffset.width * ratioz <= this.scenePosition.x + this.fieldSizes.width
+            && rpy + g.biggerOffset.height * ratioz >= this.scenePosition.y
+            && rpy - g.biggerOffset.height * ratioz <= this.scenePosition.y + this.fieldSizes.height )
           {
             this._visibleGameObjects.push( g );
             g.render( _buffer.ctx, physicRatio, this.scenePosition, this.fieldSizes );
@@ -465,7 +468,6 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    * @param {Int} xRange max X camera will move to shake
    * @param {Int} yRange max Y camera will move to shake
    * @param {Int} [duration=500] time duration
-   * @param {Boolean} [bufferApply=false] apply the fade on buffer (will render all objects transparent)
    * @example // shake with 10-10 force during 1sec
    * myCamera.shake( 10, 10, 1000 );
    */
@@ -541,9 +543,9 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       return;
     var pos = this.target.getPos();
     if ( !this.focusLock.x )
-      this.scenePosition.x = pos.x - this.fieldSizes.width * 0.5;
+      this.scenePosition.x = pos.x - this.fieldSizes.width * 0.5 + ( this.focusOffset.x || 0 );
     if ( !this.focusLock.y )
-      this.scenePosition.y = pos.y - this.fieldSizes.height * 0.5;
+      this.scenePosition.y = pos.y - this.fieldSizes.height * 0.5 + ( this.focusOffset.y || 0 );
   };
   
   /**
@@ -662,7 +664,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
   Camera.prototype.oOnMouseUp = function( mouse, physicRatio )
   {
     if ( Date.now() < this._propagationEvent[ mouse.index ].date + CONFIG.CLICK_DELAY )
-      this.mouseDetectorHandler( "Click", mouse, physicRatio );
+      this.mouseDetectorHandler( "Click", { x: mouse.x, y: mouse.y, index: mouse.index, isDown: mouse.isDown }, physicRatio );
     
     this.mouseDetectorHandler( "Up", mouse, physicRatio );
     this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
@@ -705,14 +707,17 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       return;
     
     mouse = this.convertMousePos( mouse, physicRatio );
+    
     this.trigger( "mouse" + eventType, mouse );
     if ( this[ "onMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
-    if ( this.gui && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
+    if ( this.gui && !this.gui.sleep && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
     
-    if ( !this.scene.sleep )
+    if ( this.scene && !this.scene.sleep )
     {
+      mouse.scenePosition = this.scenePosition;
+      mouse.fieldSizes    = this.fieldSizes;
       mouse.x += this.scenePosition.x;
       mouse.y += this.scenePosition.y;
       for ( var i in this.scene[ "onGlobalMouse" + eventType ] )
@@ -732,7 +737,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     if ( !mouse.stopPropagation && !this._propagationEvent[ mouse.index ][ "preventLast" + eventType ] )
     {
-      if ( !this.scene.sleep )
+      if ( this.scene && !this.scene.sleep )
       {
         for ( var i in this.scene[ "onLastGlobalMouse" + eventType ] )
         {
@@ -742,9 +747,11 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
         mouse.x -= this.scenePosition.x;
         mouse.y -= this.scenePosition.y;
       }
+      mouse.scenePosition = undefined;
+      mouse.fieldSizes    = undefined;
       
       this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
-      if ( this.gui )
+      if ( this.gui && !this.gui.sleep )
         this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] )
       this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
     }

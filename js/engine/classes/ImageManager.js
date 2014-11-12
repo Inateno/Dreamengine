@@ -65,6 +65,8 @@ function( CONFIG, States, Event, CanvasBuffer )
       img.src  = this.folderName + "/" + this.pathPrefix + url + "." + extension;
       img.name = name;
       img.totalFrame = params.totalFrame || 1;
+      img.startFrame = params.startFrame || undefined;
+      img.endFrame   = params.endFrame || undefined;
       img.totalLine  = params.totalLine || 1;
       img.eachAnim   = params.eachAnim || 0;
       img.isReversed = params.isReversed || false;
@@ -107,6 +109,8 @@ function( CONFIG, States, Event, CanvasBuffer )
       cvs.name        = img.name;
       cvs.totalFrame  = img.totalFrame;
       cvs.totalLine   = img.totalLine;
+      cvs.startFrame  = img.startFrame || undefined;
+      cvs.endFrame    = img.endFrame || undefined;
       cvs.eachAnim    = img.eachAnim;
       cvs.isReversed  = img.isReversed;
       cvs.isAnimated  = img.isAnimated;

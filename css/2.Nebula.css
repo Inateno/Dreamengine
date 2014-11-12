@@ -38,14 +38,14 @@
   #NebulaClient .centeredModal .close:hover {
     background   : #545456;
   }
-  #NebulaClient .btns {
+  #NebulaClient .centeredModal .btns {
     position  : absolute;
     bottom    : 35px;
     left      : 0;
     right     : 0;
     text-align: center;
   }
-  #NebulaClient button {
+  #NebulaClient .centeredModal button {
     background-color: rgb(18, 18, 18);
     color           : rgb(253, 253, 253);
     border-color    : rgb(193, 187, 188);
@@ -75,11 +75,11 @@
     width           : 143px;
     outline-color   : rgb(202, 202, 202);
   }
-  #NebulaClient button:hover {
+  #NebulaClient .centeredModal button:hover {
     background-color: rgb(28, 28, 28);
     color           : rgb(202, 202, 202);
   }
-  #NebulaClient button:active {
+  #NebulaClient .centeredModal button:active {
     box-shadow        : rgba(0, 0, 0, 0.121569) 0px 3px 5px 0px inset;
     -webkit-box-shadow: rgba(0, 0, 0, 0.121569) 0px 3px 5px 0px inset;
   }
@@ -94,12 +94,12 @@
   #NebulaVignet {
     cursor                 : pointer;
     position               : fixed;
-    bottom                 : -20px;
-    left                   : 50px;
+    bottom                 : -30px;
+    left                   : 60px;
     width                  : 50px;
     height                 : 74px;
     background             : #242424;
-    padding                : 15px;
+    padding                : 7px 10px;
     box-sizing             : border-box;
     border-top-left-radius : 5px;
     border-top-right-radius: 5px;

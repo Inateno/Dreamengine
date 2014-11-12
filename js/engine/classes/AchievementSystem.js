@@ -10,6 +10,17 @@ define( [ 'stash', 'DE.CONFIG', 'DE.about', 'DE.Event', 'DE.AudioManager'
 function( stash, CONFIG, about, Event, AudioManager
         , Notifications, LangSystem, SaveSystem )
 {
+  // achievement-unlock added in dictionary
+  var langs = {
+    "en": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% unlocked</div>"
+    ,"fr": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% débloqué</div>"
+    ,"es": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% desbloqueado</div>"
+    ,"pt": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% desbloqueado</div>"
+    ,"de": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% entriegelt</div>"
+    ,"it": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% sbloccato</div>"
+    ,"ru": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% разблокирован</div>"
+  };
+  
   var AchievementSystem = new function()
   {
     this.DEName        = "AchievementSystem";
@@ -20,6 +31,12 @@ function( stash, CONFIG, about, Event, AudioManager
     
     this.init = function( list, userAchievements )
     {
+      for ( var i in langs )
+      {
+        if ( !LangSystem.dictionary[ i ] )
+          continue;
+        LangSystem.dictionary[ i ][ "achievement-unlock" ] = langs[ i ];
+      }
       // SaveSystem.saveAchievements( {} ); // if you want clean your achievements
       this.achievements = [];
       for ( var i = 0, a; a = list[ i ]; ++i )
@@ -67,7 +84,7 @@ function( stash, CONFIG, about, Event, AudioManager
             uach.objectives[ targetKey ] = { "value": 0 };
           uach.objectives[ targetKey ].value += value || 1;
           break;
-        default: // egual, >=
+        default: // equal, >=
           uach.objectives[ targetKey ] = { "value": value };
           break;
       }
@@ -92,7 +109,7 @@ function( stash, CONFIG, about, Event, AudioManager
         obComplete = true;
         switch( ob.type )
         {
-          case "egual":
+          case "equal":
             if ( ob.target != ua[ i ].value )
               obComplete = false;
             break;
@@ -117,7 +134,7 @@ function( stash, CONFIG, about, Event, AudioManager
       this.userAchievements[ achievement.namespace ].complete = true;
       var name = achievement.names[ LangSystem.currentLang ] || achievement.names.en || "null";
       var url = this.achievementsUrl + achievement.namespace + ".png";
-      var txt = LangSystem.get( "achievement-unlock" ).replace( /%name%/gi, name )
+      var txt = ( LangSystem.get( "achievement-unlock" ) || "Set achievement unlock text please" ).replace( /%name%/gi, name )
         .replace( /%path%/gi, url );
       Notifications.create( txt, CONFIG.notifications.achievementUnlockDuration );
       AudioManager.fx.play( "achievement-unlocked" );

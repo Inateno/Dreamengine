@@ -30,8 +30,9 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
     if ( !ImageManager.images[ this.spriteName ] )
       throw new Error( "SpriteRenderer :: Can't find image " + this.spriteName + " in imagesDatas" );
     
-    this.startFrame = params.startFrame || 0;
-    this.endFrame   = params.endFrame || ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.startFrame = params.startFrame || ImageManager.images[ this.spriteName ].startFrame || 0;
+    this.endFrame   = params.endFrame || ImageManager.images[ this.spriteName ].endFrame
+      || ImageManager.images[ this.spriteName ].totalFrame || 0;
     this.totalFrame = ImageManager.images[ this.spriteName ].totalFrame || 0;
     this.totalLine  = params.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
     

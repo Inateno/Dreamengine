@@ -249,8 +249,10 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
     function gamepadConnected( e )
     {
       Notifications.create( LangSystem.get( "onGamepadConnect" )
-                               || ( "Gamepad " + ( index + 1 ) + " connected" ) );
+                               || ( "Gamepad " + ( e.gamepad.index + 1 ) + " connected" ) );
       _gamePads[ e.gamepad.index ] = e.gamepad;
+      if ( !_gamePads.length )
+        _gamePads.length = 0;
       _gamePads.length++;
     }
     
@@ -315,8 +317,18 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
         }
         Event.trigger( "disconnectGamepad", index );
         gamepadAvalaible[ index ] = false;
+        _gamePads.length--;
       }
     }
+    
+    this.getGamepadsLength = function()
+    {
+      var n = 0;
+      for ( var i in gamepadAvalaible )
+        if ( gamepadAvalaible[ i ] )
+          ++n;
+      return n;
+    }; 
     
     var _sensibility = 0.5;
     var overSensibility = function( force )

@@ -37,6 +37,9 @@ function(  CollisionSystem, CONFIG, Time )
       child.update( time );
     }
     
+    this.applyFocus();
+    this.applyShake();
+    
     // used for collision trigger
     if ( !this.isMoved || !this.collider )
     {

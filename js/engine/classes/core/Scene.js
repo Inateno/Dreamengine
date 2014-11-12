@@ -31,6 +31,9 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
      */
     this.gameObjects = new Array();
     
+    this.objectsByTag = {};
+    this.objectsByName = {};
+    
     // TODO - include default physic
       /*this.colliders = new Array();
         //physics attributes by using an octree with colliders inside
@@ -193,7 +196,19 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
       }
       gameObject.scene = this;
       this.gameObjects.push( gameObject );
+      if ( gameObject.name )
+      {
+        if ( !this.objectsByName[ gameObject.name ] ) 
+          this.objectsByName[ gameObject.name ] = [];
+        this.objectsByName[ gameObject.name ].push( gameObject );
+      }
       
+      if ( gameObject.tag )
+      {
+        if ( !this.objectsByTag[ gameObject.tag ] ) 
+          this.objectsByTag[ gameObject.tag ] = [];
+        this.objectsByTag[ gameObject.tag ].push( gameObject );
+      }
       // nope, when sort the scene this is not correct anymore
       // gameObject.sceneIndex = this.maxObjects;
       
@@ -233,9 +248,22 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
   Scene.prototype.remove = function( object )
   {
     this.cleanObjectBinding( object );
+    // if it's an index, it's dangerous D:
     if ( this.gameObjects[ object ] )
     {
+      var o = this.gameObjects[ object ];
       this.gameObjects.splice( object, 1 );
+      var pos = 0;
+      if ( o.tag && this.objectsByTag[ o.tag ] )
+      {
+        pos = this.objectsByTag[ o.tag ].indexOf( o );
+        this.objectsByTag[ o.tag ].splice( pos, 1 );
+      }
+      if ( o.name && this.objectsByName[ o.name ] )
+      {
+        pos = this.objectsByName[ o.name ].indexOf( o );
+        this.objectsByName[ o.name ].splice( pos, 1 );
+      }
     }
     else
     {
@@ -246,7 +274,17 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
         return;
       }
       this.gameObjects.splice( pos, 1 );
-      // this.gameObjects.splice( object.sceneIndex, 1 ); // nope sceneIndex can change
+      
+      if ( object.tag && this.objectsByTag[ object.tag ] )
+      {
+        pos = this.objectsByTag[ object.tag ].indexOf( object );
+        this.objectsByTag[ object.tag ].splice( pos, 1 );
+      }
+      if ( object.name && this.objectsByName[ object.name ] )
+      {
+        pos = this.objectsByName[ object.name ].indexOf( object );
+        this.objectsByName[ object.name ].splice( pos, 1 );
+      }
     }
     this.maxObjects--;
   };
@@ -266,6 +304,27 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     else
       object.killMePlease();
     this.remove( object );
+  };
+  
+  Scene.prototype.getObjectByTag = function( tag )
+  {
+    if ( !this.objectsByTag[ tag ] )
+      return null;
+    this.objectsByTag[ tag ][ 0 ];
+  };
+  Scene.prototype.getObjectsByTag = function( tag )
+  {
+    return this.objectsByTag[ tag ] || [];
+  };
+  Scene.prototype.getObjectByName = function( name )
+  {
+    if ( !this.objectsByName[ name ] )
+      return null;
+    return this.objectsByName[ name ][ 0 ];
+  };
+  Scene.prototype.getObjectsByName = function( name )
+  {
+    return this.objectsByName[ name ] || [];
   };
   
   /**

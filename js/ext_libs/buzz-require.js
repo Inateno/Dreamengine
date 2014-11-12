@@ -504,6 +504,13 @@ define( function()
                     if ( this.tryToPlay )
                         this.play();
                 };
+                this.sound.addEventListener("canplaythrough", function()
+                {
+                    this.oncanplaythrough = null;
+                    this.isPreloaded = true;
+                    if ( this.tryToPlay )
+                        this.play();
+                } );
                 if (src instanceof Array) {
                     for (var j in src) {
                         if (src.hasOwnProperty(j)) {

@@ -16,8 +16,8 @@
  * MyRenderer.prototype.constructor = MyRenderer;
  * MyRenderer.prototype.supr        = Renderer.prototype;
  */
-define( [ 'DE.COLORS', 'DE.Vector2', 'DE.CONFIG' ],
-function( COLORS, Vector2, CONFIG )
+define( [ 'DE.COLORS', 'DE.Vector2', 'DE.CONFIG', 'DE.Time' ],
+function( COLORS, Vector2, CONFIG, Time )
 {
   function Renderer( params )
   {
@@ -40,6 +40,21 @@ function( COLORS, Vector2, CONFIG )
     this.localPosition = params.localPosition ||
       new Vector2( params.offsetx || params.offsetX || params.left || params.x || params.offsetLeft || 0
                   , params.offsety || params.offsetY || params.top || params.y || params.offsetTop || 0 );
+    
+    this.sleep = false;
+    
+    /**
+     * object used to apply fade on final Renderer rendering
+     * @protected
+     * @memberOf Renderer
+     * @type {Object}
+     */
+    this.fadeData = {
+      "from"     : 1
+      ,"to"      : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
     
     /****
      * setScale@void( x@Int, y@Int )
@@ -67,37 +82,151 @@ function( COLORS, Vector2, CONFIG )
     }
   }
   
-  Renderer.prototype = {
+  Renderer.prototype = { constructor: Renderer };
+  
+  /**
+   * translate the renderer along the given Vector2
+   * @protected
+   * @memberOf Renderer
+   * @param {Vector2} vector
+   */
+  Renderer.prototype.translate = function( vector )
+  {
+    this.localPosition.translate( vector, true, true );
+  };
+  
+  /**
+   * translate the renderer along x
+   * @protected
+   * @memberOf Renderer
+   * @param {Int} dist
+   */
+  Renderer.prototype.translateX = function( dist )
+  {
+    this.translate( { x: dist, y: 0 } );
+  };
+  
+  /**
+   * translate the renderer along y
+   * @protected
+   * @memberOf Renderer
+   * @param {Int} dist
+   */
+  Renderer.prototype.translateY = function( dist )
+  {
+    this.translate( { x: 0, y: dist } );
+  };
     
-    constructor: Renderer
-    /****
-     * translate@void( vector@Vector2 )
-      translate the renderer offsets
-      ignore the deltaTime on renderers offseting
-     */
-    , translate: function( vector )
+  /**
+   * apply the current fade
+   * @protected
+   * @memberOf Renderer
+   */
+  Renderer.prototype.applyFade = function()
+  {
+    if ( !this.fadeData.done )
     {
-      this.localPosition.translate( vector, true, true );
-    }
-    
-    /****
-     * translateX@void( dist@Int )
-      translate the renderer horizontaly
-     */
-    , translateX: function( dist )
-    {
-      this.translate( { x: dist, y: 0 } );
-    }
-    
-    /****
-     * translateY@void( dist@Int )
-      translate the renderer verticaly
-     */
-    , translateY: function( dist )
-    {
-      this.translate( { x: 0, y: dist } );
+      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration * Time.scaleDelta
+                              * this.fadeData.dir * this.fadeData.fadeScale;
+      this.alpha += this.fadeData.stepVal * Time.scaleDelta;
+      this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+      if ( ( this.fadeData.dir < 0 && this.alpha <= this.fadeData.to )
+          || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
+          || this.alpha < 0 || this.alpha > 1 )
+      {
+        this.alpha = this.fadeData.to;
+      }
+      if ( this.fadeData.duration <= 0 )
+      {
+        // this.trigger( "fadeEnd" );
+        this.fadeData.done = true;
+        if ( this.alpha == 1 || this.alpha == 0 )
+        {
+          if ( this.alpha == 0 )
+            this.sleep = true;
+        }
+      }
     }
   };
+  
+  /**
+   * create a fade from val, to val, with given duration time
+   * @public
+   * @memberOf Renderer
+   * @param {Float} from start value
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @example myObject.renderers[ 0 ].fade( 0.5, 1, 850 );
+   */
+  Renderer.prototype.fade = function( from, to, duration )
+  {
+    if ( to == this.alpha )
+      return;
+    
+    this.sleep = false;
+    var data = {
+      from      : from || 1
+      ,to       : to != undefined ? to : 0
+      ,duration : duration || 500
+      ,oDuration: duration || 500
+      ,fadeScale: Math.abs( from - to )
+      ,done     : false
+    };
+    data.dir = data.from > to ? -1 : 1;
+    this.alpha = from;
+    this.fadeData = data;
+  };
+  
+  /**
+   * create a fade to val, from current alpha value with given duration time
+   * @public
+   * @memberOf Renderer
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @example myObject.renderers[ 0 ].fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
+   */
+  Renderer.prototype.fadeTo = function( to, duration )
+  {
+    this.sleep = false;
+    this.fade( this.alpha, to, duration );
+  };
+  
+  /**
+   * fade the renderer to alpha 0 with given duration time
+   * fade start to the current alpha or 1 if force is true
+   * @public
+   * @memberOf Renderer
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [force=false] if true will set alpha at 1 before fade
+   * @example // alpha = 0 in 850ms
+   * myObject.renderers[ 0 ].fadeOut( 850 );
+   */
+  Renderer.prototype.fadeOut = function( duration, force )
+  {
+    this.sleep = false;
+    if ( force )
+      this.alpha = 1;
+    this.fade( this.alpha, 0, duration );
+  };
+  
+  /**
+   * fade the renderer to alpha 1 with given duration time
+   * fade start to the current alpha, or 0 if force is true
+   * @public
+   * @memberOf Renderer
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [force=false] if true will set alpha at 0 before fade
+   * @example // alpha = 1 in 850ms
+   * myObject.renderers[ 0 ].fadeIn( 850 );
+   */
+  Renderer.prototype.fadeIn = function( duration, force )
+  {
+    this.sleep = false;
+    if ( force )
+      this.alpha = 0;
+    this.fade( this.alpha, 1, duration );
+  };
+  
   Renderer.prototype.render = function( ctx, physicRatio, ratioz ){}
   Renderer.prototype.DEName = "Renderer";
   

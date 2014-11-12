@@ -44,6 +44,7 @@ function( Vector2, CONFIG )
       var harmonics = this.gameObject.getHarmonics();
       return { x: -(-this.localPosition.x * harmonics.cos + this.localPosition.y * harmonics.sin) + pos.x
         , y: -(-this.localPosition.x * harmonics.sin + this.localPosition.y * -harmonics.cos) + pos.y
+        , z: pos.z
       };
     }
     

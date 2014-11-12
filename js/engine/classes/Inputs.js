@@ -11,9 +11,17 @@
  
  !! there is no all KEYBOARD keys, but you can easily add some, and share it if you want, I will add them
 **/
-define( [ 'DE.CONFIG', 'DE.Event', 'DE.GamePad', 'handjs' ],
-function( CONFIG, Event, gamePad )
+define( [ 'DE.CONFIG', 'DE.Event', 'DE.GamePad', 'DE.LangSystem', 'handjs' ],
+function( CONFIG, Event, gamePad, LangSystem )
 {
+  var _langs = {
+    "en": {
+      "leave-page": "By leaving the page you'll lost any progression unsaved."
+    }
+    , "fr": {
+      "leave-page": "En quittant la page vous allez perdre toute progression non sauvegardé."
+    }
+  };
   var Inputs = new function()
   {
     this.DEName = "Inputs";
@@ -278,8 +286,9 @@ function( CONFIG, Event, gamePad )
     /****
      * findInput@String( code@String, type@String )
      */
-    this.findInput = function( code, type )
+    this.findInputs = function( code, type )
     {
+      var inputs = [];
       // parse all gamesInputs
       for ( var i in Inputs.usedInputs )
       {
@@ -291,11 +300,11 @@ function( CONFIG, Event, gamePad )
           
           if ( input == code && tp == type )
           {
-            return i;
+            inputs.push( i );
           }
         }
       }
-      return false;
+      return inputs.length > 0 ? inputs : false;
     }
     
     /****
@@ -330,23 +339,26 @@ function( CONFIG, Event, gamePad )
       /*
        * TODO - need add an "on" keydown event handler here
        */
-      var isDown = Inputs.findInput( code, "KEYBOARD" );
-      if ( isDown !== false )
+      var inputsDown = Inputs.findInputs( code, "KEYBOARD" );
+      if ( inputsDown !== false )
       {
-        if ( !Inputs.usedInputs[ isDown ].isDown && Date.now() - Inputs.usedInputs[ isDown ].lastCall >= Inputs.usedInputs[ isDown ].interval )
+        for ( var i = 0, input; input = inputsDown[ i ]; ++i )
         {
-          // it's a long press key type ?
-          if ( Inputs.usedInputs[ isDown ].isLongPress && !Inputs.usedInputs[ isDown ].stayOn )
+          if ( !Inputs.usedInputs[ input ].isDown && Date.now() - Inputs.usedInputs[ input ].lastCall >= Inputs.usedInputs[ input ].interval )
           {
-            Inputs.usedInputs[ isDown ].lastCall = Date.now();
+            // it's a long press key type ?
+            if ( Inputs.usedInputs[ input ].isLongPress && !Inputs.usedInputs[ input ].stayOn )
+            {
+              Inputs.usedInputs[ input ].lastCall = Date.now();
+            }
+            
+            /* specific on keydown event handler here */
+            if ( !Inputs.usedInputs[ input ].isDown )
+              Inputs.trigger( 'keyDown', input, 1 );
+            Inputs.usedInputs[ input ].isDown = true;
           }
-          
-          /* specific on keydown event handler here */
-          if ( !Inputs.usedInputs[ isDown ].isDown )
-            Inputs.trigger( 'keyDown', isDown, 1 );
-          Inputs.usedInputs[ isDown ].isDown = true;
+          Inputs.usedInputs[ input ].numberPress++;
         }
-        Inputs.usedInputs[ isDown ].numberPress++;
       }
       e.preventDefault();
       // return false;
@@ -367,18 +379,21 @@ function( CONFIG, Event, gamePad )
       /*
        * TODO - need add a "on" keyup event handler here (no precise case)
        */
-      var isUp = Inputs.findInput( code, "KEYBOARD" );
-      if ( isUp !== false )
+      var inputsUp = Inputs.findInputs( code, "KEYBOARD" );
+      if ( inputsUp !== false )
       {
-        if ( Inputs.usedInputs[ isUp ].isDown )
-          Inputs.trigger( 'keyUp', isUp );
-        
-        if ( Inputs.usedInputs[ isUp ].stayOn )
+        for ( var i = 0, input; input = inputsUp[ i ]; ++i )
         {
-          Inputs.usedInputs[ isUp ].lastCall = Date.now();
+          if ( Inputs.usedInputs[ input ].isDown )
+            Inputs.trigger( 'keyUp', input );
+          
+          if ( Inputs.usedInputs[ input ].stayOn )
+          {
+            Inputs.usedInputs[ input ].lastCall = Date.now();
+          }
+          
+          Inputs.usedInputs[ input ].isDown = false;
         }
-        
-        Inputs.usedInputs[ isUp ].isDown = false;
       }
       // e.preventDefault();
       // return false;
@@ -395,16 +410,16 @@ function( CONFIG, Event, gamePad )
       var key = e.which || e.keyCode;
       var code = e.keyCode;
 
-      var isUp = Inputs.findInput( code, "KEYBOARD" );
-      if ( isUp !== false )
+      var inputsPress = Inputs.findInputs( code, "KEYBOARD" );
+      if ( inputsPress !== false )
       {
-        if ( Inputs.usedInputs[ isUp ].isDown )
-        {
-          /*
-          * need add an "on" keyup event handler here
-          */
-        }
-        // Inputs.usedInputs[ isUp ].isDown = false;
+        // for ( var i = 0, input; input = inputsPress[ i ]; ++i )
+        // {
+          // if ( Inputs.usedInputs[ input ].isDown )
+          // {
+          // }
+          // Inputs.usedInputs[ isUp ].isDown = false;
+        // }
       }
       
       // e.preventDefault();
@@ -421,13 +436,15 @@ function( CONFIG, Event, gamePad )
         _renders[ event.target.id ].oOnMouseDown( getMouse( event ) );
       
       // catch general events 'on', 'mouseDown' if there is
-      var isDown = Inputs.findInput( 1000000001, "MOUSE" );
-      if ( isDown !== false )
+      var inputsDown = Inputs.findInputs( 1000000001, "MOUSE" );
+      if ( inputsDown !== false )
       {
-        if ( !Inputs.usedInputs[ isDown ].isDown )
-          Inputs.trigger( 'mouseDown', isDown );
-        
-        Inputs.usedInputs[ isDown ].isDown = true;
+        for ( var i = 0, input; input = inputsDown[ i ]; ++i )
+        {
+          if ( !Inputs.usedInputs[ input ].isDown )
+            Inputs.trigger( 'mouseDown', input );
+          Inputs.usedInputs[ input ].isDown = true;
+        }
       }
       
       // event.preventDefault(); // kill the mouseUp u_u
@@ -444,12 +461,15 @@ function( CONFIG, Event, gamePad )
         _renders[ event.target.id ].oOnMouseUp( getMouse( event ) );
       
       // catch general events 'on', 'mouseUp' if there is
-      var isDown = Inputs.findInput( 1000000001, "MOUSE" );
-      if ( isDown !== false )
+      var inputsUp = Inputs.findInputs( 1000000001, "MOUSE" );
+      if ( inputsUp !== false )
       {
-        if ( Inputs.usedInputs[ isDown ].isDown )
-          Inputs.trigger( 'mouseUp', isDown );
-        Inputs.usedInputs[ isDown ].isDown = false;
+        for ( var i = 0, input; input = inputsUp[ i ]; ++i )
+        {
+          if ( Inputs.usedInputs[ input ].isDown )
+            Inputs.trigger( 'mouseUp', input );
+          Inputs.usedInputs[ input ].isDown = false;
+        }
       }
       
       event.preventDefault();
@@ -589,7 +609,7 @@ function( CONFIG, Event, gamePad )
       // canvas.addEventListener( "mouseclick", Inputs.mouseClick, false );
       // canvas.addEventListener( "mousedbclick", Inputs.mouseDbClick, false );
       
-      canvas.onmousewheel = Inputs.mouseWheel; // that work, sure
+      // canvas.onmousewheel = Inputs.mouseWheel; // that work, sure // double binding with addEvent, just in case it doesn't work with a browser
       // Lol IE
       if ( window.attachEvent )
         canvas.attachEvent( "onmousewheel", Inputs.mouseWheel );
@@ -640,7 +660,7 @@ function( CONFIG, Event, gamePad )
   window.onbeforeunload = function( e )
   {
     if ( !window.leavePage )
-      return "En quittant la page vous allez perdre toute progression non sauvegardé.";
+      return _langs[ LangSystem.currentLang ][ "leave-page" ];
   };
   window.onunload = function( e )
   {

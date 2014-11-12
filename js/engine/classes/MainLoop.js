@@ -62,7 +62,7 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
       }
       else if ( States.get( 'isReady' ) )
       {
-        for ( var i = 0, j; j = MainLoop.renders[ i ]; i++ )
+        for ( var i = 0, j; j = MainLoop.renders[ i ]; ++i )
         {
           j.render();
           j.update(); // call waiting input here
@@ -78,12 +78,20 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
           for ( var r in MainLoop.additionalModules )
             MainLoop.additionalModules[ r ].update( Time.currentTime );
           
-          for ( var i = 0, j; j = MainLoop.scenes[ i ]; i++ )
+          for ( i = 0, j; j = MainLoop.scenes[ i ]; ++i )
           {
             if ( !j.sleep )
               j.update();
           }
+          
+          for ( i = 0, j; j = MainLoop.renders[ i ]; ++i )
+          {
+            j.updateGuis();
+          }
+          
           Time.deltaTime = 1;
+          Time.timeSinceLastFrameScaled = 0;
+          Time.timeSinceLastFrame = 0;
           --Time.missedFrame;
         }
       }

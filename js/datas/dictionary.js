@@ -7,7 +7,6 @@
       ,"settings": "Settings"
       ,"credits": "Credits"
       ,"pause": "Pause"
-      ,"achievement-unlock": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% unlocked</div>"
       
       ,"nebula-bad-namespace": "No namespace given for the game, disable Nebula or set a valid namespace in about"
       ,"nebula-title"        : "Connect to Nebula system"
@@ -21,7 +20,6 @@
       ,"settings": "Options"
       ,"credits": "Credits"
       ,"pause": "Pause"
-      ,"achievement-unlock": "<div class='ingame-achievement'><img src='%path%' alt='%name%' />%name% débloqué</div>"
       
       ,"nebula-bad-namespace": "Aucun namespace valide n'a été trouvé, désactivation du module Nebula (vous pouvez aussi le désactiver automatiquement)"
       ,"nebula-title"        : "Connexion au système Nebula"

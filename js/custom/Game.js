@@ -133,7 +133,12 @@ function( DE )
                                         , "x": 980, "y":500, "z": 0, "zindex": 1
                                         , "renderer": shipRender
                                         , "collider":collider } );
-      Game.ship.onMouseUp= function(){this.fire();};
+      Game.ship.onMouseUp= function()
+      {
+        this.position.z += 1;
+        Game.scene.sortGameObjects();
+        // Game.camera.scenePosition.z += 0.1 * dir;
+      };
       
       // add a children
       var reactorfx = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.4, "scaleY":0.4 } );
@@ -196,6 +201,7 @@ function( DE )
       Game.scene.add( canyon, canyon2, c3, grass );
     }
     Game.scene.add( bg );
+    
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 0+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
@@ -214,21 +220,42 @@ function( DE )
     Game.camera.limits.maxY = 1080;
     // Game.camera.limits.minX = -500;
     // Game.camera.limits.maxX = 2400;
-    
+    var banane = new DE.GameObject( {
+      'x': 600, 'y': 500, 'collider': new DE.FixedBoxCollider( 200, 200 )
+    } );
+    banane.onMouseDown = function(){ console.log( "banane" ) };
+    var patate = new DE.GameObject( {
+      'x': 700, 'y': 400, 'collider': new DE.FixedBoxCollider( 200, 200 ), "z": 10
+    } );
+    patate.onMouseDown = function(){ console.log( "patate" ) };
+    Game.scene.add( banane, patate );
     //add Fire on the ship
     Game.ship.fire = function( dir )
     {
-      dir = dir || 1;
-      this.position.z += 0.1 * dir;
-      Game.camera.scenePosition.z += 0.1 * dir;
-      // Game.scene.sortGameObjects();
-      // var pos = this.getPos();
-      // var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-      // var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
-      // bullet.position.setRotation( this.position.rotation );
-      // bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
-      // Game.scene.add( bullet );
+      var pos = this.getPos();
+      var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
+      var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
+      bullet.position.setRotation( this.position.rotation );
+      bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
+      Game.scene.add( bullet );
     }
+    
+    Game.camera.gui = new DE.Gui();
+    var plus = new DE.GameObject( {
+      "x": 230, "y": 20
+      , "renderer": new DE.TextRenderer( { fillColor: "white", fontSize: 30 }, 100, 100, "+" )
+      , "collider": new DE.CircleCollider( 20 )
+    } );
+    plus.onMouseUp = function(){ Game.camera.scenePosition.z += 100; };
+    var minus = new DE.GameObject( {
+      "x": 230, "y": 60
+      , "renderer": new DE.TextRenderer( { fillColor: "white", fontSize: 30 }, 100, 100, "-" )
+      , "collider": new DE.CircleCollider( 20 )
+    } );
+    minus.onMouseUp = function(){ Game.camera.scenePosition.z -= 100; };
+    Game.camera.gui.add( plus, minus );
+    
+    
     //
     // DE.Inputs.addActionInput( "fire", "launchMissile", function(){Game.ship.fire();}, "up" )
     setTimeout( function(){ DE.States.down( "isLoading" ); }, 500 );

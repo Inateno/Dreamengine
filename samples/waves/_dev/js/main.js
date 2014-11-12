@@ -23,6 +23,7 @@ function( gameLoop, Game, images, audios, inputs, dictionary )
       , 'onStart': Game.start, 'loader': { "scale": 2 }
       , 'images': images, 'audios': audios
       , 'inputs': inputs, 'dictionary': dictionary
+      , 'ignoreNebula': true
     } );
   }
   

@@ -35,8 +35,8 @@
  * @property {Collider} [collider]
  * @property {RigidBody} [rigidbody] work in progress
  */
-define( [ 'DE.Vector2', 'DE.GameObject.render', 'DE.GameObject.update', 'DE.CONFIG', 'DE.Sizes', 'DE.Event' ],
-function( Vector2, render, update, CONFIG, Sizes, Event )
+define( [ 'DE.Vector2', 'DE.GameObject.render', 'DE.GameObject.update', 'DE.CONFIG', 'DE.Sizes', 'DE.Event', 'DE.Time' ],
+function( Vector2, render, update, CONFIG, Sizes, Event, Time )
 {
   var PI = Math.PI;
   function GameObject( params )
@@ -54,13 +54,13 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
      * @memberOf GameObject
      * @type {String}
      */
-    this.name    = params.name != undefined ? params.name : 'noname';
+    this.name    = params.name;
     /**
      * @public
      * @memberOf GameObject
      * @type {String}
      */
-    this.tag     = params.tag || 'none';
+    this.tag     = params.tag;
     /**
      * @public
      * @memberOf GameObject
@@ -159,6 +159,14 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     this.biggerOffset = new Sizes( 1, 1, 1, 1 );
     
     /**
+     * quick access to renderers[ 0 ] (in 90% of cases we use the one renderer)
+     * @protected
+     * @memberOf GameObject
+     * @type {Renderer}
+     */
+    this.renderer = undefined;
+    
+    /**
      * @protected
      * @memberOf GameObject
      * @type {Array-Renderer}
@@ -166,17 +174,11 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     this.renderers  = new Array();
     if ( params.renderers && params.renderers.length > 0 )
     {
-      for ( var i = 0, r; r = params.renderers[ i ]; i++ )
-      {
-        r.gameObject = this;
+      for ( var i = 0, r; r = params.renderers[ i ]; ++i )
         this.addRenderer( r );
-      }
     }
     if ( params.renderer )
-    {
-      params.renderer.gameObject = this;
       this.addRenderer( params.renderer );
-    }
     
     /**
      * @protected
@@ -206,6 +208,101 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
   };
   
   GameObject.prototype = { constructor: GameObject };
+  
+  
+  /**
+   * create a shake with given range
+   * you can only have one at a time
+   * @public
+   * @memberOf GameObject
+   * @param {Int} xRange max X gameObject will move to shake
+   * @param {Int} yRange max Y gameObject will move to shake
+   * @param {Int} [duration=500] time duration
+   * @example // shake with 10-10 force during 1sec
+   * player.shake( 10, 10, 1000 );
+   */
+  GameObject.prototype.shake = function( xRange, yRange, duration )
+  {
+    this.shakeData = {
+      // "startedAt" : Date.now()
+      "duration"  : duration || 500
+      ,"xRange"   : xRange
+      ,"yRange"   : yRange
+      ,"prevX"    : this.shakeData ? this.shakeData.prevX : 0
+      ,"prevY"    : this.shakeData ? this.shakeData.prevY : 0
+    };
+  };
+  
+  /**
+   * apply the shake each update
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.applyShake = function()
+  {
+    if ( !this.shakeData )
+      return;
+    
+    var shake = this.shakeData;
+    // restore previous shake
+    this.position.x -= shake.prevX;
+    this.position.y -= shake.prevY;
+    this.shakeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    // old way - Date.now() - this.shakeData.startedAt > this.shakeData.duration )
+    if ( this.shakeData.duration <= 0 )
+    {
+      delete this.shakeData;
+      return;
+    }
+    
+    shake.prevX = - ( Math.random() * shake.xRange ) + ( Math.random() * shake.xRange ) >> 0;
+    shake.prevY = - ( Math.random() * shake.yRange ) + ( Math.random() * shake.yRange ) >> 0;
+    
+    this.position.x += shake.prevX;
+    this.position.y += shake.prevY;
+  };
+  
+  /**
+   * give a target to this gameObject, then it will focus it until you changed or removed it
+   * you can lock independent axes, and set offsets
+   * @public
+   * @memberOf GameObject
+   * @param {GameObject} gameObject is the target to focus on
+   * @param {Object} [params] optional parameters, set offsets or lock
+   * @example // create a fx for your ship, decal a little on left, and lock y
+   * fx.focus( player, { lock: { y: true }, offsets: { x: -200, y: 0 } } );
+   */
+  GameObject.prototype.focus = function( gameObject, params )
+  {
+    params = params || {};
+    this.target = gameObject;
+    this.focusLock  = params.lock || {};
+    this.focusOffset= params.offsets || { x: 0, y: 0 };
+  };
+  
+  /**
+   * apply focus on target if there is one
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
+   */
+  GameObject.prototype.applyFocus = function()
+  {
+    if ( !this.target )
+      return;
+    var pos = this.target.position;
+    if ( this.target.getPos )
+      pos = this.target.getPos();
+    // focus a camera ?
+    if ( !pos )
+      pos = this.target.scenePosition;
+    
+    if ( !this.focusLock.x )
+      this.position.x = pos.x + ( this.focusOffset.x || 0 );
+    if ( !this.focusLock.y )
+      this.position.y = pos.y + ( this.focusOffset.y || 0 );
+  };
   
   /**
    * move gameObject with a vector 2
@@ -384,7 +481,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     if ( object.renderers.length > 0 )
     {
       var x = object.position.x, y = object.position.y;
-      for ( var i = 0, ren; ren = object.renderers[ i ]; i++ )
+      for ( var i = 0, ren; ren = object.renderers[ i ]; ++i )
       {
         if ( ren.sizes )
         {
@@ -508,6 +605,8 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     renderer.gameObject = this;
     this.renderers.push( renderer );
     
+    if ( this.renderers.length == 1 )
+      this.renderer = renderer;
     if ( renderer.sizes )
     {
       if ( renderer.sizes.width * renderer.sizes.scaleX + renderer.localPosition.x > this.biggerOffset.width )
@@ -718,6 +817,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
       this.trigger( "killed", this );
     }
     
+    delete this.renderer;
     for ( var i = 0; i < this.renderers.length; ++i )
     {
       delete this.renderers[ i ];
@@ -786,7 +886,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
     // if using the old way - TODO - remove it on version 0.2.0
     if ( methodName.type )
     {
-      throw new Error( "You use the old way to call addAutomatism, check the doc please" );
+      console.error( "You use the old way to call addAutomatism, check the doc please" );
       params = methodName;
       methodName = params.type;
     }
@@ -845,6 +945,76 @@ function( Vector2, render, update, CONFIG, Sizes, Event )
    */
   Event.addEventCapabilities( GameObject );
   
+  // propagation methods to renderers
+    /**
+     * create a fade from alpha to alpha on all renderers, with given duration time
+     * @public
+     * @memberOf GameObject
+     * @param {Float} from start value
+     * @param {Float} [to=0] end value
+     * @param {Int} [duration=500] fade duration in ms
+     * @example myObject.fade( 0.5, 1, 850 );
+     */
+    GameObject.prototype.fade = function( from, to, duration )
+    {
+      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
+        r.fade( from, to, duration );
+      for ( i = 0; child = this.childrens[ i ]; ++i )
+        child.fade( from, to, duration );
+    };
+    
+    /**
+     * create a fade to val on all renderers, from current alpha value with given duration time
+     * @public
+     * @memberOf GameObject
+     * @param {Float} [to=0] end value
+     * @param {Int} [duration=500] fade duration in ms
+     * @example myObject.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
+     */
+    GameObject.prototype.fadeTo = function( to, duration )
+    {
+      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
+        r.fadeTo( to, duration );
+      for ( i = 0; child = this.childrens[ i ]; ++i )
+        child.fadeTo( to, duration );
+    };
+    
+    /**
+     * fade all renderers to alpha 0 with given duration time
+     * fade start to the current alpha or 1 if force is true
+     * @public
+     * @memberOf GameObject
+     * @param {Int} [duration=500] fade duration in ms
+     * @param {Boolean} [force=false] if true will set alpha at 1 before fade
+     * @example // alpha = 0 in 850ms
+     * myObject.fadeOut( 850 );
+     */
+    GameObject.prototype.fadeOut = function( duration, force )
+    {
+      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
+        r.fadeOut( duration, force );
+      for ( i = 0; child = this.childrens[ i ]; ++i )
+        child.fadeOut( duration, force );
+    };
+    
+    /**
+     * fade all renderers to alpha 1 with given duration time
+     * fade start to the current alpha, or 0 if force is true
+     * @public
+     * @memberOf GameObject
+     * @param {Int} [duration=500] fade duration in ms
+     * @param {Boolean} [force=false] if true will set alpha at 0
+     * @example // alpha = 1 in 850ms
+     * myObject.fadeIn( 850 );
+     */
+    GameObject.prototype.fadeIn = function( duration, force )
+    {
+      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
+        r.fadeIn( duration, force );
+      for ( i = 0; child = this.childrens[ i ]; ++i )
+        child.fadeIn( duration, force );
+    };
+    
   GameObject.prototype.DEName = "GameObject";
   CONFIG.debug.log( "GameObject loaded", 3 );
   return GameObject;

@@ -43,7 +43,8 @@ function( files, gameLoop, Game, images, audios, inputs, dictionary )
     , 'images': images, 'audios': audios
     , 'inputs': inputs, 'dictionary': dictionary
     , 'about': { 'gameName': "ProtoBalls", 'author': "Dreamirl", 'gameVersion': "0.1" }
-    , 'saveModel': { 'ballKilled': 0 }, 'saveIgnoreVersion': true
+    , 'saveModel': { 'ballKilled': 0 }
+    , 'ignoreNebula': true
   } );
   window.DREAM_E = DE;
 } );

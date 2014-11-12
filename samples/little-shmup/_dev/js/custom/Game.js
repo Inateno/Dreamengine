@@ -114,7 +114,7 @@ function( DE, Player, Enemy, datas )
     Game.gameBtn.enable  = false;
     for ( var n = 0; n < Game.scene.gameObjects.length; ++n )
     {
-      if ( Game.scene.gameObjects[ n ].tag.match( "enemy|bullet" ) )
+      if ( Game.scene.gameObjects[ n ].tag && Game.scene.gameObjects[ n ].tag.match( "enemy|bullet" ) )
         Game.scene.gameObjects[ n ].askToKill();
     }
     Game.player.init();

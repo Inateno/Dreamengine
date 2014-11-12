@@ -84,14 +84,14 @@ function( DE )
       enemy.arm.add( canon );
       enemy.add( enemy.arm );
       
-      enemy.target = player;
+      enemy.targetObject = player;
       // STEP 2
       enemy.move = function()
       {
         this.translateY( 4 );
         this.rotate( 0.01 );
-        // this.arm.lookAt( this.target.position );
-        // this.arm.rotate( 0.008 ); //lookAt( this.target.position );
+        // this.arm.lookAt( this.targetObject.position );
+        // this.arm.rotate( 0.008 ); //lookAt( this.targetObject.position );
       }
       enemy.addAutomatism( "gameLogic", "move" );
       
@@ -148,15 +148,15 @@ function( DE )
     // Game.camera.sizes.scaleY = 0.8;
     // Game.camera = new DE.Camera( 1280, 720, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
     Game.camera.scene = Game.scene;
-    Game.camera.gui = new DE.Gui( Game.camera, { 'id': "Test" } );
+    Game.camera.gui = new DE.Gui();
     
     // for ( var i = 1900; i > 0; i -= 100 )
     //   Game.scene.add( new DE.GameObject( { "x": i, "y": 300 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 10, "y": 760 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 1580, "y": 750 } ) );
-    Game.scene.add( new DE.GameObject( { "x": 1580, "y": 10 } ) );
+    // Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
+    // Game.scene.add( new DE.GameObject( { "x": 10, "y": 10 } ) );
+    // Game.scene.add( new DE.GameObject( { "x": 10, "y": 760 } ) );
+    // Game.scene.add( new DE.GameObject( { "x": 1580, "y": 750 } ) );
+    // Game.scene.add( new DE.GameObject( { "x": 1580, "y": 10 } ) );
     
     var rotateCol = new DE.GameObject( { "x": 1080, "y": 0, "collider": new DE.OrientedBoxCollider( 200, 100, {} ) } );
     Game.scene.add( rotateCol );
@@ -190,23 +190,23 @@ function( DE )
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 1000+i%2*100, Game.ship );
     
-    Game.camera.gui.add( new DE.GuiLabel( { 'id': "hello", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Hello world" ) );
-    Game.camera.gui.add( new DE.GuiButton( { 'id': "Click me plz", 'x': 450, 'y': 600, "w": 100, "h": 100, 'fillColor': "white", "enable": false } ) );
-    Game.camera.gui.add( new DE.GuiImage( { 'id': 'simpleImage', 'spriteName': "reactor", "x": 200, "y": 600, "w": 100, "h": 100, "paused": true } ) );
+    // Game.camera.gui.add( new DE.GuiLabel( { 'id': "hello", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Hello world" ) );
+    // Game.camera.gui.add( new DE.GuiButton( { 'id': "Click me plz", 'x': 450, 'y': 600, "w": 100, "h": 100, 'fillColor': "white", "enable": false } ) );
+    // Game.camera.gui.add( new DE.GuiImage( { 'id': 'simpleImage', 'spriteName': "reactor", "x": 200, "y": 600, "w": 100, "h": 100, "paused": true } ) );
     
-    Game.camera.gui.components[ 'hello' ].onMouseUp = function()
-    {
-      Game.camera.gui.components[ 'Click me plz' ].toggle();
-    }
-    Game.camera.gui.components[ 'simpleImage' ].onMouseUp = function()
-    {
-      Game.camera.gui.components[ 'Click me plz' ].toggle();
-    }
-    Game.camera.gui.components[ 'Click me plz' ].onMouseUp = function()
-    {
-      console.log( "clickcik" );
-      Game.camera.renderPosition.rotate( Math.PI*0.1 );
-    }
+    // Game.camera.gui.components[ 'hello' ].onMouseUp = function()
+    // {
+    //   Game.camera.gui.components[ 'Click me plz' ].toggle();
+    // }
+    // Game.camera.gui.components[ 'simpleImage' ].onMouseUp = function()
+    // {
+    //   Game.camera.gui.components[ 'Click me plz' ].toggle();
+    // }
+    // Game.camera.gui.components[ 'Click me plz' ].onMouseUp = function()
+    // {
+    //   console.log( "clickcik" );
+    //   Game.camera.renderPosition.rotate( Math.PI*0.1 );
+    // }
     // Game.camera.position.rotate( Math.PI );
     
     //add Fire on the ship

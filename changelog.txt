@@ -1,3 +1,20 @@
+---- 0.2.1 ---- Clean 0.2.0 version and add few features
+* Fixed mouseEvents with 3D positions
+* now CollisionSystem handle z position for objects (can ignore it with argument)
+* you can convert 3D position to 2D position with argument to realize a test collision without taking care of z position
+* fix on LangSystem.get (if no language available or no en as default)
+* GameObject shake method
+* GameObject focus method
+* Camera fix focus offsets not added
+* Inputs work now with multi inputs clone (using same key for different inputs)
+* Renderer have now fade methods (fadeIn, fadeOut, fade, fadeTo same as Camera)
+* GameObject can now call fade methods for all renderers and children's renderers (so you can fade objects directly)
+* added parameters endFrame and startFrame in the imagesDatas config files (to allow directly to cut standard animation) you can still overwrite it when declaring the new SpriteRender or later in use
+* added renderer attribute to GameObject which is equivalent to renderers[ 0 ] because in 90% of cases we use the first renderer only.
+* added sleep attribute in Gui (the same as Scene)
+* add security to prevent error on camera without scene
+* add translations inside Inputs used to prevent leaving the current page
+
 ---- 0.2.0 ---- This update is not cleaned - some samples could not work
 * Engine stop the loop if you change tab / reduce window / lock session, so when the user come back on the game, the engine don't count frame missed from long time ago (example if you leave the page for 5minutes, it deduce that you missed 21428.5 frames and will apply 21428 update on each scene enable)
 * Fixed a bug with collider using an offset

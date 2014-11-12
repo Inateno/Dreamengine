@@ -75,12 +75,12 @@ function( DE )
     var box = new DE.GameObject( {
       x: 50
       // LEL !
-      // ,renderer: new DE.SpriteRenderer( {
-      //   "spriteName": "bg", "startFrame": cx, "startLine": cy
-      // } )
-      ,renderer: new DE.BoxRenderer( {
-        fillColor: color
-      }, 20, 20 )
+      ,renderer: new DE.SpriteRenderer( {
+        "spriteName": "bg", "startFrame": cx, "startLine": cy
+      } )
+      // ,renderer: new DE.BoxRenderer( {
+      //   fillColor: color
+      // }, 20, 20 )
     } );
     circle.rotate( deg / 10 );
     circle.addAutomatism( "move", "rotate", { value1: 0.04 } );

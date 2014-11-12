@@ -69,6 +69,7 @@ function( Collider, COLORS, CONFIG, CanvasBuffer )
       var offsetY = this.localPosition.y + this.height * 0.5;
       return { x: -(-offsetX * harmonics.cos + offsetY * harmonics.sin) + pos.x - this.width * 0.5
         , y: -(-offsetX * harmonics.sin + offsetY * -harmonics.cos) + pos.y - this.height * 0.5
+        , z: pos.z
       };
     }
     

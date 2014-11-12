@@ -16,7 +16,7 @@ function( CONFIG, COLORS, Time )
     if ( !this.enable )
       return;
     // distance from 10 between object and camera is ratio 1
-    var ratioz  = ratiozParent || ( 10 / ( this.position.z - camPosition.z ) ), px = 0, py = 0;
+    var ratioz = ratiozParent || ( 10 / ( this.position.z - camPosition.z ) ), px = 0, py = 0;
     
     if ( this.renderers.length == 0 && this.childrens.length == 0 && !CONFIG.DEBUG )
       return;
@@ -33,8 +33,13 @@ function( CONFIG, COLORS, Time )
     ctx.rotate( this.position.rotation );
     
     // calls renderers rendering
-    for ( var i = 0, r; r = this.renderers[ i ]; i++ )
+    for ( var i = 0, r; r = this.renderers[ i ]; ++i )
+    {
+      if ( r.sleep )
+        continue;
       r.render( ctx, physicRatio, ratioz );
+      r.applyFade();
+    }
     
     // AXIS debug
     if ( CONFIG.DEBUG_LEVEL > 1 )
@@ -51,8 +56,9 @@ function( CONFIG, COLORS, Time )
         this.collider.debugRender( ctx, physicRatio, ratioz );
     }
     
+    var child;
     // childs rendering
-    for ( var i = 0, child; child = this.childrens[ i ]; i++ )
+    for ( i = 0; child = this.childrens[ i ]; ++i )
       child.render( ctx, physicRatio, camPosition, camSizes, ratioz );
     
     ctx.rotate( -this.position.rotation );

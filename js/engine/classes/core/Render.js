@@ -386,7 +386,17 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
         this.camerasMouseCollide.apply( this, this.events[ i ] );
         delete this.events[ i ];
       }
-    }
+    };
+    
+    this.updateGuis = function()
+    {
+      if ( this.sleep || this.freeze )
+        return;
+      
+      for ( var i = 0, camera; camera = this.cameras[ i ]; ++i )
+        if ( camera.gui && !camera.gui.sleep )
+          camera.gui.update();
+    };
     
     /****
      * add@void( camera@Camera )

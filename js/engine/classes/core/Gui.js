@@ -31,14 +31,6 @@ function( CONFIG, COLORS, Time, Event, GameObject
     this.id        = params.id || undefined;
     
     /**
-     * if it's false render, update, and events will be ignored
-     * @public
-     * @memberOf Gui
-     * @type {Boolean}
-     */
-    this.enable    = params.enable != undefined ? params.enable : true;
-    
-    /**
      * you can set an alpha different from the camera's alpha to manage Gui transparency
      * @public
      * @memberOf Gui
@@ -66,6 +58,14 @@ function( CONFIG, COLORS, Time, Event, GameObject
     this.timers = new Array();
     
     /**
+     * if gui is sleeping, update will be ignored
+     * @public
+     * @memberOf Gui
+     * @type {Boolean}
+     */
+    this.sleep = false;
+    
+    /**
      * store global events, exist for Down, Move, Up and Click with all versions of Last
      * @private
      * @memberOf Gui
@@ -88,7 +88,7 @@ function( CONFIG, COLORS, Time, Event, GameObject
      */
     this.render = function( ctx, drawRatio, physicRatio, renderSizes )
     {
-      if ( !this.enable )
+      if ( this.sleep )
         return;
       var oldAlpha = ctx.globalAlpha;
       ctx.globalAlpha = oldAlpha * this.alpha;
