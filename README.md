@@ -3,6 +3,11 @@ The official website [HTML5-Dreamengine](http://dreamengine.dreamirl.com)
 Follow on [Twitter](http://twitter.com/dreamirlgames)
 Or [Facebook](https://www.facebook.com/Dreamirl)
 
+Update 0.2.1
+===========
+Fix collision and rendering detection with 3D position, add /changes some attributes to allow quick-access
+Checkout the changelog.txt for details
+
 Update 0.2.0
 ===========
 I made this update fast, maybe some samples aren't working and maybe doc isn't up to date with this last version (on few points) but this version work (I use it) I'll clean all the little things / doc soon after the LD.
