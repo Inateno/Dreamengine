@@ -11,8 +11,8 @@
  
  !! there is no all KEYBOARD keys, but you can easily add some, and share it if you want, I will add them
 **/
-define( [ 'DE.CONFIG', 'DE.Event', 'DE.GamePad', 'DE.LangSystem', 'handjs' ],
-function( CONFIG, Event, gamePad, LangSystem )
+define( [ 'DE.CONFIG', 'DE.Event', 'DE.GamePad', 'DE.LangSystem', 'DE.Time', 'handjs' ],
+function( CONFIG, Event, gamePad, LangSystem, Time )
 {
   var _langs = {
     "en": {
@@ -230,7 +230,7 @@ function( CONFIG, Event, gamePad, LangSystem )
       if ( Inputs.keyLocked )
         return;
       if ( this.usedInputs[ name ] && this.usedInputs[ name ].isDown
-        && ( !this.usedInputs[ name ].interval || Date.now() - this.usedInputs[ name ].lastCall >= this.usedInputs[ name ].interval )
+        && ( !this.usedInputs[ name ].interval || Date.now() - this.usedInputs[ name ].lastCall >= this.usedInputs[ name ].interval / Time.scaleDelta )
       )
       {
         if ( !Inputs.usedInputs[ name ].stayOn )

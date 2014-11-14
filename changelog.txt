@@ -1,3 +1,6 @@
+---- 0.2.1 fix ----
+* fix Inputs.get wasn't relative to scaleDelta
+
 ---- 0.2.1 ---- Clean 0.2.0 version and add few features
 * Fixed mouseEvents with 3D positions
 * now CollisionSystem handle z position for objects (can ignore it with argument)
