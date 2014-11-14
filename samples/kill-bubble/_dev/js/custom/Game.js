@@ -6,12 +6,11 @@
  @Inateno
 
 ***
- sample Game - kill the bubble
- there is no "end" and no menus, it's a very lite "how to" for basics
- and you can create complete game with this :)
+simple Game class declaration example
 **/
+
 define( [ 'DREAM_ENGINE' ],
-function( DreamE )
+function( DE )
 {
   var Game = {};
   
@@ -19,113 +18,107 @@ function( DreamE )
   Game.scene  = null;
   var _counter = null;
   var _timer = null;
-  var screenW = 1280, screenH = 720;
+  var screenW = 1920, screenH = 1080;
   
   // init
   Game.init = function()
   {
     console.log( "init Engine" );
-    DreamE.CONFIG.DEBUG = 1; // debug on
-    DreamE.CONFIG.DEBUG_LEVEL = 5; // all debug
-    
-    // create render
-    Game.render = new DreamE.Render( "render", { width: screenW, height: screenH , fullScreen: "ratioStretch"} );
+    DE.CONFIG.DEBUG_LEVEL = 5;
+    // render
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
     Game.render.init();
     
-    // launch the engine
-    DreamE.start();
+    DE.start();
   }
   
   // start
   Game.start = function()
   {
-    // simple localStorage usage here :)
-    console.log( "hello, you killed a total of " + ( DreamE.SaveSystem.get( "ballKilled" ) || 0 ) + " balls" );
-    Game.scene = new DreamE.Scene( "Test" );
+    console.log( "hello, you killed a total of " + DE.SaveSystem.get( "ballKilled" ) + " balls" );
+    Game.scene = new DE.Scene( "Test" );
     
-    // create your camera
-    Game.camera = new DreamE.Camera( screenW, screenH, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );
-    // give a scene at the camera
+    // camera
+    Game.camera = new DE.Camera( screenW, screenH, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );
     Game.camera.scene = Game.scene;
-    // create a gui on this camera
-    Game.camera.gui = new DreamE.Gui( Game.camera, { 'id': "Test" } );
-    // bind it on the render
-    Game.render.add( Game.camera );
+    Game.camera.gui = new DE.Gui();
     
-    // lastOn is the last event append on the camera, if no gameObject has stoped the propagation
-    Game.camera.onLastMouseDown = function( e )
+    Game.render.add( Game.camera );
+    Game.camera.lastOnMouseDown = function( e )
     {
-      // for ( var i = 0; i < 50; ++i ) // stress test if you want try
+      // for ( var i = 0; i < 50; ++i )
         addBall( Game, e.x, e.y );
     }
-    
     // Create Balls
     Game.enemies = 0;
-    _counter = new DreamE.GuiLabel( { 'id': "counter", 'x': 50, 'y': 100, "w": 200, "h": 50 }, "Balls" );
-    _counter.onSetText = function( txt )
+    _counter = new DE.GameObject( {
+      "x"         : 50
+      , "y"       : 100
+      , "renderer": new DE.TextRenderer( {}, 200, 100, "Balls" )
+    } );
+    _counter.renderer.onSetText = function( txt )
     {
       if ( txt == 0 )
         console.log( "winner" );
-    }
-    
+    };
     Game.camera.gui.add( _counter );
     
     var n = 25;
     for ( var i = 0; i < n; ++i )
       addBall( Game, Math.random() * screenW, Math.random()* screenH );
     
-    // always let a little delay between the real load and the visual load, better feeling
-    setTimeout( function(){ DreamE.States.down( "isLoading" ); }, 200 );
+    setTimeout( function(){ DE.States.down( "isLoading" ); }, 200 );
   };
   
-  // simple function to create a ball
   function addBall( object, x, y )
   {
-    var ball = new DreamE.GameObject( {
+    var ball = new DE.GameObject( {
       "tag": "Ball", "x": x, "y": y
-      , "renderer": new DreamE.CircleRenderer(
+      , "renderer": new DE.CircleRenderer(
           { "method": "fillAndStroke"
             , "strokeColor": "white"
             , "fillColor": "rgb("+(Math.random()*255>>0)+","+(Math.random()*255>>0)+","+(Math.random()*255>>0)+")"
           }, 70, 0, Math.PI*2, true )
-      , "collider": new DreamE.CircleCollider( 80 )
+      , "collider": new DE.CircleCollider( 80 )
     } );
-    ball.speedx = ( Math.random() * 5 + Math.random() * -5 ) * 2 >> 0;
-    ball.speedy = ( Math.random() * 5 + Math.random() * -5 ) * 2 >> 0;
-    
+    ball.speedx = ( Math.random() * 5 + Math.random() * -5 ) * 2;
+    ball.speedy = ( Math.random() * 5 + Math.random() * -5 ) * 2;
     ball.move = function()
     {
       this.translateX( this.speedx );
       this.translateY( this.speedy );
       
-      if ( this.position.x > 1250 )
+      if ( this.position.x > screenW - 20 )
       {
-        this.speedx = -this.speedx;
-        this.position.x = 1250;
+        this.speedx = -this.speedx * ( 0.5 + Math.random() * 1 );
+        this.position.x = screenW - 20;
       }
-      if ( this.position.x < 30 )
+      if ( this.position.x < 20 )
       {
-        this.speedx = -this.speedx;
-        this.position.x = 30;
+        this.speedx = -this.speedx * ( 0.5 + Math.random() * 1 );
+        this.position.x = 20;
       }
-      if ( this.position.y > 680 )
+      if ( this.position.y > screenH - 20 )
       {
-        this.speedy = -this.speedy;
-        this.position.y = 680;
+        this.speedy = -this.speedy * ( 0.5 + Math.random() * 1 );
+        this.position.y = screenH - 20;
       }
-      if ( this.position.y < 30 )
+      if ( this.position.y < 20 )
       {
-        this.speedy = -this.speedy;
-        this.position.y = 30;
+        this.speedy = -this.speedy * ( 0.5 + Math.random() * 1 );
+        this.position.y = 20;
       }
+      
+      this.speedx = ( this.speedx > 10 ) ? 10 : this.speedx;
+      this.speedx = ( this.speedx < -10 ) ? -10 : this.speedx;
+      this.speedy = ( this.speedy > 10 ) ? 10 : this.speedy;
+      this.speedy = ( this.speedy < -10 ) ? -10 : this.speedy;
     }
     ball.addAutomatism( "move", "move" );
-    
-    // pointers events on gameObjects
     ball.onMouseDown = function( e )
     {
       this.askToKill();
-      DreamE.SaveSystem.save( "ballKilled", DreamE.SaveSystem.get( "ballKilled" ) + 1 );
+      DE.SaveSystem.save( "ballKilled", DE.SaveSystem.get( "ballKilled" ) + 1 );
       e.stopPropagation = true;
     }
     ball.onMouseMove = function( e )
@@ -135,12 +128,12 @@ function( DreamE )
     ball.onKill = function()
     {
       Game.enemies--;
-      _counter.setText( Game.enemies );
+      _counter.renderer.setText( Game.enemies );
     }
     Game.enemies++;
-    _counter.setText( Game.enemies );
+    _counter.renderer.setText( Game.enemies );
     object.scene.add( ball );
   }
-  window.Game = Game; // debug only
+  window.Game = Game; // debug
   return Game;
 } );
