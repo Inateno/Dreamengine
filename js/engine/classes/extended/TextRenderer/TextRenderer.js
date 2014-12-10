@@ -31,6 +31,7 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
     this.textAlign    = params.textAlign || "center";
     this.textBaseline = params.textBaseline || "middle";
     this.fontSize = params.fontSize || 20;
+    this.fontStyle= params.fontStyle || "";
     this.font     = params.font || 'Calibri';
     
     this.sizes = new Sizes( width, height, 1, 1, this );
@@ -69,7 +70,7 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
     this.clearBuffer = function()
     {
       this.buffer.ctx.clearRect( 0, 0, this.sizes.width, this.sizes.height );
-      this.buffer.ctx.font         = ( this.fontSize ) + 'pt ' + ( this.font );
+      this.buffer.ctx.font         = this.fontStyle + ' ' + ( this.fontSize ) + 'pt ' + ( this.font );
       this.buffer.ctx.textAlign    = this.textAlign;
       this.buffer.ctx.textBaseline = this.textBaseline;
       if ( this.background )

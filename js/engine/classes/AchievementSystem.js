@@ -70,6 +70,22 @@ function( stash, CONFIG, about, Event, AudioManager
       SaveSystem.saveAchievements( this.userAchievements );
     };
     
+    /**
+     * if you wanna check manually if an achievement is unlocked use this method
+     * @memberOf AchievementSystem
+     * @protected
+     * @param {String} namespace - achievement namespace
+     * @example if ( DE.AchievementSystem.isUnlock( "commander" ) )
+     */
+    this.isUnlock = function( namespace )
+    {
+      for ( var i = 0, a, ua; a = this.achievements[ i ]; ++i )
+      {
+        if ( a.namespace == namespace )
+          return this.userAchievements[ namespace ] ? this.userAchievements[ namespace ].complete : false;
+      }
+    };
+    
     this.updateValue = function( achievement, targetKey, value )
     {
       var objective = achievement.objectives[ targetKey ];

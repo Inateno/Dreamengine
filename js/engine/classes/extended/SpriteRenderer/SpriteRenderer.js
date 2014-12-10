@@ -33,6 +33,10 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
     this.startFrame = params.startFrame || ImageManager.images[ this.spriteName ].startFrame || 0;
     this.endFrame   = params.endFrame || ImageManager.images[ this.spriteName ].endFrame
       || ImageManager.images[ this.spriteName ].totalFrame || 0;
+    this.currentFrame = this.startFrame || 0;
+    this.startLine    = params.startLine || 0;
+    this.currentLine  = params.startLine || 0;
+    
     this.totalFrame = ImageManager.images[ this.spriteName ].totalFrame || 0;
     this.totalLine  = params.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
     
@@ -63,17 +67,14 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
                   , params.height  || params.h || ImageManager.images[ this.spriteName ].heightFrame
                   , params.scaleX, params.scaleY, this );
     
-    this.isAnimated = params.isAnimated || ImageManager.images[ this.spriteName ].isAnimated;
-    this.isPaused  = params.paused || params.isPaused
+    this.isAnimated = params.isAnimated !== undefined ? params.isAnimated : ImageManager.images[ this.spriteName ].isAnimated;
+    this.isPaused  = params.paused !== undefined ? params.paused : params.isPaused || false;
         ImageManager.images[ this.spriteName ].isPaused || false;
-    this.isReversed  = params.reversed || params.isreversed || params.isReversed
-        || ImageManager.images[ this.spriteName ].isReversed || false;
+    this.isReversed  = params.reversed !== undefined ? params.reversed : params.isreversed != undefined ? params.isreversed :
+      params.isReversed != undefined ? params.isReversed : ImageManager.images[ this.spriteName ].isReversed || false;
     this.isOver = false;
     this.isLoop = ( params.isLoop != undefined ) ? params.isLoop : ImageManager.images[ this.spriteName ].isLoop;
     
-    this.currentFrame = this.startFrame || 0;
-    this.startLine    = params.startLine || 0;
-    this.currentLine  = params.startLine || 0;
     // this.isRatio      = params.isRatio != undefined ? params.isRatio : true;
     this.preventCenter = params.preventCenter || false;
     if ( !this.preventCenter )
@@ -160,6 +161,9 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
     this.totalFrame = ImageManager.images[ this.spriteName ].totalFrame || 0;
     this.totalLine  = params.totalLine || ImageManager.images[ this.spriteName ].totalLine || 0;
     
+    this.currentFrame= params.currentFrame !== undefined ? params.currentFrame
+      : this.currentFrame > this.endFrame ? 0 : this.currentFrame;
+    
     this.eachAnim  = params.eachAnim || ImageManager.images[ this.spriteName ].eachAnim || 0;
     this.lastAnim  = Date.now();
     
@@ -173,6 +177,14 @@ function( Renderer, ImageManager, Sizes, SpriteRender, CONFIG, Time, Event )
                   , params.height  || params.h || ImageManager.images[ this.spriteName ].heightFrame
                   , params.scaleX, params.scaleY, this );
     this.sizes._center();
+    
+    this.isAnimated = params.isAnimated !== undefined ? params.isAnimated : ImageManager.images[ this.spriteName ].isAnimated;
+    this.isPaused  = params.paused !== undefined ? params.paused : params.isPaused || false;
+        ImageManager.images[ this.spriteName ].isPaused || false;
+    this.isReversed  = params.reversed !== undefined ? params.reversed : params.isreversed != undefined ? params.isreversed :
+      params.isReversed != undefined ? params.isReversed : ImageManager.images[ this.spriteName ].isReversed || false;
+    this.isOver = false;
+    this.isLoop = ( params.isLoop != undefined ) ? params.isLoop : ImageManager.images[ this.spriteName ].isLoop;
   };
   
   CONFIG.debug.log( "SpriteRenderer loaded", 3 );

@@ -215,7 +215,7 @@ function( DE )
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 1000+i%2*100, Game.ship );
     
-    Game.camera.focus( Game.ship );
+    // Game.camera.focus( Game.ship );
     Game.camera.limits.minY = 0;
     Game.camera.limits.maxY = 1080;
     // Game.camera.limits.minX = -500;

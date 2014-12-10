@@ -126,7 +126,7 @@ function( COLORS, Vector2, CONFIG, Time )
   {
     if ( !this.fadeData.done )
     {
-      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration * Time.scaleDelta
+      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration
                               * this.fadeData.dir * this.fadeData.fadeScale;
       this.alpha += this.fadeData.stepVal * Time.scaleDelta;
       this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
@@ -138,13 +138,14 @@ function( COLORS, Vector2, CONFIG, Time )
       }
       if ( this.fadeData.duration <= 0 )
       {
-        // this.trigger( "fadeEnd" );
         this.fadeData.done = true;
         if ( this.alpha == 1 || this.alpha == 0 )
         {
           if ( this.alpha == 0 )
             this.sleep = true;
         }
+        if ( this.gameObject )
+          this.gameObject.trigger( "fadeEnd", this );
       }
     }
   };

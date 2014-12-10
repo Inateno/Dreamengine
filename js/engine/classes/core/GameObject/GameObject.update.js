@@ -39,6 +39,7 @@ function(  CollisionSystem, CONFIG, Time )
     
     this.applyFocus();
     this.applyShake();
+    this.applyMove();
     
     // used for collision trigger
     if ( !this.isMoved || !this.collider )

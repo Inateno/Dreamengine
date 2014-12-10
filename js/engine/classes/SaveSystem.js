@@ -105,15 +105,28 @@ function( stash, CONFIG, about, Event )
      */
     this.save = function( key, value )
     {
-      if ( !( key in this.saveModel ) )
+      var path = key.split( "." );
+      var nkey = path[ 0 ];
+      if ( !( nkey in this.saveModel ) )
       {
-        CONFIG.debug.log( "%c[WARN] You save a key doesn't exist in your saveModel ! add it to your saveModel but engine wont be able to get it later", 0, "color:orange" );
+        CONFIG.debug.log( "%c[WARN] You save a key " + nkey + " doesn't exist in your saveModel ! add it to your saveModel but engine wont be able to get it later", 0, "color:orange" );
       }
-      if ( !value )
-        value = this.get( key );
-      if ( this.useLocalStorage )
-        stash.set( this.namespace + this.version + key, value );
-      this.saveModel[ key ] = value;
+      if ( path.length == 2 )
+      {
+        if ( value === undefined )
+          value = this.get( nkey )[ 1 ];
+        this.saveModel[ nkey ][ path[ 1 ] ] = value;
+        if ( this.useLocalStorage )
+          stash.set( this.namespace + this.version + nkey, this.saveModel[ nkey ] );
+      }
+      else if ( path.length == 1 )
+      {
+        if ( value === undefined )
+          value = this.get( nkey );
+        this.saveModel[ nkey ] = value;
+        if ( this.useLocalStorage )
+          stash.set( this.namespace + this.version + nkey, value );
+      }
       Event.trigger( "savesystem-save", this.saveModel );
     };
     

@@ -140,7 +140,8 @@ function( DE )
               // in this case, closes is the sound
               if ( closes )
                 DE.AudioManager.fx.play( closes );
-              callbacks.call( contexts );
+              if ( callbacks )
+                callbacks.call( contexts );
               _self.remove( popup.id );
               return false;
             } );

@@ -198,6 +198,28 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     if ( this.rigidbody && this.rigidbody.gameObject != this )
       this.rigidbody.gameObject = this;
     
+    /**
+     * object used to apply shake
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.shakeData = {
+      "done": true
+      ,"prevX": 0
+      ,"prevY": 0
+    };
+    
+    /**
+     * object used to apply move translation
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.moveData = {
+      "done": true
+    };
+    
     if ( params.create )
     {
       for ( var i in params.create )
@@ -221,7 +243,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @example // shake with 10-10 force during 1sec
    * player.shake( 10, 10, 1000 );
    */
-  GameObject.prototype.shake = function( xRange, yRange, duration )
+  GameObject.prototype.shake = function( xRange, yRange, duration, callback )
   {
     this.shakeData = {
       // "startedAt" : Date.now()
@@ -230,6 +252,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       ,"yRange"   : yRange
       ,"prevX"    : this.shakeData ? this.shakeData.prevX : 0
       ,"prevY"    : this.shakeData ? this.shakeData.prevY : 0
+      ,"callback" : callback
     };
   };
   
@@ -241,18 +264,23 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.applyShake = function()
   {
-    if ( !this.shakeData )
+    if ( this.shakeData.done )
       return;
     
     var shake = this.shakeData;
     // restore previous shake
     this.position.x -= shake.prevX;
     this.position.y -= shake.prevY;
-    this.shakeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    shake.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
     // old way - Date.now() - this.shakeData.startedAt > this.shakeData.duration )
-    if ( this.shakeData.duration <= 0 )
+    if ( shake.duration <= 0 )
     {
-      delete this.shakeData;
+      if ( shake.callback )
+        shake.callback.call( this, shake.callback );
+      shake.done = true;
+      shake.prevX = 0;
+      shake.prevY = 0;
+      this.trigger( "shakeEnd" );
       return;
     }
     
@@ -261,6 +289,113 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     
     this.position.x += shake.prevX;
     this.position.y += shake.prevY;
+  };
+  
+  /**
+   * create a fluid move translation
+   * you can only have one at a time
+   * @public
+   * @memberOf GameObject
+   * @param {Object} pos give x, y, and z destination
+   * @param {Int} [duration=500] time duration
+   * @param {Function} callback will be called in the current camera context
+   * @example // move to 100,100 in 1 second
+   * player.moveTo( { x: 100, y: 100 }, 1000 );
+   * @example // move to bonus position
+   * player.moveTo( bonus.position, 1000, function(){ console.log( this ) } );
+   */
+  GameObject.prototype.moveTo = function( pos, duration, callback, curveName )
+  {
+    var myPos = this.position;
+    
+    this.moveData = {
+      "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
+      ,"distY"    : - ( myPos.y - ( pos.y !== undefined ? pos.y : myPos.y ) )
+      ,"distZ"    : - ( myPos.z - ( pos.z !== undefined ? pos.z : myPos.z ) )
+      ,"dirX"     : myPos.x > pos.x ? 1 : -1
+      ,"dirY"     : myPos.y > pos.y ? 1 : -1
+      ,"dirZ"     : myPos.z > pos.z ? 1 : -1
+      ,"duration" : duration || 500
+      ,"oDuration": duration || 500
+      ,"curveName": curveName || "linear"
+      ,"done"     : false
+      ,"stepValX" : 0
+      ,"stepValY" : 0
+      ,"stepValZ" : 0
+      ,"destX"    : pos.x
+      ,"destY"    : pos.y
+      ,"destZ"    : pos.z
+      ,"callback" : callback
+    };
+    this.moveData.leftX = this.moveData.distX;
+    this.moveData.leftY = this.moveData.distY;
+    this.moveData.leftZ = this.moveData.distZ;
+  };
+  
+  /**
+   * apply the move transition each update
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.applyMove = function()
+  {
+    if ( this.moveData.done )
+      return;
+    
+    var move = this.moveData;
+    
+    if ( move.distX != 0 )
+    {
+      move.stepValX = Time.timeSinceLastFrame / move.oDuration * move.distX * Time.scaleDelta;
+      move.leftX -= move.stepValX;
+      this.position.x += move.stepValX;
+    }
+    
+    if ( move.distY != 0 )
+    {
+      move.stepValY = Time.timeSinceLastFrame / move.oDuration * move.distY * Time.scaleDelta;
+      move.leftY -= move.stepValY * move.dirY;
+      this.position.y += move.stepValY;
+    }
+    
+    if ( move.distZ != 0 )
+    {
+      move.stepValZ = Time.timeSinceLastFrame / move.oDuration * move.distZ * Time.scaleDelta;
+      move.leftZ -= move.stepValZ * move.dirZ;
+      this.position.z += move.stepValZ;
+    }
+    
+    move.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    
+    // check pos
+    if ( move.dirX < 0 && move.leftX < 0 )
+      this.position.x += move.leftX;
+    else if ( move.dirX > 0 && move.leftX > 0 )
+      this.position.x -= move.leftX;
+    
+    if ( move.dirY < 0 && move.leftY < 0 )
+      this.position.y += move.leftY;
+    else if ( move.dirY > 0 && move.leftY > 0 )
+      this.position.y -= move.leftY;
+    
+    if ( move.dirZ < 0 && move.leftZ < 0 )
+      this.position.z += move.leftZ;
+    else if ( move.dirZ > 0 && move.leftZ > 0 )
+      this.position.z -= move.leftZ;
+    
+    if ( move.duration <= 0 )
+    {
+      this.moveData.done = true;
+      this.position.setPosition( move.destX || this.position.x
+        , move.destY || this.position.y
+        , move.destZ || this.position.z );
+      if ( move.callback )
+        move.callback.call( this, move.callback );
+      
+      this.trigger( "moveEnd" );
+      return;
+    }
   };
   
   /**
@@ -446,9 +581,9 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     var args = Array.prototype.slice.call( arguments );
     for ( var i = 0; i < args.length; ++i )
     {
-      if ( args[ i ].length )
+      if ( args[ i ].length !== undefined )
       {
-        for ( var o = 0, m = args[ i ].length || 1; o < m; ++o )
+        for ( var o = 0, m = args[ i ].length || 0; o < m; ++o )
           this.addOne( args[ i ][ o ] );
       }
       else
@@ -1009,6 +1144,9 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      */
     GameObject.prototype.fadeIn = function( duration, force )
     {
+      if ( force && this.enable == false )
+        this.enable = true;
+      
       for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
         r.fadeIn( duration, force );
       for ( i = 0; child = this.childrens[ i ]; ++i )

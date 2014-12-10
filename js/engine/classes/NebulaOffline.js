@@ -79,7 +79,9 @@ function( about, Event, SaveSystem, LangSystem
         _self.show();
       }, true );
       Event.trigger( "nebula-show" );
+      Event.on( "force-nebula-load", this.loadClient, this );
       Event.on( "close-nebula", this.hide, this );
+      Event.on( "show-nebula", this.show, this );
       Event.on( "toggle-nebula", function()
       {
         if ( this.visible )
@@ -122,7 +124,7 @@ function( about, Event, SaveSystem, LangSystem
       // load script on server
       if ( window.Nebula )
       {
-        window.Nebula.init();
+        window.Nebula.init( about, Event, SaveSystem, Notifications, AchievementSystem );
         return;
       }
       var script = document.createElement( "script" );

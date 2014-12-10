@@ -71,18 +71,13 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     DREAM_ENGINE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
     
     DREAM_ENGINE.AchievementSystem.init( params.achievements || [] );
+    
     DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
     {
       this.ImageManager.pathPrefix        = sizes.path;
       this.ImageManager.imageNotRatio     = sizes.notRatio || false;
       this.ImageManager.ratioToConception = ratioToConception;
-      this.ImageManager.arrayLoader( params.images.imagesList );
-      this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
-    }, DREAM_ENGINE );
-    
-    DREAM_ENGINE.on( 'updateScreenSizes', function()
-    {
-      this.ImageManager.folderName = params.images.folderName;
+      this.ImageManager.folderName        = params.images.folderName;
       this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
     }, DREAM_ENGINE, false );
     
@@ -138,6 +133,16 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
           }, 400, 100, "100%" )
         ]
       } );
+      
+      DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
+      {
+        this.ImageManager.pathPrefix        = sizes.path;
+        this.ImageManager.imageNotRatio     = sizes.notRatio || false;
+        this.ImageManager.ratioToConception = ratioToConception;
+        this.ImageManager.arrayLoader( params.images.imagesList );
+        this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
+      }, DREAM_ENGINE );
+        
       if ( params.onReady )
         params.onReady();
       else

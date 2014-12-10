@@ -74,6 +74,8 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     this.backgroundColor = params.backgroundColor || null;
     this.backgroundImage = params.backgroundImage || null;
     this.useTransparency = params.useTransparency || params.transparent || false;
+    this.stretchedBackground = params.stretchedBackground != undefined ? params.stretchedBackground : true;
+    
     this.cameras    = new Array();
     this.maxCameras = 0;
     
@@ -119,6 +121,29 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       ,"done"     : true
     };
     
+    /**
+     * object used to apply shake
+     * @protected
+     * @memberOf Camera
+     * @type {Object}
+     */
+    this.shakeData = {
+      "done": true
+      ,"prevX": 0
+      ,"prevY": 0
+    };
+    
+    /**
+     * object used to apply move translation
+     * @protected
+     * @memberOf Camera
+     * @type {Object}
+     */
+    this.moveData = {
+      "done": true
+    };
+    
+    
     // add Events components on camera
     Event.addEventComponents( this );
   }
@@ -142,8 +167,9 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     if ( !this.freeze )
     {
       this.applyFocus();
-      this.checkLimits();
+      this.checkLimits( physicRatio );
       this.applyShake();
+      this.applyMove();
       
       _buffer.ctx.globalAlpha = this.bufferAlpha * oldAlpha;
       
@@ -151,7 +177,10 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
         _buffer.ctx.clearRect( 0, 0, this.renderSizes.width, this.renderSizes.height );
       
       if ( this.backgroundImage != null )
-        _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0, this.renderSizes.width, this.renderSizes.height );
+        if ( this.stretchedBackground )
+          _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0, this.renderSizes.width, this.renderSizes.height );
+        else
+          _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0 );
       else if ( this.backgroundColor != null )
       {
         _buffer.ctx.fillStyle = this.backgroundColor;
@@ -257,17 +286,17 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    * @protected
    * @memberOf Camera
    */
-  Camera.prototype.checkLimits = function()
+  Camera.prototype.checkLimits = function( physicRatio )
   {
     var limits = this.limits;
-    if ( limits.minX != undefined && this.scenePosition.x < limits.minX )
-      this.scenePosition.x = limits.minX;
-    else if ( limits.maxX != undefined && this.scenePosition.x + this.renderSizes.width > limits.maxX )
-      this.scenePosition.x = limits.maxX - this.renderSizes.width;
-    if ( limits.minY != undefined && this.scenePosition.y < limits.minY )
-      this.scenePosition.y = limits.minY;
-    else if ( limits.maxY != undefined && this.scenePosition.y + this.renderSizes.height > limits.maxY )
-      this.scenePosition.y = limits.maxY - this.renderSizes.height;
+    if ( limits.minX != undefined && this.scenePosition.x < limits.minX * physicRatio )
+      this.scenePosition.x = limits.minX * physicRatio;
+    else if ( limits.maxX != undefined && this.scenePosition.x + this.renderSizes.width > limits.maxX * physicRatio )
+      this.scenePosition.x = limits.maxX * physicRatio - this.renderSizes.width;
+    if ( limits.minY != undefined && this.scenePosition.y < limits.minY * physicRatio )
+      this.scenePosition.y = limits.minY * physicRatio;
+    else if ( limits.maxY != undefined && this.scenePosition.y + this.renderSizes.height > limits.maxY * physicRatio )
+      this.scenePosition.y = limits.maxY * physicRatio - this.renderSizes.height;
   };
   
   /**
@@ -471,7 +500,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    * @example // shake with 10-10 force during 1sec
    * myCamera.shake( 10, 10, 1000 );
    */
-  Camera.prototype.shake = function( xRange, yRange, duration )
+  Camera.prototype.shake = function( xRange, yRange, duration, callback )
   {
     this.shakeData = {
       // "startedAt" : Date.now()
@@ -480,6 +509,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       ,"yRange"   : yRange
       ,"prevX"    : this.shakeData ? this.shakeData.prevX : 0
       ,"prevY"    : this.shakeData ? this.shakeData.prevY : 0
+      ,"callback" : callback
     };
   };
   
@@ -491,18 +521,23 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    */
   Camera.prototype.applyShake = function()
   {
-    if ( !this.shakeData )
+    if ( this.shakeData.done )
       return;
     
     var shake = this.shakeData;
     // restore previous shake
     this.scenePosition.x -= shake.prevX;
     this.scenePosition.y -= shake.prevY;
-    this.shakeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    shake.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
     // old way - Date.now() - this.shakeData.startedAt > this.shakeData.duration )
-    if ( this.shakeData.duration <= 0 )
+    if ( shake.duration <= 0 )
     {
-      delete this.shakeData;
+      if ( shake.callback )
+        shake.callback.call( this, shake.callback );
+      shake.done = true;
+      shake.prevX = 0;
+      shake.prevY = 0;
+      this.trigger( "shakeEnd" );
       return;
     }
     
@@ -511,6 +546,111 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     this.scenePosition.x += shake.prevX;
     this.scenePosition.y += shake.prevY;
+  };
+  
+  /**
+   * create a fluid move translation
+   * you can only have one at a time
+   * @public
+   * @memberOf Camera
+   * @param {Object} pos give x, y, and z destination
+   * @param {Int} [duration=500] time duration
+   * @param {Function} callback will be called in the current camera context
+   * @example // move to 100,100 in 1 second
+   * camera.moveTo( { x: 100, y: 100 }, 1000 );
+   * @example // move to bonus position
+   * camera.moveTo( bonus.position, 1000, function(){ console.log( this ) } );
+   */
+  Camera.prototype.moveTo = function( pos, duration, callback, curveName )
+  {
+    var myPos = this.scenePosition;
+    
+    this.moveData = {
+      "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
+      ,"distY"    : - ( myPos.y - ( pos.y !== undefined ? pos.y : myPos.y ) )
+      ,"distZ"    : - ( myPos.z - ( pos.z !== undefined ? pos.z : myPos.z ) )
+      ,"dirX"     : myPos.x > pos.x ? 1 : -1
+      ,"dirY"     : myPos.y > pos.y ? 1 : -1
+      ,"dirZ"     : myPos.z > pos.z ? 1 : -1
+      ,"duration" : duration || 500
+      ,"oDuration": duration || 500
+      ,"curveName": curveName || "linear"
+      ,"done"     : false
+      ,"stepValX" : 0
+      ,"stepValY" : 0
+      ,"stepValZ" : 0
+      ,"destX"    : ( pos.x !== undefined ? pos.x : myPos.x )
+      ,"destY"    : ( pos.y !== undefined ? pos.y : myPos.y )
+      ,"destZ"    : ( pos.z !== undefined ? pos.z : myPos.z )
+      ,"callback" : callback
+    };
+    this.moveData.leftX = this.moveData.distX;
+    this.moveData.leftY = this.moveData.distY;
+    this.moveData.leftZ = this.moveData.distZ;
+  };
+  
+  /**
+   * apply the move transition each update
+   * You shouldn't call or change this method
+   * @protected
+   * @memberOf Camera
+   */
+  Camera.prototype.applyMove = function()
+  {
+    if ( this.moveData.done )
+      return;
+    
+    var move = this.moveData;
+    
+    if ( move.distX != 0 )
+    {
+      move.stepValX = Time.timeSinceLastFrame / move.oDuration * move.distX * Time.scaleDelta;
+      move.leftX -= move.stepValX;
+      this.scenePosition.x += move.stepValX;
+    }
+    
+    if ( move.distY != 0 )
+    {
+      move.stepValY = Time.timeSinceLastFrame / move.oDuration * move.distY * Time.scaleDelta;
+      move.leftY -= move.stepValY * move.dirY;
+      this.scenePosition.y += move.stepValY;
+    }
+    
+    if ( move.distZ != 0 )
+    {
+      move.stepValZ = Time.timeSinceLastFrame / move.oDuration * move.distZ * Time.scaleDelta;
+      move.leftZ -= move.stepValZ * move.dirZ;
+      this.scenePosition.z += move.stepValZ;
+    }
+    
+    move.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    
+    // check pos
+    if ( move.dirX < 0 && move.leftX < 0 )
+      this.scenePosition.x += move.leftX;
+    else if ( move.dirX > 0 && move.leftX > 0 )
+      this.scenePosition.x -= move.leftX;
+    
+    if ( move.dirY < 0 && move.leftY < 0 )
+      this.scenePosition.y += move.leftY;
+    else if ( move.dirY > 0 && move.leftY > 0 )
+      this.scenePosition.y -= move.leftY;
+    
+    if ( move.dirZ < 0 && move.leftZ < 0 )
+      this.scenePosition.z += move.leftZ;
+    else if ( move.dirZ > 0 && move.leftZ > 0 )
+      this.scenePosition.z -= move.leftZ;
+    
+    if ( move.duration <= 0 )
+    {
+      move.done = true;
+      this.scenePosition.setPosition( move.destX, move.destY, move.destZ );
+      if ( move.callback )
+        move.callback.call( this, move.callback );
+      
+      this.trigger( "moveEnd" );
+      return;
+    }
   };
   
   /**

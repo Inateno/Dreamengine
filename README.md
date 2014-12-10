@@ -3,10 +3,17 @@ The official website [HTML5-Dreamengine](http://dreamengine.dreamirl.com)
 Follow on [Twitter](http://twitter.com/dreamirlgames)
 Or [Facebook](https://www.facebook.com/Dreamirl)
 
+Also I'm streaming on Twitch sometimes about "making games with Dreamengine", search Inateno.
+
+Checkout the changelog.txt for updates details
+
+Update 0.2.2
+===========
+Add moveTo methods on GameObject and Camera + small features + fixs
+
 Update 0.2.1
 ===========
 Fix collision and rendering detection with 3D position, add /changes some attributes to allow quick-access
-Checkout the changelog.txt for details
 
 Update 0.2.0
 ===========
@@ -22,6 +29,10 @@ I tried to focus on the main engine, with tools (like inputs, renderers), and no
 
 So I don't say it's the best HTML5 engine, I know that I can write a complex prototype in few hours, and it'll work well everywhere.
 
+Check out samples
+-------
+
+Please feel free to check out samples, they took me around 5 and 15 minutes to wrote it, it's a good way to see how fast it is (ok 1 hour for the little shmup because I used "class" inherits from GameObject).
 
 A little word about "story" (and why I did it)
 -------
@@ -64,7 +75,7 @@ Compatible with "native" platforms
 
 This part is in early release, I won't push stuff that's not working well.
 * Windows8 - 8.1 - VS Express - OK
-* WP8 - VS Express - WIP (soon)
+* WP8 - VS Express - OK
 * KindleFire (amazon appstore) - Webapp - WIP (soon)
 * Tizen - Tizen SDK - WIP (soon)
 * Android - Phonegap - not yet

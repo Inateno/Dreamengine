@@ -173,6 +173,7 @@ function( CONFIG, buzz, Event )
       this.volume = 80;
       this.muted = false;
       this.currentPlayed = [];
+      this.savedPlay = [];
       
       this.getAll = function()
       {

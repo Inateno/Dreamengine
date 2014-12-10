@@ -92,16 +92,18 @@ function( Time, CONFIG )
      * @param {Vector2|Float} Vector2 or x
      * @returns {Vector2} this current instance
      */
-    this.setPosition = function( first, y )
+    this.setPosition = function( first, y, z )
     {
-      if ( first.x !== undefined && first.y !== undefined )
+      if ( first.x !== undefined || first.y !== undefined )
       {
-        this.x = first.x;
-        this.y = first.y;
+        this.x = first.x != undefined ? first.x : this.x;
+        this.y = first.y != undefined ? first.y : this.y;
+        this.z = first.z != undefined ? first.z : this.z;
         return this;
       }
-      this.x = first;
-      this.y = y || 0;
+      this.x = first != undefined ? first : this.x;
+      this.y = y != undefined ? y : this.y;
+      this.z = z != undefined ? z : this.z;
       return this;
     }
 

@@ -1,3 +1,21 @@
+---- 0.2.2 ----
+* SaveSystem.save method can save directly a key inside an object example .save( "key.underkey", value )
+* add isUnlock in SaveSystem
+* add moveTo in GameObject and Camera
+* Vector2.setPosition can handle z
+* trigger trough parent gameObject in renderer when fade end
+* can set camera background not stretched
+* TextRenderer ca now use textStyle (italic, bold, etc...)
+
+-- Fix
+* camera limits not working as excepted with other qualities setting
+* Time using lastCalcul and lastRender (2 value for one thing so remove lastRender)
+* miss savedPlay in AudioManager
+* can force Nebula load
+* not using physicRatio in Camera.checkLimits
+* fadeIn on gameObject turn it enable if it was not
+* SpriteRenderer.changeSprite wasn't cleaning the sprite properly (with default or given values)
+
 ---- 0.2.1 fix ----
 * fix Inputs.get wasn't relative to scaleDelta
 

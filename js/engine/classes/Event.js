@@ -72,6 +72,31 @@ function( CONFIG )
     }
   };
   
+  Event.stopListen = function( eventName, f )
+  {
+    if ( !f )
+    {
+      delete this.callbacks[ eventName ];
+      delete this.contexts[ eventName ];
+      delete this.persistents[ eventName ];
+      return true;
+    }
+    else
+    {
+      for ( var i in this.callbacks[ eventName ] )
+      {
+        if ( this.callbacks[ eventName ][ i ] == f )
+        {
+          this.callbacks[ eventName ].splice( i, 1 );
+          this.contexts[ eventName ].splice( i, 1 );
+          this.persistents[ eventName ].splice( i, 1 );
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
   CONFIG.debug.log( "Event loaded", 3 );
   
   /****
@@ -135,6 +160,7 @@ function( CONFIG )
     if ( !f )
     {
       delete this.callbacks[ eventName ];
+      delete this.contexts[ eventName ];
       return true;
     }
     else

@@ -20,7 +20,6 @@ function( CONFIG, Event )
     this.lastCalcul  = Date.now();
     this.scaleDelta  = 1;
     this.currentTime = Date.now();
-    this.lastRender  = Date.now();
     this.fps         = 0;
     this.FPS         = 30;
     this.frameDelay  = 14;
@@ -54,8 +53,7 @@ function( CONFIG, Event )
       if ( this.deltaTime < 0 )
         this.deltaTime += 1;
       this.missedFrame = this.missedFrame - this.deltaTime;
-      this.timeSinceLastFrameScaled = ( this.currentTime - this.lastRender ) * this.scaleDelta;
-      this.lastRender = this.currentTime;
+      this.timeSinceLastFrameScaled = ( this.currentTime - this.lastCalcul ) * this.scaleDelta;
       this.lastCalcul = this.currentTime;
       
       return true;
