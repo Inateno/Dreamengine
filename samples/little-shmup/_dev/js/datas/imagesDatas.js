@@ -47,6 +47,8 @@ function( CONFIG )
           , "isAnimated": true, "isLoop": true } ]
       ,[ "heart", "heart", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
       ,[ "btn", "btn", "png", { "load": true, "totalFrame": 3, "isAnimated": false } ]
+      ,[ "touchControlBackground", "touchControlBackground", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      ,[ "touchControlStick", "touchControlStick", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
     ]
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );

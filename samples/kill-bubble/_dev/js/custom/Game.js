@@ -18,7 +18,7 @@ function( DE )
   Game.scene  = null;
   var _counter = null;
   var _timer = null;
-  var screenW = 1920, screenH = 1080;
+  var screenW = 1280, screenH = 720;
   
   // init
   Game.init = function()

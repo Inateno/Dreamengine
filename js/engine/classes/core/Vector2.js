@@ -145,7 +145,7 @@ function( Time, CONFIG )
      * @param {Boolean} [ignoreDelta] if you want to prevent deltaTime adjustment
      * @returns {Vector2} this current instance
      */
-    this.translate = function ( vector2, absolute, ignoreDelta )
+    this.translate = function( vector2, absolute, ignoreDelta )
     {
       if ( ( !vector2.x && vector2.x != 0 ) || ( !vector2.y && vector2.y != 0 ) )
         throw new Error( vector2 + " is not a Vector2" );
@@ -187,6 +187,12 @@ function( Time, CONFIG )
      */
     this.normalize = function()
     {
+      if ( this.x == 0 && this.y == 0 )
+      {
+        this.x = 0;
+        this.y = 0;
+        return this;
+      }
       var len = Math.sqrt( this.x * this.x + this.y * this.y );
       this.x = this.x / len;
       this.y = this.y / len;
@@ -211,6 +217,18 @@ function( Time, CONFIG )
       this.y = b.y - a.y;
       return this;
     }
+    
+    /**
+     * return the angle from a vector usefull for moves / translations without rotation
+     * @public
+     * @memberOf Vector2
+     * @param {Vector2} vector2
+     * @returns {Float} radians value
+     */
+    this.getVectorAngle = function( vector2 )
+    {
+      return ( Math.atan2( vector2.y, vector2.x ) + Math.PI * 0.5 ) % ( Math.PI * 2 );
+    };
     
     /**
      * return the dotProduct between two Vector<br>
@@ -238,10 +256,17 @@ function( Time, CONFIG )
      * @param {Vector2} b second vector2
      * @returns {Float} angle result
      */
-    this.getAngle = function ( a, b )
+    this.getAngle = function( a, b )
+    {
+      if ( !b )
+        b = this;
+      return Math.atan2( a.y - b.y, a.x - b.x );
+    }
+    
+    this.wtfAngle = function( a, b )
     {
       var tmp_vectorB = null;
-      if ( b.x )
+      if ( b && b.x )
         tmp_vectorB = new Vector2( b.x, b.y ).normalize();
       else
         tmp_vectorB = new Vector2( this.x, this.y ).normalize();

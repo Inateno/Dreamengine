@@ -90,6 +90,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     this.indexMouseOver  = {}; //[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]; // 20 touches max ?
     this.lastPointersPos = {};
+    
     /****
      * store between two event types if you asked to prevent some events
      * @private
@@ -818,7 +819,6 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     this.lastPointersPos[ mouse.index ] = mouse;
     this.indexMouseOver[ mouse.index ]  = true;
     this.mouseDetectorHandler( "Move", mouse, physicRatio );
-    this._propagationEvent[ mouse.index ] = this._propagationEvent[ mouse.index ] || {};
     this.trigger( "changeCursor", this._propagationEvent[ mouse.index ].cursor || "default" );
   };
   Camera.prototype.oOnMouseEnter = function( mouse, physicRatio )
@@ -848,7 +848,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     mouse = this.convertMousePos( mouse, physicRatio );
     
-    this.trigger( "mouse" + eventType, mouse );
+    this.trigger( "mouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
     if ( this[ "onMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
     if ( this.gui && !this.gui.sleep && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
@@ -892,7 +892,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       
       this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
       if ( this.gui && !this.gui.sleep )
-        this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] )
+        this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] );
       this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
     }
   };

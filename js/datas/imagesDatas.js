@@ -43,6 +43,12 @@ function( CONFIG )
       ,[ "bg", "ayera/bg", "jpg", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
       ,[ "canyon", "ayera/canyon", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
       ,[ "grass", "ayera/grass", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+      ,[ "grass", "ayera/grass", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+      
+      ,[ "touchControlBackground", "touchControlBackground", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      ,[ "touchControlStick", "touchControlStick", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      
+      ,[ "platform", "platform", "png", { "load": true, "totalFrame": 1, "eachAnim": 1, "totalLine": 1, "isAnimated":false } ]
     ]
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );

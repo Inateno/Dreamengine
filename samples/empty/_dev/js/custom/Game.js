@@ -6,9 +6,8 @@
  @Inateno
 
 ***
- sample Game - kill the bubble
- there is no "end" and no menus, it's a very lite "how to" for basics
- and you can create complete game with this :)
+ Sample empty to make Games
+ 
 **/
 define( [ 'DREAM_ENGINE' ],
 function( DE )
@@ -17,17 +16,16 @@ function( DE )
   
   Game.render  = null;
   Game.scene  = null;
-  var screenW = 1280, screenH = 720;
   
   // init
   Game.init = function()
   {
     console.log( "init Engine" );
     DE.CONFIG.DEBUG = 1; // debug on
-    DE.CONFIG.DEBUG_LEVEL = 5; // all debug
+    DE.CONFIG.DEBUG_LEVEL = 3; // show collider
     
     // create render
-    Game.render = new DE.Render( "render", { width: screenW, height: screenH , fullScreen: "ratioStretch"} );
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch"} );
     Game.render.init();
     
     // launch the engine

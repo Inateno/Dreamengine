@@ -1,0 +1,93 @@
+/* v0.1.0 */
+/*@font-face {
+    font-family: '';
+    src: url('img/.eot');
+    src: url('img/.eot?#iefix') format('embedded-opentype'),
+         url('img/.woff') format('woff'),
+         url('img/.ttf') format('truetype'),
+         url('img/.svg#') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}*/
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: black !important;
+  margin          : 0 !important;
+  padding         : 0 !important;
+  color           : white;
+  overflow        : hidden !important;
+  -ms-touch-action: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+button {
+  cursor: pointer;
+  -ms-touch-action: none;
+  touch-action: none;
+}
+#NebulaClient, #NebulaVignet, #notifsContainer, #popupsContainer {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+#render {
+  position   : relative;
+  /*font-family: 'custom_font';*/
+  -ms-touch-action: none;
+  touch-action: none;
+}
+canvas {
+  background-color: black;
+  -ms-touch-action: none;
+  touch-action: none;
+}
+.dreamTemplate { display: none; }
+
+/* Notifications */
+  #notifsContainer {
+    position: fixed;
+    left    : 0;
+    bottom  : 0;
+    height  : 10px;
+    padding : 5px;
+    z-index   : 9999999991;
+  }
+  .notification {
+    position        : relative;
+    padding-bottom  : 5px;
+    -webkit-transition: all 0.1s linear;
+       -moz-transition: all 0.1s linear;
+         -o-transition: all 0.1s linear;
+            transition: all 0.1s linear;
+    /*font-family: 'custom_font';*/
+  }
+  .notification>div {
+    width           : 240px;
+    min-height      : 50px;
+    border-radius   : 4px;
+    border          : 1px solid white;
+    background-color: rgba( 50, 50, 50, 0.7 );
+    padding         : 5px;
+    padding-right   : 20px;
+  }
+  .notification .notifClose {
+    position: absolute;
+    right   : 4px;
+    top     : 4px;
+    cursor  : pointer;
+  }
+
+  .notification.disapear {
+    opacity: 0;
+  }
+  
+  .ingame-achievement img {
+    float       : left;
+    height      : 50px;
+    width       : 50px;
+    margin-right: 3px;
+  }

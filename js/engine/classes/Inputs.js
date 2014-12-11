@@ -432,8 +432,21 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
      */
     this.mouseDown = function( event )
     {
+      var isRightClick = false, isMiddleClick = false;
+      if ( "which" in event )  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+      {
+        isRightClick = event.which == 3;
+        isMiddleClick= event.which == 2;
+      }
+      else if ( "button" in event )  // IE, Opera
+        isRightClick = event.button == 2;
+      
+      var mouse = getMouse( event );
+      mouse.isRightClick = isRightClick;
+      mouse.isMiddleClick = isMiddleClick;
+      
       if ( _renders[ event.target.id ] )
-        _renders[ event.target.id ].oOnMouseDown( getMouse( event ) );
+        _renders[ event.target.id ].oOnMouseDown( mouse );
       
       // catch general events 'on', 'mouseDown' if there is
       var inputsDown = Inputs.findInputs( 1000000001, "MOUSE" );
@@ -442,7 +455,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         for ( var i = 0, input; input = inputsDown[ i ]; ++i )
         {
           if ( !Inputs.usedInputs[ input ].isDown )
-            Inputs.trigger( 'mouseDown', input );
+            Inputs.trigger( 'mouseDown', input, mouse );
           Inputs.usedInputs[ input ].isDown = true;
         }
       }
@@ -452,13 +465,36 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     }
     
     /****
+     * rightClick@void( event@MouseEvent )
+      Just preventing, used in mouseDown with "wich"
+     */
+    this.rightClick = function( event )
+    {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    /****
      * mouseUp@Bool( event@MouseEvent )
       mouseUp event
      */
     this.mouseUp = function( event )
     {
+      var isRightClick = false, isMiddleClick = false;
+      if ( "which" in event )  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+      {
+        isRightClick = event.which == 3;
+        isMiddleClick= event.which == 2;
+      }
+      else if ( "button" in event )  // IE, Opera
+        isRightClick = event.button == 2;
+      
+      var mouse = getMouse( event );
+      mouse.isRightClick = isRightClick;
+      mouse.isMiddleClick = isMiddleClick;
+      
       if ( _renders[ event.target.id ] )
-        _renders[ event.target.id ].oOnMouseUp( getMouse( event ) );
+        _renders[ event.target.id ].oOnMouseUp( mouse );
       
       // catch general events 'on', 'mouseUp' if there is
       var inputsUp = Inputs.findInputs( 1000000001, "MOUSE" );
@@ -521,16 +557,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     
     /* MOUSE DOUBLE CLICK not used */
     this.mouseDbClick = function(){}
-    /****
-     * rightClick@void( event@MouseEvent )
-      Just preventing
-     */
-    this.rightClick = function( event )
-    {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
+    
     /****
      * addEvent@void( eventName@String )
       TODO - write it

@@ -4,12 +4,16 @@
 
 * ContributorsList
  @Inateno
+*/
 
-***
-* singleton@CollisionSystem
- at the moment provide only triggers method but in the future should provide Collisions resolutions.
- Miss trigger for orientedBox with all others and circle vs fixedBox
-**/
+/**
+ * currently this provide only triggering method for circle and fixedBox (also with points)
+ * TODO:
+ *  - provide collisions resolutions (giving an exit vector, working with multiple resolutions)
+ *  - collision detection circle vs fixedBox
+ *  - collision detection with orientedBox (have to finish this one)
+ * @namespace CollisionSystem
+ */
 define( [ 'DE.CONFIG' ],
 function( CONFIG )
 {
@@ -17,9 +21,14 @@ function( CONFIG )
   {
     this.DEName = "CollisionSystem";
     
-    /****
-     * pointFixedBoxCollision@Bool( point@Vector2, box@FixedBoxCollider )
-      trigger point in FixedBoxCollider
+    /**
+     * detect if the point is inside a box
+     * @memberOf CollisionSystem
+     * @protected
+     * @param {Vector2} point
+     * @param {FixedBoxCollider} box
+     * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
+     * @returns {Boolean} is colliding ?
      */
     this.pointFixedBoxCollision = function( point, box, params )
     {
@@ -31,7 +40,7 @@ function( CONFIG )
       // when mouse click in the camera field, we have to convert the 3D position from the object to 2D
       if ( point.scenePosition !== undefined && ( !params || !params.prevent3D ) && point.scenePosition.z != boxpoints.z )
       {
-        // convert 3D pos to 2D, z on point should be a z from a camera
+        // convert 3D pos to 2D, z on point should be a z from a camera, or you can simply decide
         ratioz = ( 10 / ( boxpoints.z - point.scenePosition.z ) );
         if ( ratioz != 1 )
         {
@@ -49,9 +58,14 @@ function( CONFIG )
         return false;
     }
     
-    /****
-     * fixedBoxCollision@Bool( box1@FixedBoxCollider, boxB@FixedBoxCollider )
-      FixedBox Collision triggering
+    /**
+     * detect if 2 box are colliding
+     * @memberOf CollisionSystem
+     * @protected
+     * @param {FixedBoxCollider} boxA
+     * @param {FixedBoxCollider} boxB
+     * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
+     * @returns {Boolean} is colliding ?
      */
     this.fixedBoxCollision = function( boxA, boxB, params )
     {
@@ -95,9 +109,14 @@ function( CONFIG )
         return true; 
     }
     
-    /****
-     * pointCircleCollision@Bool( point@Vector2, C@CircleCollider )
-      trigger point in CircleCollider
+    /**
+     * detect if a point is inside a circle
+     * @memberOf CollisionSystem
+     * @protected
+     * @param {Vector2} point
+     * @param {CircleCollider} C
+     * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
+     * @returns {Boolean} is colliding ?
      */
     this.pointCircleCollision = function( point, C, params )
     {
@@ -124,10 +143,15 @@ function( CONFIG )
         return false;
       return true;
     }
-
-    /****
-     * circleCollision@Bool( circleA@CircleCollider, circleB@CircleCollider )
-      return colliders triggering
+    
+    /**
+     * detect if a point is inside a circle
+     * @memberOf CollisionSystem
+     * @protected
+     * @param {CircleCollider} circleA
+     * @param {CircleCollider} circleB
+     * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
+     * @returns {Boolean} is colliding ?
      */
     this.circleCollision = function( circleA, circleB, params )
     {

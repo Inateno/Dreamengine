@@ -1,6 +1,6 @@
 ﻿define( [], function()
 {
-  var dictionnary = {
+  var dictionary = {
     "en": {
       "play": "Play"
       ,"settings": "Settings"
@@ -15,5 +15,5 @@
     }
   };
   
-  return dictionnary;
+  return dictionary;
 } );

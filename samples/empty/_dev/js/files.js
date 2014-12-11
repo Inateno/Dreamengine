@@ -25,14 +25,15 @@ require.config( {
   paths: {
     'DREAM_ENGINE': 'DreamEngine-min-require'
     // DATAS
-    , 'DE.imagesDatas' : 'datas/imagesDatas'
-    , 'DE.inputsList'  : 'datas/inputsList'
-    , 'DE.audiosList'  : 'datas/audiosList'
-    , 'DE.dictionary' : 'datas/dictionary'
+    , 'DE.imagesDatas'  : 'datas/imagesDatas'
+    , 'DE.inputsList'   : 'datas/inputsList'
+    , 'DE.audiosList'   : 'datas/audiosList'
+    , 'DE.dictionary'   : 'datas/dictionary'
+    , 'DE.dictionary'   : 'datas/dictionary'
     
-    ,'gameLoop'       : 'custom/gameLoop'
-    ,'Game'           : 'custom/Game'
-    ,'main'           : 'main'
+    ,'gameLoop'         : 'custom/gameLoop'
+    ,'Game'             : 'custom/Game'
+    ,'main'             : 'main'
   }
   , "urlArgs": "r=" + Date.now() // will be destroy when grunted
 } );

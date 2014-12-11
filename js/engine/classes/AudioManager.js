@@ -4,14 +4,15 @@
 
 * ContributorsList
  @Inateno
+*/
 
-***
-* singleton@AudioManager
- is a system over buzz provide some simple middleware
- TODO - update all of this with howler ?
-  - make musics and fxs spritable
-  - create a pool for fxs
-**/
+/**
+ * is a system over buzz provide some simple middleware
+ * TODO:
+ *  - make musics and fxs spritable
+ *  - create a pool for fxs
+ * @namespace AudioManager
+ */
 define( [ 'DE.CONFIG', 'buzz', 'DE.Event' ],
 function( CONFIG, buzz, Event )
 {

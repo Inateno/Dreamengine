@@ -8,14 +8,15 @@
 ***
 simple Game class declaration example
 **/
-define( [ 'DREAM_ENGINE' ],
-function( DE )
+define( [ 'DREAM_ENGINE', 'DE.TouchControl' ],
+function( DE, TouchControl )
 {
   var Game = {};
     
   Game.render  = null;
   Game.scene  = null;
   Game.ship  = null;
+  Game.obj = null;
   
   function addFire( object )
   {
@@ -125,6 +126,7 @@ function( DE )
     console.log( "game starto!!" );
     Game.scene = new DE.Scene( "Test" );
     
+    
     /* GAME SHIP SAMPLE */
       var shipRender = new DE.SpriteRenderer( { "spriteName": "ship", "scaleX":0.2, "scaleY":0.2 } );
       var collider = new DE.CircleCollider( 50 );
@@ -139,6 +141,17 @@ function( DE )
         Game.scene.sortGameObjects();
         // Game.camera.scenePosition.z += 0.1 * dir;
       };
+      Game.ship.axes = { x: 0, y: 0 };
+      Game.ship.logic = function()
+      {
+        this.translateX( this.axes.x * 5 );
+        this.translateY( this.axes.y * 5 );
+      };
+      Game.ship.addAutomatism( "logic", "logic" );
+      
+      Game.obj = new DE.GameObject( {
+        "x": 100, "y": 100
+      } );
       
       // add a children
       var reactorfx = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.4, "scaleY":0.4 } );
@@ -147,7 +160,7 @@ function( DE )
       reactor.position.setRotation( Math.PI );
       
       // add ship in scene
-      Game.scene.add( Game.ship );
+      Game.scene.add( Game.ship, Game.obj );
     
     // camera
     // Game.camera = new DE.Camera( 1400, 880, 420, 100, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
@@ -166,6 +179,24 @@ function( DE )
     // Game.camera.gui.gameObjects[ 0 ].onMouseUp = function(){ console.log( "coucou" ); return true }
     
     Game.render.add( Game.camera );
+    
+    var touchInput = new TouchControl({
+        "x": 100
+        ,"y": 100
+        ,"zindex": 100
+      },{
+        "collider": { 'radius': 60 }
+        ,"camera": Game.camera
+        ,appearOnTouch: true
+        , onStickMove: function( position )
+        {
+          Game.ship.axes.x = position.x;
+          Game.ship.axes.y = position.y;
+        }
+      } );
+      
+    Game.touchInput = touchInput;
+    Game.scene.add( touchInput );
     
     // Create Enemies
     Game.enemies = new Array();

@@ -3,6 +3,10 @@
 * @Inateno / http://inateno.com / http://dreamirl.com
 *
 ***
+* @images plane and touchControl : Credit (Kenney or www.kenney.nl)
+*
+* 
+***
 *
 * @singleton
 * imagesList
@@ -34,7 +38,6 @@ function( CONFIG )
     
     // usage name, real name (can contain subpath), extension, parameters
     , imagesList: [
-      // [ "name", "path", "png", { "load": true, "totalFrame": x, "totalLine": y, "isAnimated": Boolean, "isLoop": Boolean, "eachAnim": 40 } ]
     ]
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );

@@ -27,13 +27,15 @@ require.config( {
     
     ,'gameLoop'       : 'custom/gameLoop'
     ,'Game'           : 'custom/Game'
+    
+    ,'DE.TouchControl' : 'plugins/TouchControl'
   }
   , urlArgs: 'bust=' + Date.now()
 } );
 
 // init here your game with your code by using the Engine (as DE)
-require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.achievements', 'DE.dictionary' ],
-function( files, gameLoop, Game, images, audios, inputs, achievements, dictionary )
+require( [ 'files-engine', 'gameLoop', 'Game', 'DE.imagesDatas', 'DE.audiosList', 'DE.inputsList', 'DE.achievements', 'DE.dictionary', 'DE.TouchControl' ],
+function( files, gameLoop, Game, images, audios, inputs, achievements, dictionary, TouchControl )
 {
   console.log( "My Custom loads - stress test" );
   var DE = DreamEngine;

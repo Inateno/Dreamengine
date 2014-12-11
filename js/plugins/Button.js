@@ -58,7 +58,10 @@ function( DE )
     this.stateOnClick = buttonParams.stateOnClick || "hover";
     this.stateOnUp = buttonParams.stateOnUp || "hover";
     
-    this.sound = buttonParams.sound;
+    if ( buttonParams.sound )
+      this.sound = buttonParams.sound;
+    else if ( DE.AudioManager.fx.get( "mouseclick1" ) )
+      this.sound = "mouseclick1"
   }
   
   Button.prototype = new DE.GameObject();
