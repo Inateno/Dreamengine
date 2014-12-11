@@ -1,3 +1,17 @@
+---- 0.25.0 ----
+* add rightClick / middleClick inside mouse events
+* change default DEBUG vector color
+* add Vector2.wtfAngle (was previous getAngle, don't know why did this, maybe tired to much)
+* add Vector2.getVectorAngle return the absolute angle from a Vector2 (usefulle when object is not rotate)
+* Plugin TouchControl
+* Sample Platformer with all collisions / physics inside (use it for your platform-games!)
+* map editor with the platformer sample
+
+-- Fix
+* Vector2.getAngle was giving wtf angle
+* fix Vecotr2.normalize, if Vector2 was 0-0 try 0/0 fixed
+* other minor fix
+
 ---- 0.2.2 ----
 * SaveSystem.save method can save directly a key inside an object example .save( "key.underkey", value )
 * add isUnlock in SaveSystem
