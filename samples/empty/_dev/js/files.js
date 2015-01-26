@@ -29,7 +29,6 @@ require.config( {
     , 'DE.inputsList'   : 'datas/inputsList'
     , 'DE.audiosList'   : 'datas/audiosList'
     , 'DE.dictionary'   : 'datas/dictionary'
-    , 'DE.dictionary'   : 'datas/dictionary'
     
     ,'gameLoop'         : 'custom/gameLoop'
     ,'Game'             : 'custom/Game'
