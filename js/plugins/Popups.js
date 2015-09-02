@@ -140,8 +140,7 @@ function( DE )
               // in this case, closes is the sound
               if ( closes )
                 DE.AudioManager.fx.play( closes );
-              if ( callbacks )
-                callbacks.call( contexts );
+              callbacks.call( contexts );
               _self.remove( popup.id );
               return false;
             } );
@@ -159,12 +158,12 @@ function( DE )
     
     this.remove = function( id )
     {
+      if ( !this.popups[ id ] )
+        return;
       this.el.removeChild( this.popups[ id ] );
       this.trigger( "kill" );
       if ( --this.nPopups == 0 )
-      {
         this.trigger( "zeroPopups" );
-      }
     }
   };
   

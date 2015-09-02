@@ -110,9 +110,23 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
       if ( !this.queue[ type ][ input ] )
       {
         console.log( '%cWARN:: Try to bind on a non existant input ::: ' + type + ' - ' + input, "color:red" );
-        return 
+        return;
       }
       this.queue[ type ][ input ].push( callback );
+      return this.queue[ type ][ input ].length;
+    }
+    
+    this.stopListening = function( type, input, index )
+    {
+      if ( index !== undefined )
+      {
+        this.queue[ type ][ input ][ index ] = null;
+        return;
+      }
+      
+      for ( var i = 0; i < this.queue[ type ][ input ].length; ++i )
+        delete this.queue[ type ][ input ][ i ];
+      this.queue[ type ][ input ] = [];
     }
     
     /****
@@ -128,10 +142,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         newInputs[ i ] = {};
         
         newInputs[ i ].inputs = new Array();
-        for ( var n = 0, I; I = customInputs[ i ].keycodes[ n ]; n++ )
+        for ( var n = 0, I; I = customInputs[ i ].keycodes[ n ]; ++n )
         {
           var type = ( I[ 0 ] == "K" || I[ 0 ] == "k" ) ? "KEYBOARD" : "MOUSE";
-          var data = I.split(".");
+          var data = I.split( "." );
           var gamePadID = 0;
           var name;
           if ( data[ 0 ][ 0 ] == "G" )
@@ -156,13 +170,13 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
             continue;
           }
           
-          if (type == "GAMEPADBUTTONS")
+          if ( type == "GAMEPADBUTTONS" )
           {
-            gamePad.plugBtnToInput(this, i, gamePadID, this.dbInputs[ type ][ name ] );
+            gamePad.plugBtnToInput( this, i, gamePadID, this.dbInputs[ type ][ name ] );
           }
-          else if (type == "GAMEPADAXES")
+          else if ( type == "GAMEPADAXES" )
           {
-            gamePad.plugAxeToInput(this, i, gamePadID, this.dbInputs[ type ][ name ] );
+            gamePad.plugAxeToInput( this, i, gamePadID, this.dbInputs[ type ][ name ] );
           }
           newInputs[ i ].inputs.push( { "code": this.dbInputs[ type ][ name ], "type": type } );
         }
@@ -190,6 +204,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         this.queue[ 'axeStart'][ i ]   = new Array();
         this.queue[ 'axeStop'][ i ]    = new Array();
        }
+       
+      this.queue[ 'axeMoved' ][ 'wheelTop' ]  = new Array();
+      this.queue[ 'axeMoved' ][ 'wheelDown' ] = new Array();
+      
       this.usedInputs = newInputs;
       this.toggleListeners();
     }
@@ -215,9 +233,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     {
       if ( Inputs.keyLocked && eventType.search( "mouse" ) == -1 )
         return;
-      for ( var ev in Inputs.queue[ eventType ][ keyName ] )
+      for ( var ev = 0; ev < Inputs.queue[ eventType ][ keyName ].length; ++ev )
       {
-        Inputs.queue[ eventType ][ keyName ][ ev ]( val );
+        if ( Inputs.queue[ eventType ][ keyName ][ ev ] )
+          Inputs.queue[ eventType ][ keyName ][ ev ]( val );
       }
     }
     
@@ -228,7 +247,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     this.key = function( name )
     {
       if ( Inputs.keyLocked )
-        return;
+        return false;
       if ( this.usedInputs[ name ] && this.usedInputs[ name ].isDown
         && ( !this.usedInputs[ name ].interval || Date.now() - this.usedInputs[ name ].lastCall >= this.usedInputs[ name ].interval / Time.scaleDelta )
       )
@@ -310,7 +329,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     /****
      * keyDown@Bool( event@KeyboardEvent )
       TODO - define if we have to put preventDefault and return false at the end
-      (I don't remeber why I comment but it was something with DOM Inputs)
+      (I don't remember why I comment but it was something with DOM Inputs)
      */
     this.keyDown = function( event )
     {
@@ -624,22 +643,22 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     {
       _renders[ render.id ] = render;
       
-      var canvas = render.canvas;
+      var view = render.pixiRenderer.view;
       // handjs used here :)
-      canvas.addEventListener( "pointerdown", Inputs.mouseDown, false );
-      canvas.addEventListener( "pointerup", Inputs.mouseUp, false );
-      canvas.addEventListener( "pointerout", Inputs.mouseMove, false );
-      canvas.addEventListener( "pointermove", Inputs.mouseMove, false );
-      canvas.addEventListener( "contextmenu", Inputs.rightClick, false );
-      canvas.addEventListener( "DOMMouseScroll", Inputs.mouseWheel, false ); // seems not working
-      canvas.addEventListener( "mousewheel", Inputs.mouseWheel, false ); // same here
-      // canvas.addEventListener( "mouseclick", Inputs.mouseClick, false );
-      // canvas.addEventListener( "mousedbclick", Inputs.mouseDbClick, false );
+      view.addEventListener( "pointerdown", Inputs.mouseDown, false );
+      view.addEventListener( "pointerup", Inputs.mouseUp, false );
+      view.addEventListener( "pointerout", Inputs.mouseMove, false );
+      view.addEventListener( "pointermove", Inputs.mouseMove, false );
+      view.addEventListener( "contextmenu", Inputs.rightClick, false );
+      view.addEventListener( "DOMMouseScroll", Inputs.mouseWheel, false ); // seems not working
+      view.addEventListener( "mousewheel", Inputs.mouseWheel, false ); // same here
+      // view.addEventListener( "mouseclick", Inputs.mouseClick, false );
+      // view.addEventListener( "mousedbclick", Inputs.mouseDbClick, false );
       
-      // canvas.onmousewheel = Inputs.mouseWheel; // that work, sure // double binding with addEvent, just in case it doesn't work with a browser
+      // view.onmousewheel = Inputs.mouseWheel; // that work, sure // double binding with addEvent, just in case it doesn't work with a browser
       // Lol IE
       if ( window.attachEvent )
-        canvas.attachEvent( "onmousewheel", Inputs.mouseWheel );
+        view.attachEvent( "onmousewheel", Inputs.mouseWheel );
     }
     
     /****
@@ -648,27 +667,28 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
      */
     this.removeRender = function( renderId )
     {
-      if ( !_renders[ renderId ].canvas )
+      if ( !_renders[ renderId ].pixiRenderer.view )
       {
         CONFIG.debug.log( "[INPUTS] Try to remove a renders but not found :: " + renderId, 1 );
         return;
       }
       
-      _renders[ renderId ].canvas.removeEventListener( "pointerdown", Inputs.mouseDown, false );
-      _renders[ renderId ].canvas.removeEventListener( "pointerup", Inputs.mouseUp, false );
-      _renders[ renderId ].canvas.removeEventListener( "pointerout", Inputs.mouseUp, false );
-      _renders[ renderId ].canvas.removeEventListener( "pointermove", Inputs.mouseMove, false );
-      _renders[ renderId ].canvas.removeEventListener( "contextmenu", Inputs.rightClick, false );
-      _renders[ renderId ].canvas.removeEventListener( "DOMMouseScroll", Inputs.mouseWheel, false );
-      // _renders[ renderId ].canvas.removeEventListener( "mouseclick", Inputs.mouseClick, false );
-      // _renders[ renderId ].canvas.removeEventListener( "mousedbclick", Inputs.mouseDbClick, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "pointerdown", Inputs.mouseDown, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "pointerup", Inputs.mouseUp, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "pointerout", Inputs.mouseUp, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "pointermove", Inputs.mouseMove, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "contextmenu", Inputs.rightClick, false );
+      _renders[ renderId ].pixiRenderer.view.removeEventListener( "DOMMouseScroll", Inputs.mouseWheel, false );
+      // _renders[ renderId ].view.removeEventListener( "mouseclick", Inputs.mouseClick, false );
+      // _renders[ renderId ].view.removeEventListener( "mousedbclick", Inputs.mouseDbClick, false );
       
       delete( _renders[ renderId ] );
     }
     
     /****
      * mouseWheel@void( e@MouseEvent )
-      trigger mouseWheel with good direction
+      trigger mouseWheel with good direction on axeMoved listener
+     * update - now use event binding like keys or gamepad so call in Inputs: M.wheelDown / wheelTop
      */
     this.mouseWheel = function( e )
     {
@@ -677,10 +697,16 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
       if ( e.detail )
         dir = e.detail < 0 ? 1 : -1;
       
+      var side = "Down";
       if ( dir == 1 )
-        Inputs.trigger( 'axeMoved', 'wheelTop' );
-      else
-        Inputs.trigger( 'axeMoved', 'wheelDown' );
+        side = "Top";
+      
+      var inputsDown = Inputs.findInputs( Inputs.dbInputs.MOUSE[ "wheel" + side ], "MOUSE" );
+      if ( inputsDown !== false )
+      {
+        for ( var i = 0, input; input = inputsDown[ i ]; ++i )
+          Inputs.trigger( 'axeMoved', input, 1 );
+      }
     }
   };
   

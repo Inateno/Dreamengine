@@ -20,7 +20,7 @@ function( CONFIG )
     ,"down":{"keycodes":[ "K.down" , 'K.s' ] }
     ,"jump":{"keycodes":[ 'G0.B.A', "K.space" ], "stayOn": true }
     
-    // ,"fire":{"keycodes":[ "K.space" , 'G0.B.A' ]/*, "interval": 100*/ }
+    ,"fire":{"keycodes":[ "K.space" , 'G0.B.A' ]/*, "interval": 100*/ }
     ,"deep":{"keycodes":[ "K.shift" , 'G0.B.B' ]/*, "interval": 100*/ }
     
     ,"haxe":{"keycodes":[ "G0.A.LHorizontal" ] }

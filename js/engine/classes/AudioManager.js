@@ -233,7 +233,9 @@ function( CONFIG, buzz, Event )
       this.stopAllAndPlay = function( name, ignore )
       {
         this.stopAll( ignore );
-        this.play( name );
+        if ( name != ignore)
+          this.play( name );
+        
         return this;
       }
       
@@ -368,7 +370,18 @@ function( CONFIG, buzz, Event )
           _fxs[ name ].sound.stop();
         _fxs[ name ].sound.play();
         return this;
-      }
+      }      
+      
+      /****
+       * playRandom@void( array@Array )
+         play a random sound in the array
+         example : playRandom( [ "footstep1", "footstep2" ] )
+         */
+      this.playRandom = function ( array )
+      {
+        var rand = Math.random() * array.length >> 0;
+        this.play( array[ rand ] );
+      }      
       
       this.stop = function( name )
       {

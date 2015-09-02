@@ -35,7 +35,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     this.objectsByName = {};
     
     // TODO - include default physic
-      /*this.colliders = new Array();
+      /*this.collideObjects = new Array();
         //physics attributes by using an octree with colliders inside
         this.maxObjectsPerGrid = 5;
         this.grid     = new Array(); // TODO - octree for collisions ? WIP
@@ -50,7 +50,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
      * @memberOf Scene
      * @type {Boolean}
      */
-    this.sleep = false;
+    this.enable = true;
     
     // TODO - used or not ?
       // actually not useful (simply a quick access to gameObjects.length) but I want to this to create octree
@@ -96,7 +96,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
      */
     this.update = function()
     {
-      if ( this.sleep )
+      if ( !this.enable )
         return;
       for ( var i = 0, t = this.gameObjects.length, g; i < t; ++i )
       {
@@ -128,6 +128,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     
     /**
      * Sort gameObjects in the scene along z axis or using z-index for objects on the same same plan.
+     * not sorting gameObjects array because this one contain objects for update and collision, no priority on z / zindex
      * If z and z-index are same, objects are sorted from lower x to higher.
      * You shouldn't call this method directly because engine do it for you, but in some case it's useful to do
      * @protected
@@ -147,8 +148,10 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
       } );
       
       for ( var i = 0, go; go = this.gameObjects[ i ]; ++i )
-        go.sortChildrens();
+        go.sortChildren();
       this.waitSortGameObjects = false;
+      
+      this.trigger( "updateObjects" );
     };
     
     /**
@@ -214,6 +217,11 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
       
       ++this.maxObjects;
       this.waitSortGameObjects = true;
+      
+      if ( CONFIG.DEBUG )
+        gameObject._createDebugRender();
+      
+      this.trigger( "updateObjects" );
     };
     
     Event.addEventComponents( this );
@@ -286,6 +294,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
         this.objectsByName[ object.name ].splice( pos, 1 );
       }
     }
+    this.trigger( "updateObjects" );
     this.maxObjects--;
   };
   

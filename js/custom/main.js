@@ -42,7 +42,7 @@ function( files, gameLoop, Game, images, audios, inputs, achievements, dictionar
   DE.init(
   {
     'customLoop': gameLoop, 'onReady': Game.init
-    , 'onStart': Game.start, 'loader': { "scale": 2 }
+    , 'onStart': Game.start
     , 'images': images, 'audios': audios
     , 'inputs': inputs, 'dictionary': dictionary
     , 'about': { 'gameName': "StressTest", "namespace": "ztech", 'author': "Dreamirl", 'gameVersion': "0.1" }

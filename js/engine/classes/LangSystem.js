@@ -29,7 +29,18 @@ function( CONFIG )
         this.dictionary[ i ] = dictionary[ i ];
         this.avalaibleLang.push( i );
       }
-    }
+    };
+    
+    this.addDictionary = function( dictionary )
+    {
+      for ( var i in dictionary )
+      {
+        if ( !this.dictionary[ i ] )
+          this.dictionary[ i ] = {};
+        for ( var n in dictionary[ i ] )
+          this.dictionary[ i ][ n ] = dictionary[ i ][ n ];
+      }
+    };
     
     /****
      * get@String( what@String )
@@ -39,7 +50,7 @@ function( CONFIG )
     {
       return this.dictionary[ this.currentLang ][ what ] ||
         ( this.dictionary[ "en" ] && this.dictionary[ "en" ][ what ] ) || null;
-    }
+    };
     
     /****
      * forceget@String( lang@String, what@String )
@@ -50,7 +61,7 @@ function( CONFIG )
       if ( this.avalaibleLang.indexOf( lang ) == -1 )
         return null;
       return this.dictionary[ lang ][ what ] || null;
-    }
+    };
     
     /****
      * getLang@void( [lang@String] )
@@ -70,7 +81,7 @@ function( CONFIG )
           break;
         }
       }
-    }
+    };
   };
   
   CONFIG.debug.log( "LangSystem loaded", 3 );

@@ -639,4 +639,4 @@ define( [ 'DE.CONFIG', 'DE.Event', 'DE.Notifications', 'DE.LangSystem' ]
   
   CONFIG.debug.log( "gamepad loaded", 3 );
   return gamePads;
-});
+} );

@@ -38,6 +38,10 @@ function()
       WIDTH   : 100
       ,HEIGHT : 100
     }
+    , GIZMO: {
+      SIZE  : 25
+      ,WIDTH: 2
+    }
   };
   
   CONFIG.debug = {
@@ -60,6 +64,9 @@ function()
     ,gamepadChange    : true
     ,achievementUnlockDuration: 8000
   };
+  
+  CONFIG.MIN_SIZE_BUFFER_W = 1540;
+  CONFIG.MIN_SIZE_BUFFER_H = 1540;
   
   CONFIG.debug.log( "CONFIG loaded", 3 );
   return CONFIG;

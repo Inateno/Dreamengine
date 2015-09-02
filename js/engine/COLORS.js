@@ -15,14 +15,14 @@ function( CONFIG )
   var COLORS = {};
   
   COLORS.DEName                = "COLORS";
-  COLORS.defaultColor          = "white";
+  COLORS.defaultColor          = "0xffffff";
   COLORS.DEBUG                 = {};
-  COLORS.DEBUG.GAME_OBJECT     = "white";
+  COLORS.DEBUG.GAME_OBJECT     = "0xffffff";
   COLORS.DEBUG.GUI             = "purple";
-  COLORS.DEBUG.X_AXIS          = "red";
-  COLORS.DEBUG.Y_AXIS          = "rgb(0,205,0)";
-  COLORS.DEBUG.COLLIDER        = "rgb(205,20,100)";
-  COLORS.DEBUG.CIRCLE_COLLIDER = "rgb(205,50,100)";
+  COLORS.DEBUG.X_AXIS          = "0xff0000";
+  COLORS.DEBUG.Y_AXIS          = "0x009900";
+  COLORS.DEBUG.COLLIDER        = "0xBB1155";
+  COLORS.DEBUG.CIRCLE_COLLIDER = "0x991144";
   
   CONFIG.debug.log( "COLORS loaded", 3 );
   return COLORS;

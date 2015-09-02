@@ -28,7 +28,7 @@ function( DE )
     if ( buttonParams.textRenderer )
     {
       var tr = buttonParams.textRenderer;
-      objectParams.renderers.push( new DE.TextRenderer( tr, tr.textWidth, tr.textHeight, tr.text ) );
+      objectParams.renderers.push( new DE.TextRenderer( tr.text, tr ) );
     }
     
     if ( !buttonParams.collider )
@@ -58,10 +58,7 @@ function( DE )
     this.stateOnClick = buttonParams.stateOnClick || "hover";
     this.stateOnUp = buttonParams.stateOnUp || "hover";
     
-    if ( buttonParams.sound )
-      this.sound = buttonParams.sound;
-    else if ( DE.AudioManager.fx.get( "mouseclick1" ) )
-      this.sound = "mouseclick1"
+    this.sound = buttonParams.sound || "click";
   }
   
   Button.prototype = new DE.GameObject();
@@ -127,7 +124,7 @@ function( DE )
         propagation.cursor = "pointer";
         dir = 2;
         break;
-      default:
+      case "null":
         propagation.cursor = "default";
     }
     if ( this.direction == "horizontal" )

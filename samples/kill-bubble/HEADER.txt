@@ -1,4 +1,0 @@
-/*
-  a little demo game made by Inateno
-  kill bubbles, free to use and modify
-*/

@@ -1,3 +1,0 @@
-/*
-  platformer sample
-*/

@@ -15,7 +15,7 @@ function( CONFIG )
   var about = {};
   
   about.DEName = "about";
-  about.version= "0.1.0";
+  about.version= "0.35.0";
   about.gameName    = "DreamGame";
   about.gameVersion = "0.1.0";
   about.gameAuthor  = "Dreamirl";
@@ -27,6 +27,8 @@ function( CONFIG )
     about.gameVersion = values.gameVersion || about.gameVersion;
     about.gameAuthor  = values.gameAuthor || about.gameAuthor;
     about.namespace   = values.namespace || null;
+    about.gamePrice   = values.gamePrice || null;
+    about.packPrice   = values.packPrice || null;
   };
   
   CONFIG.debug.log( "about loaded", 3 );

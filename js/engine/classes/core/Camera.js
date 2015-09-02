@@ -25,31 +25,114 @@
  * @property {String} [tag="none"] assign tags if it's can be useful for you
  * @property {Scene} [scene=null] you can give a scene on creation, or later
 **/
-define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Vector2', 'DE.CanvasBuffer', 'DE.Mid.gameObjectMouseEvent'
+define( [ 'PIXI', 'DE.CONFIG', 'DE.Vector2', 'DE.Mid.gameObjectMouseEvent'
         , 'DE.ImageManager', 'DE.Event', 'DE.Time' ],
-function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
+function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
         , ImageManager, Event, Time )
 {
+  function SceneContainer()
+  {
+    PIXI.Container.call( this );
+    this.position.z = 0;
+  }
+  SceneContainer.prototype = Object.create( PIXI.Container.prototype );
+  SceneContainer.prototype.constructor = SceneContainer;
+  Object.defineProperties( SceneContainer.prototype, {
+    // redefine getter setter to invert pos to work has excepted
+    x: {
+      get: function()
+      {
+        return -this.position.x;
+      }
+      , set: function( v )
+      {
+        this.position.x = -v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,y: {
+      get: function()
+      {
+        return -this.position.y;
+      }
+      , set: function( v )
+      {
+        this.position.y = -v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,z: {
+      get: function()
+      {
+        return this.position.z;
+      }
+      , set: function( v )
+      {
+        var ratioz  = ( 10 / ( v - -10 ) );
+        this.scale.set( ratioz, ratioz );
+        this.position.z = v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,pos: {
+      get: function()
+      {
+        return { x: -this.position.x, y: -this.position.y, z: this.position.z };
+      }
+      ,set: function( o )
+      {
+        this.position.x = -o.x;
+        this.position.y = -o.y;
+        this.z = o.z !== undefined ? o.z : this.position.z || 0;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+  } );
+  
+  // Camera is a PIXI container append in the render, it had an other container for scene
   function Camera( width, height, x, y, params )
   {
+    PIXI.Container.call( this );
+    
+    this.trigger = this.emit; // keep trigger for the engine, let emit for socket don't use it
+    
     params = params || {};
     
     this.name   = params.name || "";
+    this.id     = "camera_" + Date.now() + "-" + Math.random() * Date.now();
     this.tag    = params.tag || "";
-    this.scene  = params.scene || null;
-    this.gui    = params.gui || undefined;
+    this._scene = params.scene || null;
+    this._gui   = params.gui || undefined;
     
-    this.renderSizes = new Sizes( width, height, params.scale || params.scaleX || 1
-                                , params.scale || params.scaleY || 1 );
-    this.fieldSizes = new Sizes( width, height, params.scale || params.scaleX || 1
-                                , params.scale || params.scaleY || 1 );
-    // position in the render (canvas)
-    this.renderPosition= new Vector2( x + width * 0.5, y + height * 0.5, params.z || -10 );
-    this.savedPosition = new Vector2( x + width * 0.5, y + height * 0.5, params.z || -10 );
+    this.needUpdateVisible = true;
+    this.updatable = true;
     
-    // position inside the sceneworld
-    this.scenePosition = new Vector2( params.realx || 0, params.realy || 0
-                                    , params.realz || params.z || -10 );
+    this.position.set( x, y );
+    
+    if ( params.backgroundImage )
+    {
+      this.background = new PIXI.extras.TilingSprite( PIXI.utils.TextureCache[ PIXI.loader.resources[ params.backgroundImage ].url ], width, height );
+      this.addChild( this.background );
+    }
+    
+    this.sceneContainer = new SceneContainer();
+    this.addChild( this.sceneContainer );
+    this.sceneContainer.pos = {
+      x: params.realX || params.sceneX || 0
+      ,y: params.realY || params.sceneY || 0
+      ,z: params.realZ || params.sceneZ || 0
+    };
+    this.scenePosition = this.sceneContainer.pos; // copy reference to improve compatibilities with old games
+    this.sceneContainer.id = this.id;
+    
+    this.renderSizes = new PIXI.Point( width, height );
+    this.fieldSizes  = this.renderSizes; // copy reference to improve compatibilities with old games
+    this.scale.set( params.scale || params.scaleX || 1, params.scale || params.scaleY || 1 ) ;
+    this.renderScale = this.scale; // copy reference to improve compatibilities with old games
+    
     this.limits = {
       minX: params.minX != undefined ? params.minX : undefined
       ,maxX: params.maxX != undefined ? params.maxX : undefined
@@ -58,44 +141,30 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     };
     
     /**
-     * applied on final rendering, this will display the camera with transparency in the Render
-     * @public
-     * @memberOf Camera
-     */
-    this.alpha = params.alpha || 1;
-    
-    /**
      * applied before rendering, all gameObjects and gui will inherits from the bufferAlpha
      * @public
      * @memberOf Camera
      */
-    this.bufferAlpha = params.bufferAlpha || 1;
+    // this.bufferAlpha = params.bufferAlpha || 1;
     
-    this.backgroundColor = params.backgroundColor || null;
-    this.backgroundImage = params.backgroundImage || null;
-    this.useTransparency = params.useTransparency || params.transparent || false;
-    this.stretchedBackground = params.stretchedBackground != undefined ? params.stretchedBackground : true;
+    // this.backgroundColor = params.backgroundColor || null;
+    // this.backgroundImage = params.backgroundImage || null;
+    // this.useTransparency = params.useTransparency || params.transparent || false;
+    // this.stretchedBackground = params.stretchedBackground != undefined ? params.stretchedBackground : true;
     
     this.cameras    = new Array();
     this.maxCameras = 0;
     
-    this.freeze  = false;
-    this.sleep   = false;
-    
-    this.startX  = 0
-    this.startY  = 0
-    this._buffer = new CanvasBuffer( this.renderSizes.width, this.renderSizes.height );
-    // this._gameObjects = []; // sotre last active objects 
     this._visibleGameObjects = [];
     
-    this.indexMouseOver  = {}; //[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]; // 20 touches max ?
-    this.lastPointersPos = {};
     
     /****
      * store between two event types if you asked to prevent some events
      * @private
      */
     this._propagationEvent = {}; //[ {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ];
+    this.indexMouseOver  = {}; //[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]; // 20 touches max ?
+    this.lastPointersPos = {};
     
     /**
      * object used to apply fade on final Camera rendering
@@ -146,138 +215,167 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     
     // add Events components on camera
-    Event.addEventComponents( this );
+    // Event.addEventComponents( this );
   }
   
-  /**
-   * render the camera, called by renders that contain this camera (can be contained by two or more render)
-   * You touch this method at your own risks
-   * @protected
-   * @param {Context2D} ctx
-   * @param {Float} drawRatio
-   * @param {Float} physicRatio
-   * @memberOf Camera
-   */
-  Camera.prototype.render = function( ctx, drawRatio, physicRatio )
-  {
-    if ( this.sleep )
-      return;
-    
-    var oldAlpha = ctx.globalAlpha;
-    var _buffer = this._buffer;
-    if ( !this.freeze )
-    {
-      this.applyFocus();
-      this.checkLimits( physicRatio );
-      this.applyShake();
-      this.applyMove();
-      
-      _buffer.ctx.globalAlpha = this.bufferAlpha * oldAlpha;
-      
-      if ( this.useTransparency )
-        _buffer.ctx.clearRect( 0, 0, this.renderSizes.width, this.renderSizes.height );
-      
-      if ( this.backgroundImage != null )
-        if ( this.stretchedBackground )
-          _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0, this.renderSizes.width, this.renderSizes.height );
-        else
-          _buffer.ctx.drawImage( ImageManager.images[ this.backgroundImage ], 0, 0 );
-      else if ( this.backgroundColor != null )
+  Camera.prototype = Object.create( PIXI.Container.prototype );
+  Camera.prototype.constructor = Camera;
+  Object.defineProperties( Camera.prototype, {
+    /**
+     * Scene, setting will update event binding
+     *
+     * @member {number}
+     * @memberof Text#
+     */
+    scene: {
+      get: function()
       {
-        _buffer.ctx.fillStyle = this.backgroundColor;
-        _buffer.ctx.fillRect( 0, 0, this.renderSizes.width, this.renderSizes.height );
+        return this._scene;
       }
-      
-      _buffer.ctx.save();
-      // renderize here game objects
-      if ( this.scene )
+      , set: function( scene )
       {
-        var _gameObjects /*= this._gameObjects*/ = this.scene.gameObjects;
-        this._visibleGameObjects = [];
-        for ( var i = 0, t = _gameObjects.length, g, rpx, rpy, ratioz; i < t; i++ )
+        if ( this._scene )
         {
-          g = _gameObjects[ i ];
-          
-          if ( g.position.z < this.scenePosition.z )
-            continue;
-          
-          ratioz  = ( 10 / ( g.position.z - this.scenePosition.z ) );
-          rpx = g.position.x;
-          rpy = g.position.y;
-          // calculate real position only if ratioz isn't 1, otherwise the result is simply g.position.x
-          if ( ratioz != 1 )
-          {
-            rpx = ( g.position.x - ( this.scenePosition.x + this.fieldSizes.width * 0.5 ) ) * ratioz + ( this.scenePosition.x + this.fieldSizes.width * 0.5 );
-            rpy = ( g.position.y - ( this.scenePosition.y + this.fieldSizes.height * 0.5 ) ) * ratioz + ( this.scenePosition.y + this.fieldSizes.height * 0.5 );
-          }
-          if ( g && g.enable
-            && rpx + g.biggerOffset.width * ratioz >= this.scenePosition.x
-            && rpx - g.biggerOffset.width * ratioz <= this.scenePosition.x + this.fieldSizes.width
-            && rpy + g.biggerOffset.height * ratioz >= this.scenePosition.y
-            && rpy - g.biggerOffset.height * ratioz <= this.scenePosition.y + this.fieldSizes.height )
-          {
-            this._visibleGameObjects.push( g );
-            g.render( _buffer.ctx, physicRatio, this.scenePosition, this.fieldSizes );
-          }
+          // this._scene.stopListening( "updateObjects", this );
+          this._scene.stopListen( "updateObjects", this.updateObjects );
         }
+        this._scene = scene;
+        this._scene.on( "updateObjects", this.updateObjects, this );
       }
-      else
-      {
-        _buffer.ctx.textAlign = "center";
-        _buffer.ctx.fillStyle = "white";
-        _buffer.ctx.fillText( "No scene affiliated :(", this.renderSizes.width * 0.5, this.renderSizes.height * 0.5 );
-      }
-      
-      _buffer.ctx.restore();
-      _buffer.ctx.globalAlpha = this.alpha * oldAlpha;
-      
-      // debuging - display name and stroke the camera
-      if ( CONFIG.DEBUG )
-      {
-        _buffer.ctx.fillStyle = "white";
-        _buffer.ctx.textAlign = "left";
-        _buffer.ctx.fillText( "Camera " + this.name, 10, 20);
-        
-        _buffer.ctx.strokeStyle = "red";
-        _buffer.ctx.strokeRect( 0, 0, this.renderSizes.width >> 0
-                                   , this.renderSizes.height >> 0 );
-        
-        _buffer.ctx.fillStyle = "yellow";
-        _buffer.ctx.fillRect( this.renderSizes.width - 10, this.renderSizes.height - 10, 10, 10 );
-        _buffer.ctx.fillRect( this.renderSizes.width - 10, 0, 10, 10 );
-        _buffer.ctx.fillRect( 0, this.renderSizes.height - 10, 10, 10 );
-        _buffer.ctx.fillRect( 0, 0, 10, 10 );
-        
-        _buffer.ctx.fillRect( this.renderSizes.width * 0.5
-                            ,this.renderSizes.height * 0.5
-                            , 20, 5 );
-        _buffer.ctx.fillRect( this.renderSizes.width * 0.5
-                            ,this.renderSizes.height * 0.5
-                            , 5, 20 );
-      }
-      this.applyFade();
     }
     
-    ctx.translate( this.renderPosition.x * drawRatio >> 0
-                  , this.renderPosition.y * drawRatio >> 0 );
-    ctx.rotate( this.renderPosition.rotation );
+    , gui: {
+      get: function()
+      {
+        return this._gui;
+      }
+      , set: function( value )
+      {
+        if ( this._gui )
+          this.removeChild( this._gui );
+        
+        this._gui = value;
+        if ( value )
+          this.addChild( this._gui );
+      }
+    }
     
-    if ( this.gui )
-      this.gui.render( _buffer.ctx, drawRatio, physicRatio, this.renderSizes );
-    ctx.globalAlpha = this.alpha;
-    ctx.drawImage( _buffer.canvas
-          , -this.renderSizes.width * this.renderSizes.scaleX * drawRatio * 0.5 >> 0
-          , -this.renderSizes.height * this.renderSizes.scaleY * drawRatio * 0.5 >> 0
-          , this.renderSizes.width * this.renderSizes.scaleX * drawRatio >> 0
-          , this.renderSizes.height * this.renderSizes.scaleY * drawRatio >> 0 );
+    ,enable: {
+      get: function()
+      {
+        return this.updatable && this.visible;
+      }
+      , set: function( value )
+      {
+        this.updatable  = value;
+        this.renderable = value;
+        this.visible    = value;
+      }
+    }
     
-    // the GUI will totally change with DOM components, try to not use it
-    // prefer using GameObjects in your scene
+    // to improve compatibilities with older games
+    ,sleep: {
+      get: function()
+      {
+        return !this.enable;
+      }
+      , set: function( value )
+      {
+        this.enable = !value;
+      }
+    }
+  } );
+  
+  /**
+   * updateObjects from scene trigger, update children from scene visibleObjects
+   */
+  Camera.prototype.updateObjects = function()
+  {
+    this.sceneContainer.removeChildren();
     
-    ctx.rotate( -this.renderPosition.rotation );
-    ctx.translate( -this.renderPosition.x * drawRatio >> 0
-                  , -this.renderPosition.y * drawRatio >> 0 );
-    ctx.globalAlpha = oldAlpha;
+    var objs = this._scene.gameObjects;
+    this._visibleGameObjects = objs;
+    for ( var i = 0, t = objs.length; i < t; ++i )
+      this.sceneContainer.addChild( objs[ i ] );
+    this.needUpdateVisible = true;
+    return this;
+  };
+  
+  /**
+   * update camera middlewares
+   */
+  Camera.prototype.render = function( physicRatio )
+  {
+    if ( this.needUpdateVisible ) // todo add trigger from scene / gameobjects when they turn on/off/move
+      this.updateVisibleObjects();
+    
+    this.applyFade();
+    this.applyMove();
+    this.applyFocus();
+    this.applyShake();
+    this.checkLimits( physicRatio );
+    this.calculatePerspective();
+    
+    return this;
+  };
+  
+  Camera.prototype.calculatePerspective = function()
+  {
+    var cpos = this.sceneContainer.pos;
+    for ( var i = 0, c, ratioz, rpx, rpy, gpos; i < this.sceneContainer.children.length; ++i )
+    {
+      c = this.sceneContainer.children[ i ];
+      if ( !c.getPos || !c.position )
+        continue;
+      gpos = c.getPos();
+      ratioz  = ( 10 / ( gpos.z - -10 ) );
+      
+      rpx = gpos.x;
+      rpy = gpos.y;
+      if ( ratioz != 1 )
+      {
+        rpx = cpos.x + ( gpos.x - ( cpos.x + this.renderSizes.x * 0.5 ) ) * ratioz + this.renderSizes.x * 0.5 >> 0;
+        rpy = cpos.y + ( gpos.y - ( cpos.y + this.renderSizes.y * 0.5 ) ) * ratioz + this.renderSizes.y * 0.5 >> 0;
+      }
+      
+      c.savedPosition.setPosition( c.position );
+      c.position.setPosition( rpx, rpy );
+    }
+  };
+  
+  Camera.prototype.restoreAfterRender = function()
+  {
+    for ( var i = 0, c; i < this.sceneContainer.children.length; ++i )
+    {
+      c = this.sceneContainer.children[ i ];
+      if ( !c.position )
+        continue;
+      c.position.setPosition( c.savedPosition );
+    }
+  };
+  
+  /**
+   * updateVisibleObjects
+   */
+  Camera.prototype.updateVisibleObjects = function()
+  {
+    // this._visibleGameObjects = [];
+    // for ( var i = 0, c, b; i < this.sceneContainer.children.length; ++i )
+    // {
+    //   c = this.sceneContainer.children[ i ];
+    //   b = c.getBounds();
+    //   if ( b.x > this.sceneContainer.x + this.renderSizes.x
+    //     || b.x + b.width < this.sceneContainer.x
+    //     || b.y > this.sceneContainer.y + this.renderSizes.y
+    //     || b.y + b.height < this.sceneContainer.y )
+    //     c.visible = false;
+    //   else if ( c.renderable )
+    //   {
+    //     this._visibleGameObjects.push( c );
+    //     c.visible = true;
+    //   }
+    // }
+    // this.needUpdateVisible = false;
   };
   
   /**
@@ -290,33 +388,33 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
   Camera.prototype.checkLimits = function( physicRatio )
   {
     var limits = this.limits;
-    if ( limits.minX != undefined && this.scenePosition.x < limits.minX * physicRatio )
-      this.scenePosition.x = limits.minX * physicRatio;
-    else if ( limits.maxX != undefined && this.scenePosition.x + this.renderSizes.width > limits.maxX * physicRatio )
-      this.scenePosition.x = limits.maxX * physicRatio - this.renderSizes.width;
-    if ( limits.minY != undefined && this.scenePosition.y < limits.minY * physicRatio )
-      this.scenePosition.y = limits.minY * physicRatio;
-    else if ( limits.maxY != undefined && this.scenePosition.y + this.renderSizes.height > limits.maxY * physicRatio )
-      this.scenePosition.y = limits.maxY * physicRatio - this.renderSizes.height;
+    if ( limits.minX != undefined && this.sceneContainer.x < limits.minX * physicRatio )
+      this.sceneContainer.x = limits.minX * physicRatio;
+    else if ( limits.maxX != undefined && this.sceneContainer.x + this.renderSizes.x > limits.maxX * physicRatio * this.sceneContainer.scale.x )
+      this.sceneContainer.x = limits.maxX * physicRatio * this.sceneContainer.scale.x - this.renderSizes.x;
+    if ( limits.minY != undefined && this.sceneContainer.y < limits.minY * physicRatio )
+      this.sceneContainer.y = limits.minY * physicRatio;
+    else if ( limits.maxY != undefined && this.sceneContainer.y + this.renderSizes.y > limits.maxY * physicRatio * this.sceneContainer.scale.y )
+      this.sceneContainer.y = limits.maxY * physicRatio * this.sceneContainer.scale.y - this.renderSizes.y;
   };
   
-  /**
-   * when the engine, or you change quality setting
-   * TODO - remove newSizes if this isn't used / useful
-   * You touch this method at your own risks
-   * @protected
-   * @memberOf Camera
-   * @param {Float} physicRatio is the new physical ratio to go to the "native" size
-   */
-  Camera.prototype.screenChangedSizeIndex = function( physicRatio/*, newSizes*/ )
-  {
-    this.renderSizes.width  = this.fieldSizes.width * physicRatio >> 0;
-    this.renderSizes.height = this.fieldSizes.height * physicRatio >> 0;
-    this.renderPosition.x = this.savedPosition.x * physicRatio >> 0;
-    this.renderPosition.y = this.savedPosition.y * physicRatio >> 0;
-    this._buffer.canvas.width = this.renderSizes.width;
-    this._buffer.canvas.height = this.renderSizes.height;
-  };
+  // /**
+  //  * when the engine, or you change quality setting
+  //  * TODO - remove newSizes if this isn't used / useful
+  //  * You touch this method at your own risks
+  //  * @protected
+  //  * @memberOf Camera
+  //  * @param {Float} physicRatio is the new physical ratio to go to the "native" size
+  //  */
+  // Camera.prototype.screenChangedSizeIndex = function( physicRatio/*, newSizes*/ )
+  // {
+  //   this.renderSizes.x  = this.renderSizes.x * physicRatio >> 0;
+  //   this.renderSizes.y = this.renderSizes.y * physicRatio >> 0;
+  //   this.x = this.savedPosition.x * physicRatio >> 0;
+  //   this.y = this.savedPosition.y * physicRatio >> 0;
+  //   this._buffer.canvas.width = this.renderSizes.x;
+  //   this._buffer.canvas.height = this.renderSizes.y;
+  // };
   
   /**
    * add a Camera to your camera
@@ -376,7 +474,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
         if ( this.alpha == 1 || this.alpha == 0 )
         {
           if ( this.alpha == 0 )
-            this.sleep = true;
+            this.enable = false;
         }
       }
     }
@@ -399,7 +497,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
         if ( this.bufferAlpha == 1 || this.bufferAlpha == 0 )
         {
           if ( this.bufferAlpha == 0 )
-            this.sleep = true;
+            this.enable = false;
           this.useTransparency = this.oUseTransparency;
         }
       }
@@ -422,7 +520,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       || ( this.alpha == 0 && bufferApply ) )
       return;
     
-    this.sleep = false;
+    this.enable = false;
     var data = {
       from      : from || 1
       ,to       : to != undefined ? to : 0
@@ -456,7 +554,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    */
   Camera.prototype.fadeTo = function( to, duration, bufferApply )
   {
-    this.sleep = false;
+    this.enable = false;
     this.fade( this.alpha, to, duration, bufferApply );
   };
   
@@ -527,8 +625,8 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     
     var shake = this.shakeData;
     // restore previous shake
-    this.scenePosition.x -= shake.prevX;
-    this.scenePosition.y -= shake.prevY;
+    this.sceneContainer.x -= shake.prevX;
+    this.sceneContainer.y -= shake.prevY;
     shake.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
     // old way - Date.now() - this.shakeData.startedAt > this.shakeData.duration )
     if ( shake.duration <= 0 )
@@ -545,8 +643,8 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     shake.prevX = - ( Math.random() * shake.xRange ) + ( Math.random() * shake.xRange ) >> 0;
     shake.prevY = - ( Math.random() * shake.yRange ) + ( Math.random() * shake.yRange ) >> 0;
     
-    this.scenePosition.x += shake.prevX;
-    this.scenePosition.y += shake.prevY;
+    this.sceneContainer.x += shake.prevX;
+    this.sceneContainer.y += shake.prevY;
   };
   
   /**
@@ -564,7 +662,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    */
   Camera.prototype.moveTo = function( pos, duration, callback, curveName )
   {
-    var myPos = this.scenePosition;
+    var myPos = this.sceneContainer;
     
     this.moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
@@ -588,6 +686,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     this.moveData.leftX = this.moveData.distX;
     this.moveData.leftY = this.moveData.distY;
     this.moveData.leftZ = this.moveData.distZ;
+    // console.log( this.moveData, this.sceneContainer.z )
   };
   
   /**
@@ -607,45 +706,45 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     {
       move.stepValX = Time.timeSinceLastFrame / move.oDuration * move.distX * Time.scaleDelta;
       move.leftX -= move.stepValX;
-      this.scenePosition.x += move.stepValX;
+      this.sceneContainer.x += move.stepValX;
     }
     
     if ( move.distY != 0 )
     {
       move.stepValY = Time.timeSinceLastFrame / move.oDuration * move.distY * Time.scaleDelta;
       move.leftY -= move.stepValY * move.dirY;
-      this.scenePosition.y += move.stepValY;
+      this.sceneContainer.y += move.stepValY;
     }
     
     if ( move.distZ != 0 )
     {
       move.stepValZ = Time.timeSinceLastFrame / move.oDuration * move.distZ * Time.scaleDelta;
       move.leftZ -= move.stepValZ * move.dirZ;
-      this.scenePosition.z += move.stepValZ;
+      this.sceneContainer.z += move.stepValZ;
     }
     
     move.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
     
     // check pos
     if ( move.dirX < 0 && move.leftX < 0 )
-      this.scenePosition.x += move.leftX;
+      this.sceneContainer.x += move.leftX;
     else if ( move.dirX > 0 && move.leftX > 0 )
-      this.scenePosition.x -= move.leftX;
+      this.sceneContainer.x -= move.leftX;
     
     if ( move.dirY < 0 && move.leftY < 0 )
-      this.scenePosition.y += move.leftY;
+      this.sceneContainer.y += move.leftY;
     else if ( move.dirY > 0 && move.leftY > 0 )
-      this.scenePosition.y -= move.leftY;
+      this.sceneContainer.y -= move.leftY;
     
     if ( move.dirZ < 0 && move.leftZ < 0 )
-      this.scenePosition.z += move.leftZ;
+      this.sceneContainer.z += move.leftZ;
     else if ( move.dirZ > 0 && move.leftZ > 0 )
-      this.scenePosition.z -= move.leftZ;
+      this.sceneContainer.z -= move.leftZ;
     
     if ( move.duration <= 0 )
     {
       move.done = true;
-      this.scenePosition.setPosition( move.destX, move.destY, move.destZ );
+      this.sceneContainer.pos = { x: move.destX, y: move.destY, z: move.destZ };
       if ( move.callback )
         move.callback.call( this, move.callback );
       
@@ -670,6 +769,16 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
     this.target = gameObject;
     this.focusLock  = params.lock || {};
     this.focusOffset= params.offsets || { x: 0, y: 0 };
+    this.focusMaxParent = null;
+    
+    var parent = gameObject;
+    while ( parent && !this.focusMaxParent )
+    {
+      if ( parent.parent && parent.parent.id == this.id )
+        this.focusMaxParent = parent;
+      else
+        parent = parent.parent;
+    }
   };
   
   /**
@@ -682,11 +791,28 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
   {
     if ( !this.target )
       return;
+    
+    if ( this.focusMaxParent )
+    {
+      this.sceneContainer.pos = { x: 0, y: 0 };
+      this.sceneContainer.updateTransform();
+      // this.sceneContainer.removeChild( this.focusMaxParent );
+      this.focusMaxParent.updateTransform();
+    }
+    // inverser les X et Y de la position de la camera dans la scene ?
     var pos = this.target.getPos();
-    if ( !this.focusLock.x )
-      this.scenePosition.x = pos.x - this.fieldSizes.width * 0.5 + ( this.focusOffset.x || 0 );
-    if ( !this.focusLock.y )
-      this.scenePosition.y = pos.y - this.fieldSizes.height * 0.5 + ( this.focusOffset.y || 0 );
+    if ( !this.focusLock.x && !this.focusLock.y )
+      this.sceneContainer.pos = {
+        x: pos.x * this.sceneContainer.scale.x - ( this.renderSizes.x * 0.5 ) + ( this.focusOffset.x || 0 )
+        , y: pos.y * this.sceneContainer.scale.y - ( this.renderSizes.y * 0.5 ) + ( this.focusOffset.y || 0 )
+      };
+    else if ( !this.focusLock.x )
+      this.sceneContainer.x = pos.x * this.sceneContainer.scale.x - ( this.renderSizes.x * 0.5 ) + ( this.focusOffset.x || 0 );
+    else if ( !this.focusLock.y )
+      this.sceneContainer.y = pos.y * this.sceneContainer.scale.y - ( this.renderSizes.y * 0.5 ) + ( this.focusOffset.y || 0 );
+    
+    // if ( this.focusMaxParent )
+    //   this.sceneContainer.addChild( this.focusMaxParent );
   };
   
   /**
@@ -697,37 +823,24 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    */
   Camera.prototype.convertMousePos = function( mouse, physicRatio )
   {
-    mouse.x -= ( this.renderPosition.x - this.renderSizes.width * 0.5 ) >> 0;
-    mouse.y -= ( this.renderPosition.y - this.renderSizes.height * 0.5 ) >> 0;
-    var harmonics = this.renderPosition.getHarmonics();
-    if ( harmonics.sin == 0 && harmonics.cos == 0 )
-    {
-      if ( this.renderSizes.scaleX != 1 || this.renderSizes.scaleY != 1 )
-      {
-        return { x: ( mouse.x / physicRatio - ( ( this.renderSizes.width - this.renderSizes.width * this.renderSizes.scaleX ) / 2 ) ) / this.renderSizes.scaleX >> 0
-          , y: ( mouse.y / physicRatio - ( ( this.renderSizes.height - this.renderSizes.height * this.renderSizes.scaleY ) / 2 ) ) / this.renderSizes.scaleY >> 0
-          , "index": mouse.index };
-      }
-      return { x: mouse.x / physicRatio >> 0
-        , y: mouse.y / physicRatio >> 0
-        , "index": mouse.index };
-    }
+    mouse.x -= this.x;
+    mouse.y -= this.y;
     
-    var x = ( this.renderSizes.width / 2 - mouse.x );
-    var y = ( this.renderSizes.height / 2 - mouse.y );
-    
-    if ( this.renderSizes.scaleX != 1 || this.renderSizes.scaleY != 1 )
+    if ( this._sr == 0 && this._cr == 1 )
     {
       return {
-        "x": ( ( -(x * harmonics.cos + y * harmonics.sin ) + this.renderSizes.width / 2 ) / physicRatio - ( ( this.renderSizes.width - this.renderSizes.width * this.renderSizes.scaleX ) / 2 ) ) / this.renderSizes.scaleX >> 0
-        , "y": ( ( (x * harmonics.sin + y * -harmonics.cos ) + this.renderSizes.height / 2 ) / physicRatio - ( ( this.renderSizes.height - this.renderSizes.height * this.renderSizes.scaleY ) / 2 ) ) / this.renderSizes.scaleY >> 0
+        x: ( mouse.x * this.renderScale.x / physicRatio >> 0 )// - ( ( this.renderSizes.x - this.renderSizes.x * this.renderScale.x ) / 2 ) ) / this.renderScale.x >> 0
+        , y: ( mouse.y * this.renderScale.y / physicRatio >> 0 )//- ( ( this.renderSizes.y - this.renderSizes.y * this.renderScale.y ) / 2 ) ) / this.renderScale.y >> 0
         , "index": mouse.index
-        , "isDown": mouse.isDown
       };
     }
+    
+    var x = mouse.x;//( this.renderSizes.x / 2 - mouse.x );
+    var y = mouse.y;//( this.renderSizes.y / 2 - mouse.y );
+    
     return {
-      "x": ( -(x * harmonics.cos + y * harmonics.sin ) + this.renderSizes.width / 2 ) / physicRatio >> 0
-      , "y": ( (x * harmonics.sin + y * -harmonics.cos ) + this.renderSizes.height / 2 ) / physicRatio >> 0
+      "x": ( ( x * this._cr + y * this._sr ) ) * this.renderScale.x / physicRatio >> 0
+      , "y": ( -( x * this._sr + y * -this._cr ) ) * this.renderScale.y / physicRatio >> 0
       , "index": mouse.index, "isDown": mouse.isDown
     };
   };
@@ -843,61 +956,63 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
    */
   Camera.prototype.mouseDetectorHandler = function( eventType, mouse, physicRatio )
   {
-    if ( this.freeze || this.sleep || this._propagationEvent[ mouse.index ][ "prevent" + eventType ] )
+    if ( !this.enable || this._propagationEvent[ mouse.index ][ "prevent" + eventType ] )
       return;
     
     mouse = this.convertMousePos( mouse, physicRatio );
+    var mouseInScene = {
+      x: mouse.x + this.sceneContainer.x
+      ,y: mouse.y + this.sceneContainer.y
+      ,index: mouse.index, isDown: mouse.isDown
+    };
     
     this.trigger( "mouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
     if ( this[ "onMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
-    if ( this.gui && !this.gui.sleep && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
+    if ( this.gui && this.gui.enable && this.gui[ "oOnMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) || mouse.stopPropagation )
       return;
     
-    if ( this.scene && !this.scene.sleep )
+    if ( this._scene && this._scene.enable )
     {
-      mouse.scenePosition = this.scenePosition;
-      mouse.fieldSizes    = this.fieldSizes;
-      mouse.x += this.scenePosition.x;
-      mouse.y += this.scenePosition.y;
-      for ( var i in this.scene[ "onGlobalMouse" + eventType ] )
+      mouse.sceneContainer = this.sceneContainer;
+      mouse.renderSizes    = this.renderSizes;
+      
+      for ( var i in this._scene[ "onGlobalMouse" + eventType ] )
       {
-        if ( this.scene[ "onGlobalMouse" + eventType ][ i ].enable )
-          if ( this.scene[ "onGlobalMouse" + eventType ][ i ][ "onGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] ) )
+        if ( this._scene[ "onGlobalMouse" + eventType ][ i ].enable )
+          if ( this._scene[ "onGlobalMouse" + eventType ][ i ][ "onGlobalMouse" + eventType ]( mouseInScene, this._propagationEvent[ mouse.index ] ) )
             return;
       }
       for ( var i = this._visibleGameObjects.length - 1, g; i >= 0; --i )
       {
         g = this._visibleGameObjects[ i ];
         
-        if ( gameObjectMouseEvent( eventType, g, mouse, this._propagationEvent[ mouse.index ] ) )
+        if ( gameObjectMouseEvent( eventType, g, mouse, mouseInScene, this._propagationEvent[ mouse.index ] ) )
           return;
       }
     }
     
     if ( !mouse.stopPropagation && !this._propagationEvent[ mouse.index ][ "preventLast" + eventType ] )
     {
-      if ( this.scene && !this.scene.sleep )
+      if ( this._scene && !this._scene.enable )
       {
-        for ( var i in this.scene[ "onLastGlobalMouse" + eventType ] )
+        for ( var i in this._scene[ "onLastGlobalMouse" + eventType ] )
         {
-          if ( this.scene[ "onLastGlobalMouse" + eventType ][ i ].enable )
-            this.scene[ "onLastGlobalMouse" + eventType ][ i ][ "onLastGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
+          if ( this._scene[ "onLastGlobalMouse" + eventType ][ i ].enable )
+            this._scene[ "onLastGlobalMouse" + eventType ][ i ][ "onLastGlobalMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
         }
-        mouse.x -= this.scenePosition.x;
-        mouse.y -= this.scenePosition.y;
       }
-      mouse.scenePosition = undefined;
-      mouse.fieldSizes    = undefined;
+      mouse.sceneContainer = undefined;
+      mouse.renderSizes    = undefined;
       
-      this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
-      if ( this.gui && !this.gui.sleep )
+      this.trigger( "lastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
+      if ( this.gui && !this.gui.enable )
         this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] );
       this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );
     }
   };
   
-  Event.addEventCapabilities( Camera );
+  // Event.addEventCapabilities( Camera );
   Camera.prototype.DEName = "Camera";
   
   CONFIG.debug.log( "Camera loaded", 3 );

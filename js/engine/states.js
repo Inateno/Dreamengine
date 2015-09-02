@@ -34,10 +34,11 @@ function( Event, CONFIG )
       states[ who ] = true;
     }
     
-    this.down = function( who )
+    this.down = function( who, preventReady )
     {
       CONFIG.debug.log( "State down " + who, 3 );
-      checkIsReady( who, false );
+      if ( !preventReady )
+        checkIsReady( who, false );
       Event.trigger( "not" + who, false );
       states[ who ] = false;
     }
@@ -52,8 +53,15 @@ function( Event, CONFIG )
   {
     if ( what == "isReady" || what == "isLoading" )
       return;
+    
+    // if we are gonna to load image prevent here
+    if ( what == "isLoadingImages" && state === true )
+      return;
     var st = states;
+    
+    // if not loading images or if not gonna to load image
     if ( ( !st.isLoadingImages || ( what == "isLoadingImages" && state === false ) )
+      // and check the engine is inited or is gonna to be loaded now
       && ( st.isInited || ( what == "isInited" && state === true ) ) )
     {
       States.up( 'isReady' );
