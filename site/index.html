@@ -1,0 +1,1408 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dream-Engine</title>
+    <link rel="icon" type="image/png" href="ico16.png" />
+    <!-- test push -->
+    <link href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+    <script src="js/jquery.js" type="text/javascript"></script>
+    <script src="js/source.js" type="text/javascript"></script>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="assets/imgs/icon.ico">
+  </head>
+  <body>
+    <div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/all.js#xfbml=1&appId=381877878522759";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+    
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><img src="assets/imgs/logo_boot.png" width="100px"/></a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#Engine" data-target="engine">Engine</a></li>
+            <li><a href="http://dreamirl.com/">Dreamirl's site</a></li>
+            <li><a href="#Games" data-target="games">Games made with</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+    
+    <div class="container">
+      <div class="masthead">
+        <div class="social-networks">
+          <div class="fb-like" data-href="https://facebook.com/dreamirl" data-width="40px" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+          <div><a href="https://twitter.com/DreamirlGames" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @DreamirlGames</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script></div>
+        </div>
+        
+        <h1 class="text-muted"><img src="assets/imgs/logo_boot.png" width="300px"/></h1>
+        <h3 style="margin-left:85px;margin-top:-20px;color:#DDDDDD;">In games we trust</h3>
+        
+        <ul class="nav nav-justified">
+          <li><a href="#Engine" data-target="engine">Engine</a></li>
+          <li><a href="http://dreamirl.com/">Dreamirl's site</a></li>
+          <li><a href="#Games" data-target="games">Games made with</a></li>
+          <li><a href="#Howto" data-target="howto">How to</a></li>
+          <li><a href="/doc" data-target="doc">API Doc</a></li>
+        </ul>
+      </div>
+      
+      <div class="jumbotron">
+        <div class="container">
+          <div id="home" class="page engine">
+            <h1 style="text-align:center"><img src="assets/imgs/logo.png" /></h1>
+            <p>
+              Hello there, if you are here, it's probably because you're interested in making HTML5 Games, or you're just curious about our game engine.<br />
+              So here is the github's link, more descriptions/tutorials are coming soon.<br />
+              The "How to" will help you to start, and the <a href="/doc">documentation</a> is available but not complete, feel free to help me complete it :).
+            </p>
+            <h3><a href="https://github.com/inateno/dreamengine">Dream-Engine on Github</a></h3>
+            <h2><a href="http://twitch.tv/dreamirl">Also feel free to come on our channel on Twitch and see how we do/ask questions</a></h2>
+            <p>
+              If you are new in JavaScript (or if you only develop in jQuery), I strongly recommend you check out the <a href="http://requirejs.org/">RequireJS</a> before you start a new project using our Dream-Engine. You can also use the standalone version of our engine that only requires RequireJS to load the engine.<br />
+              
+              Also, if you don't know <a href="http://gruntjs.com/">Grunt</a>, you might want to check it out beforehands (even if you can do it later), as this will save you a lot of time to build your own game (especially games on specific platforms).
+            </p>
+            <h2><a href="#Howto" data-target="howto">Start with the "How to"</a></h2>
+            <p>
+              There is currently the API Documentation website, and I'm filling it. Regardless, the code is well commented (Prioritizing on what you will use for sure). There is also the "How To" which is a great way to get started with the Engine.<br />
+              Documentation is made for those who want get closer with the engine, or those who want contribute.
+            </p>
+          </div>
+          
+          <div id="page" class="page games">
+            <p>
+              The Games featured below were made using the Dream-Engine.<br />
+              If you made anything using the Dream Engine (a game, a prototype etc...), make sure to let us know so we can feature it here !<br />
+              (If your project is getting displayed here we will need a 256px icon, a short presentation (in English if you can) that will be visible 
+              on this page as well as a longer one that will be displayed if someone presses "About" on your Project's card.)
+              <br /><br />
+              If you wish to contact us: <a href="http://facebook.com/Dreamirl">Facebook</a> - <a href="http://twitter.com/dreamirlgames">Twitter</a> - contact[ at ]dreamirl[ dot ]com
+            </p>
+          </div>
+          
+          <div id="page" class="page howto">
+            <h2>Beginner's guide about the Dream-Engine</h2>
+            <p>
+              Do you wish to try the Dream-Engine ? If yes, you've come to the right place !
+              <br />
+              With this short guide, you will be able to do things like <a href="http://dreamirl.com/protos/shmup">"this"</a> with no efforts.
+              <br />
+              We are going to use GameObjects (with inheritance), SpriteRenderer, TextRenderer, Keyboard and Mouse Inputs, Gamepad API, Audio, and after all this, compile it all using Grunt.
+              <br />
+              By the end of this tutorial, you should be able to make your own complete game !
+              <br />
+              Let's get started then ?
+            </p>
+            <h3>Before coding, managing folders and files</h3>
+            <p>
+              Copy all the sample "kill-bubble" in a new folder (being the least filled folder that we have at our disposal). This is my personal way of doing it : "(grunt file, _dev folder, release folder)"<br/>
+              You can of course do as you please, but keep in mind that I will be using this template for the rest of the tutorial.
+              <br />
+              We are only going to work on the "_dev" so if you see something such as "Go in the 'js' folder", it will actually be "_dev/js".
+              <br />
+              Rename the balls.html if you want to as well as the title or other meta. You don't have to rename css/js files.
+            </p>
+            <ul>
+              <li>The "custom" folder : I put everything that does not come from the engine.</li>
+              <li>The "datas" folder : This is where you'll find all the default data files used by the engine, each of them is used to declare what you are going to use (images, audios, inputs, localisation etc...)</li>
+              <li>The "ext_libs" folder : Contains only the required libraries but you can add new external libraries here if you need any.</li>
+              <li>The "platforms" folder : Contains the files needed to compile on specific platforms (currently only w8).</li>
+              <li>The "DreamEngine-min-require.js" is the compiled version of the engine.</li>
+              <li>The "files.js" is the required config (that's where you have to write your custom files)</li>
+              <li>The "main.js" will start the engine (and launch the game using it). You can set some parameters here but usually you can just everything as it is (simply give the init and start functions, custom gameLoop and the data files, you can change it if you want but it's not necessary).</li>
+            </ul>
+            <p>Just open js/custom/Game.js to remove the current game. Remove from line 17 to 144 and add this :</p>
+<textarea rows="11" disabled="disabled">
+  Game.init = function()
+  {
+    console.log( "engine inited, init the game" );
+  }
+  Game.start = function()
+  {
+    console.log( "engine start")
+    
+    // set the loading down allow to create all what you need before really start it (better feeling)
+    setTimeout( function(){ DE.States.down( "isLoading" ); }, 200 );
+  }
+</textarea>
+            <p style="color:red">If you encounter any difficulties or need additional help, you can check out the full sample source code available in your "samples" directory (little-shmup).</p>
+            
+            <h3 id="customEngine">Customize the engine for your own game</h3>
+            <p>
+              First thing you need to do is have your Inputs, Images and Audios that you're going to need in your game.<br />
+              Copy the folders "audio" and "img" from "sample/little-shmup/_dev" in your "_dev" folder.<br />
+              Then go into your "js/datas" folder and open "audiosList.js", in the audioList's array, you have to put all the musics and FXs that you wish to use : 
+            </p>
+<textarea rows="8" disabled="disabled">
+    // args are: [ "name the engine use", "path to", [ audio formats in an array ], { an optional params object }, is eloquent I think I don't have to explain, if it's an FX set isMusic to false (otherwhise it'll go in musics library)
+    // MUSICS
+    [ "music", "audio/awake10_megaWall", [ 'ogg', 'mp3' ], { "preload": true, "loop": true, "isMusic": true } ]
+    
+    // FX
+    ,[ "piew", "audio/piew", [ 'ogg', 'mp3' ], { "preload": true, "loop": false, "isMusic": false } ]
+</textarea>
+            <p>This is quite simple so I won't be spending any more time on it. Now proceed to open dictionary.js, if you want to use more languages, you can do so, but I personnaly made it for English and French so far.</p>
+<textarea rows="15" disabled="disabled">
+  var dictionary = {
+    "en": {
+      "loose"   : "You are dead"
+      ,"replay" : "Replay ?"
+      ,"play"   : "Play"
+      ,"benchmark"   : "Run benchmark"
+    }
+    , "fr" : {
+      "loose"   : "Vous êtes mort"
+      ,"replay" : "Rejouer ?"
+      ,"play"   : "Jouer"
+      ,"benchmark"   : "Lancer le test"
+    }
+  };
+</textarea>
+            <p>Now set "imagesDatas.js", it's a little bit more complicated because there are a lot of options, and that's also where we'll be setting up the Quality Settings.</p>
+<textarea rows="30" disabled="disabled">
+  var datas = {
+    // avalaible images sizes (engine will load optimisest images depends on user resolution)
+    screenSizes: [
+      { "w": 1000, "h": 1080, "path": "" }
+      ,{ "w": 666, "h": 720, "path": "", "notRatio": true }
+      ,{ "w": 333, "h": 360, "path": "", "notRatio": true }
+    ]
+    
+    // index of the used screen size during game conception
+    , conceptionSizeIndex: 0
+    
+    // images folder name 
+    , folderName: "img"
+    
+    // usage name, real name (can contain subpath), extension, parameters
+    , imagesList: [
+      [ "ship", "ship", "png", { "load": true, "totalFrame": 10, "eachAnim": 40
+        , "isAnimated": false, "isLoop": false } ]
+      ,[ "p-fire", "p-fire", "png", { "load": true, "totalFrame": 10, "eachAnim": 40
+          , "isAnimated": true, "isLoop": false } ]
+      ,[ "enemies", "enemies", "png", { "load": true, "totalFrame": 4, "isAnimated": false, "isLoop": false } ]
+      ,[ "reactor", "reactor", "png", { "load": true, "totalFrame": 4, "eachAnim": 40
+          , "isAnimated": true, "isLoop": true } ]
+      ,[ "e-fire", "e-fire", "png", { "load": true, "totalFrame": 4, "eachAnim": 80
+          , "isAnimated": true, "isLoop": true } ]
+      ,[ "heart", "heart", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      ,[ "btn", "btn", "png", { "load": true, "totalFrame": 3, "isAnimated": false } ]
+    ]
+  };
+</textarea>
+            <p>
+              Now, let's take a look at some details.
+              <br />
+              First of all, screenSizes are the different available qualities for your game, you can have just one set up, but if you want to see your game running well on mobiles, and have a great quality on a desktop computer, you should use this file to make more than one.
+              <br />
+              You provide a width (w) and a height (h) and you can set a specific path for the quality. This path will be a suffix to the folderName.
+              <br />
+              There is also another way to have a good customization without having to resize all of your images and creating new folders. You can simply set the "notRatio" to true, and this will make it so that the given sizes aren't the native sizes for your images (this feature is currently work in progress).
+              <br /><br />
+              <b>You shoudln't set a path that's different from the original quality AND notRatio to true at the same time, because when you set notRatio, the Engine resizes images with the ratio from the original size and replace it with the current one.</b>
+              <br /><br />
+              conceptionSizeIndex is the index in the screenSizes array which you build the game in (in this case, we'll make the game based on 1000*1080, so it's 0, but I could put 1 if I were to make the game based on 666*720. You can of course set this as your default size, <b>BUT you cannot set notRatio on the conceptionSizeIndex size attribute if you want to modify the conceptionSize. You have to manually resize all of your images for the given ratio.</b>
+              <br /><br />
+              folderName is the path to images
+              <br /><br />
+              Now, to load your images, you have to use an array with the following parameters:
+            </p>
+            <ul>
+              <li>The name you want to use in the code (current: ship)</li>
+              <li>The Image name being the same one as the one in your folder (current: ship, but you should use my-super_awes0me.ship, you know you should)</li>
+              <li>The Image's format</li>
+              <li>Object parameters with the following options (keep in mind that all the options here are meant to save you some time when you create a SpriteRenderer, so use them wisely and you'll see a good use for them later on) :
+                <ul>
+                  <li>{Boolean=true} load -> Used to load the image on the loading screen</li>
+                  <li>{Int=1} totalFrame -> The total amount of frames in your image (only if it's a Spriteset). If you set this as 0 or 1, the engine will automatically set "isAnimated" to false, saving some calculating time</li>
+                  <li>{Int=1} totalLine -> The total amount of lines in your image (only if it's a Spriteset)</li>
+                  <li>{Int=0} eachAnim -> The delay between each frame (in milliseconds)</li>
+                  <li>{Boolean=false} isReversed -> Used to have a reversed animation on the Sprite by default</li>
+                  <li>{Boolean=false} isAnimated -> Used to automatically animate the Sprite by default</li>
+                  <li>{Boolean=false} isPaused -> Used to pause the image by default when you use Sprites (and if you set isAnimated: true)</li>
+                  <li>{Boolean=true} isLoop -> Used to loop animations by default if you use Sprites</li>
+                </ul>
+              </li>
+            </ul>
+            
+            <p>Now, open inputsDatas.js, and you can see that this is another file that has many options. Try to do this as best as you can, trust me, it will save you a lot of trouble later on :)</p>
+<textarea rows="12" disabled="disabled">
+  var inputsList = {
+    "left":{"keycodes":[ "K.left" , 'K.a', 'K.q' ] }
+    ,"right":{"keycodes":[ "K.right" , 'K.d' ] }
+    ,"up":{"keycodes":[ "K.up" , 'K.z', 'K.w' ] }
+    ,"down":{"keycodes":[ "K.down" , 'K.s' ] }
+    ,"haxe":{"keycodes":[ "G0.A.LHorizontal" ] }
+    ,"vaxe":{"keycodes":[ "G0.A.LVertical" ] }
+    ,"fire":{"keycodes":[ "K.space" , 'G0.B.A' ], "interval": 100 }
+    ,"confirm":{"keycodes":[ 'K.enter', 'G0.B.A' ], "interval": 500 }
+    ,"back":{"keycodes":[ 'K.escape', 'G0.B.B' ], "interval": 500 }
+  };
+</textarea>
+            <!-- ending translate plz -->
+            <p>
+              Some details, here it's not an array because we want a name on our inputs.<br />
+              I explain with the "fire" input.
+            </p>
+            <ul>
+              <li>"fire" is the input name</li>
+              <li>"keycodes" is an array with all inputs (keyboard or gamepad) that trigger this input.<br />
+                If you want use gamepad axes I suggest you to do it in an other input, then catch this events in an other handler because an axe value goes from -1 to 1 and a button is 0 to 1 (I did it here for left/right - up/down and haxe/vaxe, you'll see in the code)<br />
+                To see all inputs available open <a href="https://github.com/Inateno/Dreamengine/blob/master/js/engine/classes/Inputs.js">Inputs class</a> starting at line 34
+                </li>
+              <li>then you can set "interval", the input will trigger each interval (milliseconds)</li>
+              <li>isLongPress@Bool is a special parameters, if you set it to true, the input will trigger only after the given delay (when you call Inputs.key)</li>
+              <li>stayOn@Bool make special effect to, if you set it to true, the input will trigger until you release the button (when you call Inputs.key)</li>
+            </ul>
+            <p>Wooo, that's all for customizing the engine. As I said it's a little bit complicated, and sometimes it boring, but honestly this will save you to much time later</p>
+            
+            <h3 id="customFiles">Custom files</h3>
+            <p>
+              We are making a shmup game, so we need a Player class, Enemy, and Bullet.
+              <br />
+              The Dreamengine is made to think inherits and architecture, I'm going to show you how to do this and make something maintainable.
+              <br />
+              So create in the js/custom folder the files Player.js Enemy.js Bullet.js and datas.js (to save all the custom datas of the game).
+              <br />
+              Add these files in js/files.js like this (there is already Game and customLoop):
+            </p>
+<textarea rows="5" disabled="disabled">
+    ,'Player'         : 'custom/Player'
+    ,'Enemy'          : 'custom/Enemy'
+    ,'Bullet'         : 'custom/Bullet'
+    ,'datas'          : 'custom/datas'
+</textarea>
+            <p>Now we write the basic needs for RequireJS. In each custom files created write this</p>
+<textarea rows="9" disabled="disabled">
+define( [ 'datas', 'DREAM_ENGINE' ]
+, function( datas, DE )
+{
+  var myFunction = function()
+  {
+  }
+  return myFunction;
+} );
+</textarea>
+            <p>
+              In js/custom/datas.js remove 'datas', 'DREAM_ENGINE' (and the same args in the function), datas don't need anybody, it's just json datas, and replace myFunction by datas = {} (it's not a function!)<br />
+              In Player.js and Enemy.js add 'Bullet' in the define array and Bullet in function's arguments
+              <br />
+              The Game.js will create the player, the Enemies and he need the datas to know what to do. So add these files in the Game.js define (as we do it before) you should have this at the beginning of your Game.js
+            </p>
+<textarea rows="3" disabled="disabled">
+define( [ 'DREAM_ENGINE', 'Player', 'Enemy', 'datas' ],
+function( DE, Player, Enemy, datas )
+</textarea>
+            <p>Ok we are ready start</p>
+            
+            <h3>The basics, Scene, Render, GameObject</h3>
+            <p>
+              Before write Player or Enemy, we have to write the basics to see the engine running without problems (if you forget images, or do a mistake it'll not load).<br />
+              We already wrote an empty Game.init and Game.start function. If you look in main.js you can see that we give at the engine theses functions.<br />
+              In fact when the engine is ready it initialize dictionary, Inputs, ImageManager, SystemDetection (by default it's web only, we'll see this later), and load the loader (you need a loader.png in the base path you given) and when this loader is loaded, the engine call your init function than you gift before.<br />
+              At this moment the engine start load custom Images and you should see the Dreamirl's loader.<br />
+              When the engine finished to load it call your start function.<br /><br />
+              So in the init function, you can set some parameters (like debug), create Scenes or Renders but you can't make GameObjects using images here, you have to do this in the start function<br />
+              The init is short:
+            </p>
+<textarea rows="24" disabled="disabled">
+  Game.init = function()
+  {
+    DE.CONFIG.DEBUG_LEVEL = 1; // debug
+    
+    // create render "render" is the element id, fullScreen is the method you want to, if you don't want stretched, set a width and a height
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+    Game.render.init();
+    
+    // create scene - name it only
+    Game.scene = new DE.Scene( "Test" );
+    
+    // create your camera, cam size, and cam position in the Render, then options
+    Game.camera = new DE.Camera( Game.screen.w, Game.screen.h, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,200)" } );
+    
+    // give a scene at the camera
+    Game.camera.scene = Game.scene;
+    // bind it on the render
+    Game.render.add( Game.camera );
+    
+    // launch the engine (it's not done by the engine because maybe you want launch it later)
+    DE.start();
+  }
+</textarea>
+            <p>Add on the top the used sizes, we will need it to place the player, enemies, and if we change it it's only here. The size is the conceptionSizeIndex in the imagesDatas.</p>
+            <textarea rows="2" disabled="disabled">Game.screen = { "w": 1000, "h": 1080 };</textarea>
+            
+            <p>
+              With this you have the Render, the Scene and the Camera.<br />
+              If you did well, you should get a blue screen after the loading by launching the html in your browser.
+              <br /><br />
+              
+              Before starting custom classes, we can already write a part of the start function by making the menu (very simple menu), in the Game.start (before the setTimeout, always before) add:
+            </p>
+<textarea rows="28" disabled="disabled">
+    /** Game Button **/
+      var gameBtn = new DE.GameObject( {
+        "x": Game.screen.w / 2, "y": Game.screen.h / 2
+        , "renderers": [
+          // to make a "good button" I recommend you to use a SpriteSet with 3 frame
+          // and changing the currentFrame when trigger GameObject's mouse events
+          // you can make a "Button GameObject class" of course (I have to re-write all Gui)
+          new DE.SpriteRenderer( { "spriteName": "btn" } )
+          // an other way to do it without Sprite
+          /*new DE.BoxRenderer( {
+            "fillColor": "rgb(200,100,100)", "strokeColor": "white", "method": "fillAndStroke"
+          }, 300, 100 )*/
+          , new DE.TextRenderer( {
+            "fontSize": 32, "font": "Arial Black" // not a nice font but just to show you how to :)
+          }, 500, 60, DE.LangSystem.get( "play" ) )
+        ]
+        , "collider": new DE.FixedBoxCollider( 550, 70 )
+      } );
+      gameBtn.onMouseEnter = function( /*mouse*/ ){ this.renderers[ 0 ].setFrame( 1 ); }
+      gameBtn.onMouseLeave = function(){ this.renderers[ 0 ].setFrame( 0 ); }
+      gameBtn.onMouseUp = function()
+      {
+        this.renderers[ 0 ].setFrame( 0 );
+        Game.startGame();
+      }
+      Game.gameBtn = gameBtn;
+      Game.scene.add( Game.gameBtn ); // important, add the object otherwise you'll not see it
+      /****/
+</textarea>
+            <p>I commented the code but, as resume:</p>
+            <ul>
+              <li>Make a GameObject with an optional params object</li>
+              <li>Create a SpriteRenderer by giving at least the spriteName (here you can change parameters we have set in the imagesDatas, but we did well so nothing to change)</li>
+              <li>Create a TextRenderer by providing a param object (can be empty), text, and buffer's sizes</li>
+              <li>Make a FixedBoxCollider with height and width</li>
+              <li>The pointers events are simple, "onMouse" + eventName and write a function. You can bind with a on() but it's slower, and don't provide the "this" in the right context (because it's again more slower).<br />
+                It's an architecture question only. If it's the object's event handler, you should use an intern method. If it's an extern listener, use on().<br />
+                Mouse events give a mouse attributes (not got here), you can stop the current event by returning true, and stop the propagation by using mouse.stopPropagation = true;</li>
+            </ul>
+            <p>
+              At this point you could see than we can already make a simple button plugin's with GameObjects, I'll do it when the Gui will be ready.<br />
+              You can think "why we don't used the GUI", and the reason is simple. I'm refactoring this part of the engine.<br />
+              But we will be able to use the GameObjects or DOM, so if you like this method (or to append GUI on a GameObject directly) this will work.<br />
+              Okay if you launch the html file you should have a button "Play" in the middle of the screen (if you click you'll get an error obviously we didn't created the startGame function)
+            </p>
+            
+            <h3>The Player</h3>
+            <p>
+              Important first step with the engine. Classe's inheritance.<br />
+              I didn't make a "extend" method, I don't like that, you provide an object as constructor, you use "this" inside methods but not inside the constructor, and btw you can't make private methods because you are inside a json object.<br />
+              Go in Player.js and replace the content by this, we can directly set custom attributes
+            </p>
+<textarea rows="28" disabled="disabled">
+  // args are written with a _ because they become private (we use args later in methods)
+  function Player( _screenSizes )
+  {
+    DE.GameObject.call( this, {
+      "x": _screenSizes.w / 2, "y": _screenSizes.h - 280, "zindex": 5, "tag": "player"
+      ,"renderer": new DE.SpriteRenderer( { "spriteName": "ship", "scale": 0.7 } )
+      ,"collider": new DE.CircleCollider( 20 )
+    } );
+    
+    var _self = this;
+    // create the reactor as child directly
+    this.add( new DE.GameObject( {
+      "x": 0, "y": 120, "renderer": new DE.SpriteRenderer( { "spriteName": "reactor", "scale": 0.7 } )
+    } ) );
+    this.childrens[ 0 ].position.setRotation( Math.PI );
+    
+    this.speed = 10;
+    this.axes  = { x: 0, y: 0 }; // useful for gamepad to do like this
+    this.life  = 3;
+  }
+  
+  // inherits from GameObject, and get the supr
+  Player.prototype = new DE.GameObject();
+  Player.prototype.constructor = Player;
+  Player.prototype.supr        = DE.GameObject.prototype;
+  
+  return Player;
+</textarea>
+            <p>
+              We created a customized GameObject, first we call the GameObject, then you can write your attributes and methods inside the function or add them later in the prototype.<br />
+              At the end, we make the rest of inheritance by setting the prototype, redirecting to the good constructor, and the super (to GameObject).<br />
+              After this you can set prototyped method.<br /><br />
+              
+              Create the Player and add it to the scene in Game.start before setTimeout (I won't say it next time :p)
+            </p>
+<textarea rows="3" disabled="disabled">
+    Game.player = new Player( Game.screen );
+    Game.scene.add( Game.player );
+</textarea>
+            <p>
+              Wooow, but that's not exciting yet.<br />
+              Go back to Player.js, we are going to make it moving and firing!<br />
+              Add inside the main Player scope (because we use private attributes) the following methods.
+            </p>
+<textarea rows="35" disabled="disabled">
+    this.init = function()
+    {
+      this.life = 3;
+      this.position.setPosition( _screenSizes.w / 2, _screenSizes.h - 280 );
+      for ( var i = 0; i < this.hearts.length; ++i )
+        this.hearts[ i ].enable = true;
+      this.enable = true;
+    }
+    
+    this.checkPos = function()
+    {
+      // I should make a middleware for this case maybe
+      if ( this.position.x < this.collider.radius )
+        this.position.x = this.collider.radius;
+      else if ( this.position.x > _screenSizes.w - this.collider.radius )
+        this.position.x = _screenSizes.w - this.collider.radius;
+      if ( this.position.y < this.collider.radius )
+        this.position.y = this.collider.radius;
+      else if ( this.position.y > _screenSizes.h - this.collider.radius )
+        this.position.y = _screenSizes.h - this.collider.radius;
+    }
+    this.checkInputs = function()
+    {
+      this.checkPos();
+      if ( this.flipping )
+      {
+        this.translateX( this.speed * _lastDir );
+        return;
+      }
+      
+      // translate along axes
+      var axeH = this.axes.x;
+      var axeV = this.axes.y;
+      if ( DE.Inputs.key( "up" ) )
+        axeV = -1;
+      else if ( DE.Inputs.key( "down" ) )
+        axeV = 1;
+      if ( DE.Inputs.key( "left" ) )
+        axeH = -1;
+      else if ( DE.Inputs.key( "right" ) )
+        axeH = 1;
+      
+      // keyboard can axe to 1-1 cut it to 1/2-1/2 like gamepad axe
+      if ( Math.abs( axeV ) == 1 && Math.abs( axeH ) == 1 )
+      {
+        axeV = axeV * 0.5;
+        axeH = axeH * 0.5;
+      }
+      
+      // little animation
+      if ( axeH > 0 )
+        this.renderers[ 0 ].setFrame( 1 );
+      else if ( axeH < 0 )
+        this.renderers[ 0 ].setFrame( 9 );
+      else
+        this.renderers[ 0 ].setFrame( 0 );
+      
+      this.translate( { x: axeH * this.speed, y: axeV * this.speed } );
+      
+      // here chek the fire button input (gamepad and keyboard)
+      if ( DE.Inputs.key( "fire" ) )
+        this.fire();
+    }
+    
+    // make bullet
+    this.fire = function( mouse, target )
+    {
+      DE.AudioManager.fx.play( "piew" );
+      this.scene.add( new Bullet( _screenSizes, this ) );
+    }
+    
+    var _lastDir = 0, _lastFlip = Date.now(), _flipInterval = 600
+      , _flipDelay = 500, _lastCheck = Date.now();
+    this.flip = function( dir )
+    {
+      if ( this.flipping )
+        return;
+      dir = dir > 0 ? 1 : -1;
+      var checkDir = _lastDir
+        , checkTime = _lastCheck;
+      _lastDir = dir;
+      _lastCheck = Date.now();
+      if ( dir != checkDir || Date.now() - _lastFlip < _flipInterval
+          || Date.now() - checkTime > _flipDelay )
+        return;
+      _lastFlip = Date.now();
+      // do the flip
+      var rd = this.renderers[ 0 ];
+      rd.isAnimated = true;
+      rd.isReversed = dir < 0 ? true : false;
+      rd.restartAnim();
+      this.flipping = true;
+    }
+    // on anim end kill the flip
+    this.renderers[ 0 ].onAnimEnd = function()
+    {
+      _self.flipping = false;
+      this.setFrame( 0 );
+    }
+    
+    this.lastDamage = Date.now();
+    this.damageInterval = 1000;
+    
+    this.hearts = [];
+    this.createGui = function()
+    {
+      for ( var i = 0; i < this.life; ++i )
+      {
+        var heart = new DE.GameObject( {
+          "x": i * 65 + 40, "y": _screenSizes.h - 60, "zindex": 20
+          , "renderer": new DE.SpriteRenderer( { "spriteName": "heart", "scale": 0.6 } )
+        } );
+        this.hearts.push( heart );
+        this.scene.add( heart );
+      }
+      
+      // of for this part I don't recommend you to do like this if it's not the GameObject's Gui
+      // so for menus I recommend you to make a independent singleton
+      this.gui = new DE.GameObject( { "x": _screenSizes.w / 2, "y": _screenSizes.h / 2, "zindex": 25 } );
+      var loose = new DE.GameObject( {
+        "renderer": new DE.TextRenderer( {
+           "fontSize": 64, "font": "Arial Black" // not a nice font but just to show you how to :)
+        }, 700, 100, DE.LangSystem.get( "loose" ) )
+      } );
+      this.gui.restartBtn = new DE.GameObject( {
+        "y": 150
+        , "renderers": [
+          new DE.SpriteRenderer( { "spriteName": "btn" } )
+          , new DE.TextRenderer( {
+            "fontSize": 32, "font": "Arial Black"
+          }, 300, 60, DE.LangSystem.get( "replay" ) )
+        ]
+        , "collider": new DE.FixedBoxCollider( 550, 70 )
+      } );
+      this.gui.restartBtn.onMouseEnter = function()
+      {
+        this.renderers[ 0 ].setFrame( 1 );
+      }
+      this.gui.restartBtn.onMouseLeave = function()
+      {
+        this.renderers[ 0 ].setFrame( 0 );
+      }
+      this.gui.restartBtn.onMouseUp = function()
+      {
+        this.parent.enable = false;
+        this.renderers[ 0 ].setFrame( 0 );
+        _self.trigger( "restart" ); // use trigger method - Game will catch it
+      }
+      this.gui.add( loose );
+      this.gui.add( this.gui.restartBtn );
+      this.scene.add( this.gui );
+      this.gui.enable = false;
+    }
+    
+    // register down keys to detect a flip intention
+    DE.Inputs.on( "keyDown", "left", function(){ _self.flip( -1 ) } );
+    DE.Inputs.on( "keyDown", "right", function(){ _self.flip( 1 ) } );
+    // when menu is up, check gamePad keys
+    DE.Inputs.on( "keyDown", "confirm", function(){
+      if ( _self.gui.enable )
+        _self.gui.restartBtn.onMouseUp();
+    } );
+    
+    // register axes listeners - we use different than keyboard because keyboard is "left" "right"
+    // with gamepad it's just h-axe or v-axe and get the force value
+    DE.Inputs.on( "axeMoved", "haxe", function(val){ _self.updateAxes( val, undefined ); } );
+    DE.Inputs.on( "axeMoved", "vaxe", function(val){ _self.updateAxes( undefined, val ); } );
+    DE.Inputs.on( "axeStop", "haxe", function(){ _self.updateAxes( 0, undefined ); } );
+    DE.Inputs.on( "axeStop", "vaxe", function(){ _self.updateAxes( undefined, 0 ); } );
+    
+    this.addAutomatism( "checkInputs", "checkInputs" );
+</textarea>
+            <p>And in the prototype</p>
+<textarea rows="20" disabled="disabled">
+  Player.prototype.getDamage = function()
+  {
+    if ( Date.now() - this.lastDamage < this.damageInterval )
+      return;
+    this.lastDamage = Date.now();
+    this.life--;
+    if ( this.life < 0 )
+    {
+      // active loose gui
+      this.gui.enable = true;
+      // DE.AudioManager.fx.play( "kaboom" );
+      this.enable = false;
+      return;
+    }
+    this.hearts[ this.life ].enable = false;
+  }
+  
+  // here update axes, and flip intention
+  Player.prototype.updateAxes = function( x, y )
+  {
+    if ( x != 0 && Math.abs( this.axes.x ) < 0.7 && this.axes.y < 0.5 && Math.abs( x ) > 0.8 )
+      this.flip( x );
+    this.axes = {
+      'x': x !== undefined ? x : this.axes.x
+      ,'y': y !== undefined ? y : this.axes.y
+    };
+  }
+</textarea>
+            <p>
+              Ok, it's time to explain.
+              <br />
+              We added the method init (when restart game), checkPos (provide area limits), checkInputs (to control the ship), fire, flip (little feature to dodge by flipping on the sides), createGui (create heart and restart button), getDamage in the prototype and updateAxes in the prototype.<br />
+              Each function seems to me eloquent so I don't explain each of them (you knows JavaScript) but I explain the engine features.<br />
+              Look at the last lines in the main scope:
+            </p>
+            <ul>
+              <li>We registered events directly on Inputs. For gamepad's axes it's an other handler to catch forces and detect the flip depending on the value of this force (double tap to produce a flip)</li>
+              <li>We registered an automatism, it's something that the GameObject will call each frame but you can precise an interval (the first argument is the name for the automatism, the type is the called method)</li>
+            </ul>
+            <p>
+              In the createGui method we created a button "restartBtn" that trigger a restart event on mouseUp.<br />
+              Bind this in Game.js (after player creation) and disable the player to don't see it in the menu:
+            </p>
+<textarea rows="7" disabled="disabled">
+    /* added previously
+      Game.player = new Player( Game.screen );
+      Game.scene.add( Game.player );*/
+    Game.player.createGui();
+    Game.player.on( "restart", function(){ Game.startGame(); } );
+    Game.player.enable = false;
+</textarea>
+            <p>Set the fxs volume lower</p>
+<textarea rows="2" disabled="disabled">
+DE.AudioManager.fx.setVolume( 10 );
+</textarea>
+            <p>At this point you can't see your "Player" because we didn't create the "StartGame "function, add after the start function.</p>
+<textarea rows="19" disabled="disabled">
+  Game.startGame = function()
+  {
+    Game.run = true;
+    Game.gameBtn.enable = false;
+    // clean the scene
+    for ( var n = 0; n < Game.scene.gameObjects.length; ++n )
+    {
+      if ( Game.scene.gameObjects[ n ].tag.match( "enemy|bullet" ) )
+        Game.scene.gameObjects[ n ].askToKill();
+    }
+    // init player
+    Game.player.init();
+    for ( var i in datas.waves )
+      datas.waves[ i ].readed = false;
+    _firstCheck = false;
+    // start the music
+    DE.AudioManager.music.stopAllAndPlay( "music" );
+  }
+</textarea>
+            <p>
+              Nothing exceptional here, we just used the music manager, and cleaned the scene by parsing all gameObjects by checking the tag (we have to create Bullet and Enemy still )<br /><br />
+              Now if you refresh and click "Play" you can control your ship with keyboard (and with gamepad if you use chrome)<br />
+              <b>tadaaam....</b><br /><br />
+              Hum ok, we have some work to do to finish this "game". But you already know lot of things to be able to make games.
+              <br />
+              In the following lines, we are going to see how to delete objects, it's very simple (just call askToKill) and make some collisions detection.
+            </p>
+            <h3>Enemy and Bullet - collisions, enemy's deletion</h3>
+            <p>
+              To move a bullet, we will use the "addAutomatism" method. It's very powerfull to make some IA, and you can remove an automatism (with removeAutomatism(name)) so you can make an automatism call an other, destroying himself, etc... it's like "co-routine" in C# but more easy and "clean" in my opinion :)<br />
+              If the object is disabled, all automatisms are also disabled.<br /><br />
+              If you want you can copy Enemy.js, Bullet.js and datas.js from the custom folder in the sample, and this will be finished, anyway I paste code here.<br /><br />
+              Open Bullet.js
+            </p>
+<textarea rows="10" disabled="disabled">
+  // args are written with a _ because they become private (we use args later in methods)
+  // player reference is optionnal, only when it's an enemy instantiating a bullet
+  function Bullet( _screenSizes, _parent, _player )
+  {
+    DE.GameObject.call( this, {
+      "x": _parent.position.x, "y": _parent.position.y, "zindex": _parent.zindex + 1
+      , "tag": _parent.tag == "player" ? "b-p" : "b-e"
+      , "renderer": new DE.SpriteRenderer( { "spriteName": ( _parent.tag == "player" ? "p" : "e" ) + "-fire"
+                                          , "scale": 0.7 } )
+      , "collider": new DE.CircleCollider( 30 )
+    } );
+    this.vector = { x: 0, y: 0 };
+    
+    if ( _parent.tag == "player" )
+    {
+      this.vector.y = -10;
+      this.position.y -= 50;
+      this.tag = "p-bullet";
+      this.renderers[ 0 ].onAnimEnd = function()
+      {
+        this.startFrame = 8;
+        this.isLoop = true;
+        this.restartAnim();
+      }
+    }
+    else
+    {
+      this.position.y += datas.enemies[ _parent.name ].bulletOffset;
+      this.vector.y = 10;
+      this.tag = "e-bullet";
+    }
+    
+    this.gameLogic = function()
+    {
+      this.translate( this.vector );
+      
+      if ( this.position.y < -50 || this.position.y > _screenSizes.h + 50 )
+        this.askToKill();
+      
+      if ( _player )
+      {
+        if ( _player.enable && !_player.flipping
+            && DE.CollisionSystem.circleCollision( this.collider, _player.collider ) )
+        {
+          this.askToKill();
+          _player.getDamage();
+        }
+      }
+      else
+      {
+        // player bullets, checking collisions with all objects in the scene
+        var gos = this.scene.gameObjects;
+        for ( var n = 0, t = gos.length, g; n < t; ++n )
+        {
+          g = gos[ n ];
+          if ( g.tag == "enemy" && DE.CollisionSystem.circleCollision( this.collider, g.collider ) )
+          {
+            g.getDamage();
+            this.askToKill();
+            return;
+          }
+        }
+      }
+    }
+    
+    this.addAutomatism( "logic", "gameLogic" );
+  }
+  
+  Bullet.prototype = new DE.GameObject();
+  Bullet.prototype.constructor = Bullet;
+  Bullet.prototype.supr        = DE.GameObject.prototype;
+  
+  return Bullet;
+</textarea>
+            <p>Open Enemy.js</p>
+<textarea rows="10" disabled="disabled">
+  // optimising performances here by passing the player to check collisions only with this objects
+  // (we don't need to search it inside all gameObjects,
+  //  and we will give the player's reference to Bullets to do the same)
+  function Enemy( _screenSizes, params, _player )
+  {
+    var _myd = datas.enemies[ params.name ];
+    DE.GameObject.call( this, {
+      "x": params.x, "y": params.y, "name": params.name, "tag": "enemy"
+      ,"renderer": new DE.SpriteRenderer( { "spriteName": _myd.spriteName
+                                         , "startFrame": _myd.frame, "scale": _myd.scale || 1 } )
+      ,"collider": new DE.CircleCollider( _myd.radius || 50
+                        , { "offsetX": _myd.colOffsetX || 0, "offsetY": _myd.colOffsetY || 0 } )
+    } );
+    
+    this.lastFire   = Date.now();
+    this.fireRate   = _myd.fireRate;
+    this.life       = _myd.life;
+    this.offsetFire = _myd.offsetFire || 0;
+    this.speed      = _myd.speed || 4;
+    
+    this.gameLogic = function()
+    {
+      if ( this.position.y > 1400 )
+        this.askToKill();
+      if ( _player.enable && !_player.flipping
+          && DE.CollisionSystem.circleCollision( this.collider, _player.collider ) )
+      {
+        this.askToKill();
+        _player.getDamage();
+      }
+      this.translateY( this.speed );
+      this.fire();
+    }
+    // very simple fire method, just a fireRate
+    this.fire = function()
+    {
+      if ( !this.enable || !this.fireRate || Date.now() - this.lastFire < this.fireRate )
+        return;
+      this.lastFire = Date.now();
+      this.scene.add( new Bullet( _screenSizes, this, _player ) );
+    }
+    
+    this.getDamage = function()
+    {
+      this.life--;
+      if ( this.life <= 0 )
+        this.askToKill();
+    }
+    
+    this.addAutomatism( "IA", "gameLogic" );
+  };
+  
+  Enemy.prototype = new DE.GameObject();
+  Enemy.prototype.constructor = Enemy;
+  Enemy.prototype.supr        = DE.GameObject.prototype;
+  
+  return Enemy;
+</textarea>
+            <p>
+              As you can see in Enemy and Bullet, to test a collision, we call CollisionSystem and the needed method (here circleCollision) returning a boolean true if there is a collision and false if not.<br />
+              This is not physics, trigger only, but enough for a Shoot'em up (and for lot of games).<br />
+              In the Game.js at the end we add:
+            </p>
+<textarea rows="10" disabled="disabled">
+  // simple waves spawner
+  var _lastCheck = undefined, _firstCheck, _currentWave = undefined;
+  Game.checkSpawns = function( time )
+  {
+    if ( !Game.run )
+      return;
+    if ( !_firstCheck )
+      _firstCheck = time;
+    _lastCheck = time;
+    
+    var waveTime = ( ( _lastCheck - _firstCheck ) / 100 >> 0 ) * 100;
+    _currentWave = datas.waves[ waveTime ];
+    if ( _currentWave && !_currentWave.readed )
+    {
+      _currentWave.readed = true;
+      for ( var i = 0, e; e = _currentWave.enemies[ i ]; ++i )
+      {
+        Game.scene.add( new Enemy( Game.screen, e, Game.player ) );
+      }
+    }
+  }
+</textarea>
+            <p>
+              And to make it work, don't forget to add it in the customLoop.js<br />
+              The customLoop is like an automatism but it's general. Not for a specific object.<br />
+              In the most cases, I didn't use the gameLoop because I do all my stuff with automatism
+            </p>
+<textarea rows="4" disabled="disabled">
+  function gameLoop( time )
+  {
+    Game.checkSpawns( time );
+  }
+</textarea>
+            <h3>The datas to generate waves</h3>
+            <p>In datas.js we create datas enemies, and datas waves. You can copy directly datas.js from the original sample</p>
+<textarea rows="8" disabled="disabled">
+define( []
+, function()
+{
+  var datas = {
+    "enemies": {
+      "one": { "spriteName": "enemies", "frame": 0, "bulletOffset": 50, "fireRate": false, "life": 3
+              , "radius": 60, "colOffsetX": 0, "colOffsetY": 0, "offsetFire": 50, "scale": 0.4, "speed": 4 }
+      ,"two": { "spriteName": "enemies", "frame": 1, "bulletOffset": 50, "fireRate": 1300, "life": 4
+              , "radius": 70, "colOffsetX": 0, "colOffsetY": 0, "offsetFire": 50, "scale": 0.4, "speed": 6 }
+      ,"three": { "spriteName": "enemies", "frame": 2, "bulletOffset": 50, "fireRate": 1000, "life": 10
+              , "radius": 80, "colOffsetX": 0, "colOffsetY": 0, "offsetFire": 50, "scale": 0.4, "speed": 2 }
+      ,"four": { "spriteName": "enemies", "frame": 3, "bulletOffset": 50, "fireRate": 600, "life": 4
+              , "radius": 60, "colOffsetX": 0, "colOffsetY": 0, "offsetFire": 50, "scale": 0.4, "speed": 7 }
+      ,"bench": { "spriteName": "enemies", "frame": 2, "bulletOffset": 50, "fireRate": 100, "life": 4
+              , "radius": 60, "colOffsetX": 0, "colOffsetY": 0, "offsetFire": 50, "scale": 0.4, "speed": 2 }
+    }
+    
+    , "waves": {
+      "2000": {
+        "enemies": [
+          { "x": 200, "y": -200, "name": "one" }
+          ,{ "x": 800, "y": -200, "name": "one" }
+        ]
+      }
+      ,"2800": {
+        "enemies": [
+          { "x": 300, "y": -200, "name": "one" }
+          ,{ "x": 700, "y": -200, "name": "one" }
+        ]
+      }
+      ,"4000": {
+        "enemies": [
+          { "x": 100, "y": -200, "name": "one" }
+          ,{ "x": 500, "y": -200, "name": "two" }
+          ,{ "x": 900, "y": -200, "name": "one" }
+        ]
+      }
+      ,"5300": {
+        "enemies": [
+          { "x": 300, "y": -200, "name": "two" }
+          ,{ "x": 500, "y": -200, "name": "two" }
+          ,{ "x": 400, "y": -200, "name": "two" }
+        ]
+      }
+      ,"5900": {
+        "enemies": [
+          { "x": 800, "y": -200, "name": "two" }
+          ,{ "x": 700, "y": -200, "name": "two" }
+          ,{ "x": 600, "y": -200, "name": "two" }
+        ]
+      }
+      ,"7000": {
+        "enemies": [
+          { "x": 350, "y": -200, "name": "three" }
+          ,{ "x": 500, "y": -400, "name": "four" }
+          ,{ "x": 650, "y": -200, "name": "three" }
+        ]
+      }
+      ,"8000": {
+        "enemies": [
+          { "x": 250, "y": -300, "name": "three" }
+          ,{ "x": 500, "y": -200, "name": "three" }
+          ,{ "x": 750, "y": -300, "name": "three" }
+        ]
+      }
+    }
+  };
+  return datas;
+} );
+</textarea>
+            <p>
+              Here you have a great base to make a shoot'em up.<br />
+              It's easy to make it better, some ideas if you want:
+            </p>
+            <ul>
+              <li>Bind gamepad on menus (like in our Pongarena</li>
+              <li>Make more complex pattern (a pattern for fires)</li>
+              <li>Add background scrolling (use a GameObject's pool)</li>
+            </ul>
+            <p>
+              Hope this was useful, and it was giving you a good sketch about the engine possibilities and methodologies.<br />
+              If I made mistakes please report it on Twitter/Fb/Reddit.<br />
+              Good code and Have fun
+            </p>
+            
+            <h3>Grunt the game</h3>
+            <p>Nothing is most simple, get npm modules (look package.json) and launch:</p>
+            <ul>
+              <li>grunt: copy img, audio in the folder release/_common, grunt for the web, grunt for w8</li>
+              <li>grunt web: grunt the game.js for the web in release/web</li>
+              <li>grunt win8: grunt the game.js for Windows8 in release/win8</li>
+            </ul>
+            <p>If you want add platforms, do as the same as I already do in compileSettings.json (and you have to create the customized files fot the platform, look in _dev/js/platforms/w8)</p>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="row games" style="margin:0">
+      
+      <div class="card col-lg-offset-1 col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Finger in the noise</h3>
+              <p>Finger-Rocket is a ciruclar tower defense, protect your planets in the space, against asteroids rains and some other.<br />
+                Don't forget you canc ontrol your missiles with your fingers!<br />
+                <span class="release-state release-alpha">Early-alpha avalaible now!</span>
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/games/finger-rocket" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/finger-rocket.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Finger-Rocker</h3>
+              <p>A circular tower defense, protect your planet against asteroids</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/games/finger-rocket" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Global Game Jam</h3>
+              <p>
+                Here is a game made during the Global Game Jam 2014, a plate-former beat them all with scenarist ending.<br />
+                More on <a href="http://globalgamejam.org/2014/games/look-you">the global game jam website</a>
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj14/look-at-you" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/ggj14/look-at-you.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>GGJ14 - Look at You</h3>
+              <p>A scenarist plate-former beat them all.</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj14/look-at-you" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs"></div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>The Sample</h3>
+              <p>You are new with the Dreamengine ? Here is a good way to start.<br />
+                Follow our "how to" to make this game using gamepad, sounds and more.
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/protos/shmup" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/shmup.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Shmup Sample</h3>
+              <p>A great sample to start with the engine</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/protos/shmup" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+          <div class="caption">
+            <h3>Immediate multiplayer fun</h3>
+            <p>
+              In this game, you can play with your friends or against the computer. </br>
+              Make some big precise fire or a firing rain!<br />
+              <span class="release-state released">Released!</span>
+            </p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/pongarena" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">Back</button>
+            </p>
+          </div>
+        </div>
+        <div class="front thumbnail">
+          <a href="#" class="thumbnail">
+            <img src="assets/imgs/games/pongarena.png" alt="...">
+          </a>
+          <div class="caption">
+            <h3>Pongarena</h3>
+            <p>Play this nervous arcade game with your friends. Easy to learn, hard to master !</p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/pongarena" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">About</button>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs visible-sm visible-md"></div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+          <div class="caption">
+            <h3>Stab your friends and say "Thank you"</h3>
+            <p>
+              Bio-carnage is a procedural multiplayer dungeon crawler.</br>
+              Shoot with the arrow keys and use ZQSD or WASD to move.</br>
+              <span class="release-state release-alpha">
+                Early-alpha, no multiplayer, no advanced features, stay in touch.
+              </span>
+            </p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/bio-carnage" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">Back</button>
+            </p>
+          </div>
+        </div>
+        <div class="front thumbnail">
+          <a href="#" class="thumbnail">
+            <img src="assets/imgs/games/bio-carnage.png" alt="...">
+          </a>
+          <div class="caption">
+            <h3>Bio-Carnage</h3>
+            <p>Can you reach the core of the infested starship ? A totaly random new dungeon each play.</p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/bio-carnage" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">About</button>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-lg"></div>
+      
+      <div class="card col-lg-offset-1 col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+          <div class="caption">
+            <h3>Choose-your-own runner</h3>
+            <p>
+              Tribal run is a runner where every types of platform has a new mechanics.</br>
+              Try no gravity, fly between walls, run upside down...</br>
+              Play with your friends on keyboard, with gamepads, or touch device.<br />
+              <span class="release-state release-beta">Beta release!</span>
+            </p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/tribal-run" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">Back</button>
+            </p>
+          </div>
+        </div>
+        <div class="front thumbnail">
+          <a href="#" class="thumbnail">
+            <img src="assets/imgs/games/tribal-run.png" alt="...">
+          </a>
+          <div class="caption">
+            <h3>Tribal-Run</h3>
+            <p>Wich one will make the better run ? </br>
+              play with your friends up to 4 !</p>
+            <p style="text-align:center">
+              <a href="http://dreamirl.com/games/tribal-run" target="_blank" class="btn btn-primary">Play</a>
+              <button class="btn btn-default about">About</button>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs"></div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>GGJ15 - GFY</h3>
+              <p>
+                Made by a team of 2 during the Global Game Jam this game use platform engine sample and is playable with gamepad.<br />
+                More on <a href="http://globalgamejam.org/2015/games/go-fck-yourself">the global game jam website</a>
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj15/gfy" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/ggj15/gfy.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>GGJ15 - Go F*ck Yourself</h3>
+              <p>A versus game</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj15/gfy" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>GGJ15 - Game of Life</h3>
+              <p>
+                The game of life<br />
+                More on <a href="http://globalgamejam.org/2015/games/le-jeu-de-la-vie">the global game jam website</a>
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj15/game-of-life/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/ggj15/gol.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>GGJ15 - Game of Life</h3>
+              <p>A life management strategic game</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/jams/ggj15/game-of-life/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs visible-sm visible-md"></div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>ARTE - Speedfarming</h3>
+              <p>
+                Speedfarming is a serious game about farming in cities.<br />
+                More on <a href="http://future.arte.tv/fr/les-villes-du-futur">ARTE website</a>
+              </p>
+              <p style="text-align:center">
+                <a href="http://php4.arte.tv/speedfarming/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/speedfarming.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>ARTE - Speedfarming</h3>
+              <p>A Serious game about farming</p>
+              <p style="text-align:center">
+                <a href="http://php4.arte.tv/speedfarming/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Solitaire</h3>
+              <p>
+                Simple solitaire card game<br />
+                This game isn't free to use and is it the property of a company.
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/solitaire/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/solitaire.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Solitaire</h3>
+              <p>Simple solitaire card game</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/solitaire/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs visible-lg"></div>
+      
+      <div class="card col-lg-offset-1 col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Crossword</h3>
+              <p>
+                Simple crossword game<br />
+                This game isn't free to use and is it the property of a company.
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/crossword/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/crossword.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Crossword</h3>
+              <p>Simple crossword game</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/crossword/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Sudoku</h3>
+              <p>
+                Simple sudoku game<br />
+                This game isn't free to use and is it the property of a company.
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/sudoku/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/sudoku.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Sudoku</h3>
+              <p>Simple sudoku game</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/demos/sudoku/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="clearfix visible-xs visible-sm visible-md"></div>
+      
+      <div class="card col-xs-6 col-sm-3 col-lg-2">
+        <div class="back thumbnail">
+            <div class="caption">
+              <h3>Eat this Cake</h3>
+              <p>
+                A boulder dash-like game<br />
+                You like cakes and candies ? This game is definitively for you !
+              </p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/games/eat-this-cake/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">Back</button>
+              </p>
+            </div>
+        </div>
+        <div class="front thumbnail">
+            <a href="#" class="thumbnail">
+              <img src="assets/imgs/games/eat-this-cake.png" alt="...">
+            </a>
+            <div class="caption">
+              <h3>Eat this Cake</h3>
+              <p>A crazy boulder dash for those who like cakes</p>
+              <p style="text-align:center">
+                <a href="http://dreamirl.com/games/eat-this-cake/" target="_blank" class="btn btn-primary">Play</a>
+                <button class="btn btn-default about">About</button>
+              </p>
+            </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-32283976-11', 'dreamirl.com');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
