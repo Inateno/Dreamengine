@@ -8,8 +8,8 @@
  * @example Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
  * Game.render.init();
  */
-define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs', 'DE.CanvasBuffer' ],
-function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
+define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs', 'DE.CanvasBuffer', 'DE.Event' ],
+function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, Event )
 {
   function Render( divId, params )
   {
@@ -72,7 +72,14 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       this.div.appendChild( this.canvas );
       Inputs.addRender( this );
       
-      this.ctx = this.canvas.getContext( '2d' );
+      if ( window.WebGL2D )
+      {
+        WebGL2D.enable( this.canvas );
+        this.ctx = this.canvas.getContext("webgl-2d");
+      }
+      else
+        this.ctx = this.canvas.getContext( '2d' );
+      
       this.buffer = new CanvasBuffer( this.sizes.width, this.sizes.height );
       this.inited = true;
       this.updateSizes();
@@ -204,6 +211,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
       var lastResize = undefined;
       var recallMethod = function()
       {
+        Event.trigger( "screenSizeChange" );
         o.fullScreenMethod.call( o );
       };
       if ( window.addEventListener )
@@ -300,8 +308,10 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer )
      */
     this.fullScreenMethod = function()
     {
+      var offsetH = window.DEremoveUsableHeight || 0;
+      
       var screenW = ( window.innerWidth || document.documentElement.clientWidth );
-      var screenH = ( window.innerHeight || document.documentElement.clientHeight );
+      var screenH = ( window.innerHeight || document.documentElement.clientHeight ) - offsetH;
       
       var divParentH = window.getComputedStyle( this.div.parentElement, null ).getPropertyValue( 'height' );
       if ( this.div.parentElement != null

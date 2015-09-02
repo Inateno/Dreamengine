@@ -144,6 +144,7 @@ function( stash, CONFIG, about, Event )
         stash.set( this.namespace + this.version + i, this.saveModel[ i ] );
       }
     };
+    Event.on( "unload-game", this.saveAll, this );
     
     this.saveAchievements = function( userAchievements )
     {

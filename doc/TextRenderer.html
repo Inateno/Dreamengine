@@ -312,7 +312,81 @@ checkout Renderer for standard parameters</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-125">line 125</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-134">line 134</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="applyScale"><span class="type-signature">&lt;protected> </span>applyScale<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>apply the current scale</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Renderer.html#applyScale">Renderer#applyScale</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-277">line 277</a>
     </li></ul></dd>
     
 
@@ -529,7 +603,7 @@ checkout Renderer for standard parameters</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-162">line 162</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-171">line 171</a>
     </li></ul></dd>
     
 
@@ -718,7 +792,7 @@ fade start to the current alpha, or 0 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-223">line 223</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-229">line 229</a>
     </li></ul></dd>
     
 
@@ -907,7 +981,7 @@ fade start to the current alpha or 1 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-205">line 205</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-211">line 211</a>
     </li></ul></dd>
     
 
@@ -1095,7 +1169,7 @@ fade start to the current alpha or 1 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-189">line 189</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-195">line 195</a>
     </li></ul></dd>
     
 
@@ -1121,6 +1195,191 @@ fade start to the current alpha or 1 if force is true</p>
         <h5>Example</h5>
         
     <pre class="sunlight-highlight-javascript"> myObject.renderers[ 0 ].fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="scaleTo"><span class="type-signature"></span>scaleTo<span class="signature">(scale, <span class="optional">duration</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>create a fluid scale
+you can only have one at a time</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+		<th>Default</th>
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>scale</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>give final x, and final y</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Int</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    500
+                
+                </td>
+            
+
+            <td class="description last"><p>time duration</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Renderer.html#scaleTo">Renderer#scaleTo</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-247">line 247</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript"> // scale to 2,3 in 1 secondmyRenderer.scaleTo( { x: 2, y: 3 }, 1000 );</pre>
 
 
     
@@ -1224,7 +1483,7 @@ fade start to the current alpha or 1 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-93">line 93</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-102">line 102</a>
     </li></ul></dd>
     
 
@@ -1347,7 +1606,7 @@ fade start to the current alpha or 1 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-104">line 104</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-113">line 113</a>
     </li></ul></dd>
     
 
@@ -1470,7 +1729,7 @@ fade start to the current alpha or 1 if force is true</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-115">line 115</a>
+        <a href="Renderer.js.html">core/Renderer.js</a>, <a href="Renderer.js.html#sunlight-1-line-124">line 124</a>
     </li></ul></dd>
     
 
@@ -1521,7 +1780,7 @@ fade start to the current alpha or 1 if force is true</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Thu Dec 11 2014 19:55:29 GMT+0100 (CET) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Mar 05 2015 14:20:09 GMT+0100 (CET) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

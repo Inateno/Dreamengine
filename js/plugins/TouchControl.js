@@ -1,5 +1,5 @@
 /**
- * by Fangh44 @FanghGD
+ *
  * @example var touchInput = new TouchControl({
         "x": 100
         ,"y": 100
@@ -18,16 +18,21 @@
           Game.ship.translateY( position.y )
         }
       });
+      
+      you can call touchInput.trigger("forceStop") when you are leaving the main scene for example.
+      With this, you are stopping tracking the mouse, and make the touchInput sleep.
  */
 define( [ 'DREAM_ENGINE' ],
 function( DE )
 {
   function TouchControl( objectParams, touchControlParams )
   {
-    this.isTouched              = false;
-    this.camera                 = null;
-    this.normalizedPosition     = { "x": 0, "y":0 };
-    objectParams.renderers      = [];
+    this.isTouched             = false;
+    this.camera                = null;
+    this.normalizedPosition    = {"x": 0, "y":0};
+    this.oldNormalizedPosition = {"x": 0, "y":0};
+    objectParams.renderers     = [];
+    var _self                  = this;
     
     if ( !touchControlParams.collider )
       console.log( "%cNo collider on a touch control, it'll not work..", "color:red;background:black;" );
@@ -65,7 +70,10 @@ function( DE )
     
     this.add(this.stick);
     
-    this.onStickMoved = touchControlParams.onStickMoved || touchControlParams.onStickMove || function(){};
+    if ( touchControlParams.onStickMoved )
+      this.onStickMoved = touchControlParams.onStickMoved;
+    else
+      this.onStickMoved =function(){};    
     
     if( touchControlParams.appearOnTouch == undefined )
       touchControlParams.appearOnTouch = false;
@@ -74,7 +82,8 @@ function( DE )
       touchControlParams.fadeOutTime = 200;
     
     if( touchControlParams.fadeInTime == undefined )
-      touchControlParams.fadeInTime = 200;    
+      touchControlParams.fadeInTime = 200;
+    
     
     this.camera.on( "mouseMove", function( mouse )
     {
@@ -90,39 +99,67 @@ function( DE )
           var angle = this.position.getAngle( mouse );          
           this.stick.position.setPosition( Math.cos( angle ) * this.collider.radius, Math.sin( angle )* this.collider.radius);
         }
+        
+        this.normalizedPosition = this.getNormalizedPosition( this.stick.position.x, this.stick.position.y, this.collider.radius ); 
+        if ( this.oldNormalizedPosition.x != this.normalizedPosition.x && this.oldNormalizedPosition.y != this.normalizedPosition.y )
+        {
+          this.oldNormalizedPosition = this.normalizedPosition;
+          this.onStickMoved( this.normalizedPosition );
+          this.trigger( "stickMoved", this.normalizedPosition );          
+        }
       }
-      
-      this.normalizedPosition = this.getNormalizedPosition( this.stick.position.x, -this.stick.position.y, this.collider.radius ); 
-      this.onStickMoved( this.normalizedPosition );
-      this.trigger( "stickMoved", this.normalizedPosition );
-      
+    }, this);
+    
+    this.on( "forceStop", function()
+    {
+      this.stopMe();
     }, this);
     
     this.camera.on( "mouseUp", function( mouse )
     {
-      mouse.stopPropagation = true;
+      this.stopMe();
+    }, this );
+    
+    this.camera.onMouseLeave = function()
+    {
+      _self.stopMe();
+    };
+    
+    this.camera.on( "lastMouseDown", function( mouse )
+    {
+      if ( !this.collider.enable )
+        this.collider.enable = true;
+      
+      this.isTouched = true;
+      if ( touchControlParams.appearOnTouch )
+      {
+        this.trigger("appear");
+        this.renderer.fadeIn( touchControlParams.fadeInTime );
+        this.stick.renderer.fadeIn( touchControlParams.fadeInTime );
+        this.position.setPosition( mouse );
+      }      
+    }, this);
+    
+    this.stopMe = function( mouse )
+    {
+      if ( mouse )
+        mouse.stopPropagation = true;
+      
       this.isTouched = false;
       this.stick.position.setPosition( 0, 0 );
       
-      this.onStickMoved( { "x":0, "y": 0 } );
+      this.onStickMoved( {"x":0, "y": 0} );
       this.trigger( "stickStopped", this.normalizedPosition );
       
       if ( touchControlParams.appearOnTouch )
       {
         this.renderer.fadeOut( touchControlParams.fadeOutTime );
         this.stick.renderer.fadeOut ( touchControlParams.fadeOutTime );
+        
+        this.collider.enable = false;
+        this.trigger("disappear");
       }
-    }, this );
-    
-    this.camera.on( "mouseDown", function( mouse )
-    {
-      if ( touchControlParams.appearOnTouch )
-      {
-        this.renderer.fadeIn( touchControlParams.fadeInTime );
-        this.stick.renderer.fadeIn( touchControlParams.fadeInTime );
-        this.position.setPosition( mouse );
-      }      
-    }, this);   
+    }
     
     this.getNormalizedPosition = function(x, y, radius)
     {
@@ -140,7 +177,8 @@ function( DE )
       if (position.y < -1)
         position.y = -1;
       
-      position.y *= -1;
+      position.x = Math.round( position.x * 100 ) / 100;
+      position.y = Math.round( position.y * 100 ) / 100;
       
       return position;   
     }

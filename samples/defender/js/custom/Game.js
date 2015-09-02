@@ -63,13 +63,13 @@ function( DE )
       if ( DE.Inputs.key( "shoot" ) )
         this.shoot();
       if ( DE.Inputs.key( "up" ) )
-        this.translateY( -this.speed );
+        this.translateY( -this.speed, true );
       if ( DE.Inputs.key( "left" ) )
-        this.translateX( -this.speed );
+        this.translateX( -this.speed, true );
       if ( DE.Inputs.key( "right" ) )
-        this.translateX( this.speed );
+        this.translateX( this.speed, true );
       if ( DE.Inputs.key( "down" ) )
-        this.translateY( this.speed );
+        this.translateY( this.speed, true );
       
       player.lookAt( pointer.position );
     }

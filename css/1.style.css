@@ -9,22 +9,28 @@
     font-weight: normal;
     font-style: normal;
 }*/
-
+* {
+  webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background-color: black !important;
-  margin          : 0 !important;
-  padding         : 0 !important;
-  color           : white;
-  overflow        : hidden !important;
-  -ms-touch-action: none;
-  touch-action: none;
+  font-family          : "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size            : 14px;
+  line-height          : 1.42857143;
+  background-color     : black !important;
+  margin               : 0 !important;
+  padding              : 0 !important;
+  color                : white;
+  overflow             : hidden !important;
+  -ms-touch-action     : none;
+  touch-action         : none;
   -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  -webkit-user-select  : none;
+  -khtml-user-select   : none;
+  -moz-user-select     : none;
+  -ms-user-select      : none;
+  user-select          : none;
 }
 button {
   cursor: pointer;
@@ -68,10 +74,10 @@ canvas {
   }
   .notification>div {
     width           : 240px;
-    min-height      : 50px;
+    min-height      : 62px !important;
     border-radius   : 4px;
     border          : 1px solid white;
-    background-color: rgba( 50, 50, 50, 0.7 );
+    background-color: rgba( 50, 50, 50, 0.7 ) !important;
     padding         : 5px;
     padding-right   : 20px;
   }

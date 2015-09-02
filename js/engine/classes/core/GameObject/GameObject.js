@@ -48,7 +48,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      * @memberOf GameObject
      * @type {String}
      */
-    this.id      = params.id || Math.random() * 999999999 >> 0;
+    this.id      = params.id !== undefined ? params.id : Math.random() * 999999999 >> 0;
     /**
      * @public
      * @memberOf GameObject
@@ -298,7 +298,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @memberOf GameObject
    * @param {Object} pos give x, y, and z destination
    * @param {Int} [duration=500] time duration
-   * @param {Function} callback will be called in the current camera context
+   * @param {Function} callback will be called in the current object context
    * @example // move to 100,100 in 1 second
    * player.moveTo( { x: 100, y: 100 }, 1000 );
    * @example // move to bonus position
@@ -355,14 +355,14 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     if ( move.distY != 0 )
     {
       move.stepValY = Time.timeSinceLastFrame / move.oDuration * move.distY * Time.scaleDelta;
-      move.leftY -= move.stepValY * move.dirY;
+      move.leftY -= move.stepValY * move.dirY; // * dirY because y is inverted
       this.position.y += move.stepValY;
     }
     
     if ( move.distZ != 0 )
     {
       move.stepValZ = Time.timeSinceLastFrame / move.oDuration * move.distZ * Time.scaleDelta;
-      move.leftZ -= move.stepValZ * move.dirZ;
+      move.leftZ -= move.stepValZ * move.dirZ; // * dirZ because z is inverted
       this.position.z += move.stepValZ;
     }
     
@@ -394,7 +394,6 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
         move.callback.call( this, move.callback );
       
       this.trigger( "moveEnd" );
-      return;
     }
   };
   
@@ -589,6 +588,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       else
         this.addOne( args[ i ] );
     }
+    this.sortChildrens();
   };
   
   /**
@@ -655,13 +655,21 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.remove = function( object )
   {
-    var index = this.childrens.indexOf( object );
-    
-    if ( index !== - 1 )
+    if ( isNaN( object ) )
+    {
+      var index = this.childrens.indexOf( object );
+      
+      if ( index !== - 1 )
+      {
+        object.parent = undefined;
+        // object.parentPosition = null;
+        this.childrens.splice( index, 1 );
+      }
+    }
+    else
     {
       object.parent = undefined;
-      // object.parentPosition = null;
-      this.childrens.splice( index, 1 );
+      this.childrens.splice( object, 1 );
     }
   };
   
@@ -904,9 +912,9 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.askToKill = function( params )
   {
-    this.scene.cleanObjectBinding( this );
-    this.enable   = false;
-    this.flag     = "delete";
+    if ( this.scene )
+      this.scene.cleanObjectBinding( this );
+    
     this.killArgs = params || {};
     if ( !this.killArgs.preventEvents && !this.killArgs.preventKillEvent )
     {
@@ -914,6 +922,13 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
         this.onKill();
       this.trigger( "kill", this );
     }
+    if ( this.parent )
+    {
+      this.parent.delete( this );
+      return;
+    }
+    this.enable   = false;
+    this.flag     = "delete";
   };
   
   /**
@@ -945,6 +960,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.killMePlease = function()
   {
+    this.enable = false;
     if ( !this.killArgs.preventEvents && !this.killArgs.preventKilledEvent )
     {
       if ( this.onKilled )

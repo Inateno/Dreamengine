@@ -11,6 +11,8 @@
 define( [ 'DE.CONFIG', 'DE.States', 'DE.Event', 'DE.CanvasBuffer' ],
 function( CONFIG, States, Event, CanvasBuffer )
 {
+  var _loadingImages = null;
+  var _indexLoading = 0;
   var ImageManager = new function()
   {
     this.DEName = "ImageManager";
@@ -36,18 +38,29 @@ function( CONFIG, States, Event, CanvasBuffer )
         return;
       }
       
-      var imgs = imagesDatas;
-      for ( var i = 0, img; i < imgs.length; ++i )
+      _loadingImages = imagesDatas;
+      _indexLoading = 0;
+      
+      // var imgs = imagesDatas;
+      this.imagesLoaded = 0;
+      this.imagesRequested = imagesDatas.length;
+      
+      if ( imagesDatas.length > 0 )
+        this.pushImage( imagesDatas[ 0 ][ 0 ], imagesDatas[ 0 ][ 1 ], imagesDatas[ 0 ][ 2 ], imagesDatas[ 0 ][ 3 ])
+      else
       {
-        img = imgs[ i ];
-        if ( !img || ( img[ 3 ] || {} ).load === false )
-          continue;
-        this.pushImage( img[ 0 ], img[ 1 ], img[ 2 ], img[ 3 ] );
+        setTimeout( function()
+        {
+          States.down( 'isLoadingImages' );
+        }, 150 );
       }
-      if ( imagesDatas.length == 0 )
-      {
-        setTimeout( function(){ States.down( 'isLoadingImages' ); }, 10 );
-      }
+      // for ( var i = 0, img; i < imgs.length; ++i )
+      // {
+      //   img = imgs[ i ];
+      //   if ( !img || ( img[ 3 ] || {} ).load === false )
+      //     continue;
+      //   this.pushImage( img[ 0 ], img[ 1 ], img[ 2 ], img[ 3 ] );
+      // }
     }
     
     /****
@@ -81,9 +94,14 @@ function( CONFIG, States, Event, CanvasBuffer )
       
       img.onload = function()
       {
+        if ( _loadingImages && _indexLoading + 1 < _loadingImages.length )
+        {
+          ImageManager.pushImage( _loadingImages[ ++_indexLoading ][ 0 ], _loadingImages[ _indexLoading ][ 1 ]
+            , _loadingImages[ _indexLoading ][ 2 ], _loadingImages[ _indexLoading ][ 3 ] );
+        }
         ImageManager.imageLoaded( this );
       }
-      this.imagesRequested++;
+      
       States.up( 'isLoadingImages' );
       CONFIG.debug.log( "LoadImage " + name, 3 );
     }
@@ -96,36 +114,52 @@ function( CONFIG, States, Event, CanvasBuffer )
     this.imageLoaded = function( img )
     {
       CONFIG.debug.log( "Image:" + img.name + " correctly loaded", 3 );
-      var buff = new CanvasBuffer( img.width, img.height )
-        , cvs = buff.canvas
-        , ctx = buff.ctx;
       
-      if ( this.imageNotRatio || img.notRatio )
+      /*** Warning
+       * removing images by a canvas buffer is faster when drawing it or part of it
+       * but it cause issue if the game is loading to much images, and if the buffer just crash 'cause memory
+       * the JS API cannot reload it because it's definitively lost
+       * with Image only, it's safer, if there is tons of images, the browser will still be able to draw
+       * I set the security on 1540px+ images (the most often it's images used for environments, and it's the most laggy)
+       * you can decrease this security through config file if you want, but care
+       */
+      if ( CONFIG.FORCE_BUFFERISATION
+        || ( img.width > CONFIG.MIN_SIZE_BUFFER_W && img.height > CONFIG.MIN_SIZE_BUFFER_H ) )
       {
-        cvs.width  = cvs.width * this.ratioToConception;
-        cvs.height = cvs.height * this.ratioToConception;
+        var buff = new CanvasBuffer( img.width, img.height )
+          , cvs = buff.canvas
+          , ctx = buff.ctx;
+        
+        if ( this.imageNotRatio || img.notRatio )
+        {
+          cvs.width  = cvs.width * this.ratioToConception;
+          cvs.height = cvs.height * this.ratioToConception;
+        }
+        
+        cvs.name        = img.name;
+        cvs.totalFrame  = img.totalFrame;
+        cvs.totalLine   = img.totalLine;
+        cvs.startFrame  = img.startFrame || undefined;
+        cvs.endFrame    = img.endFrame || undefined;
+        cvs.eachAnim    = img.eachAnim;
+        cvs.isReversed  = img.isReversed;
+        cvs.isAnimated  = img.isAnimated;
+        cvs.isPaused    = img.isPaused;
+        cvs.isLoop      = img.isLoop;
+        cvs.widthFrame  = cvs.width / cvs.totalFrame >> 0;
+        cvs.heightFrame = cvs.height / cvs.totalLine >> 0;
+        ctx.drawImage( img, 0, 0, cvs.width, cvs.height );
+        this.images[ img.name ] = cvs;
       }
-      
-      cvs.name        = img.name;
-      cvs.totalFrame  = img.totalFrame;
-      cvs.totalLine   = img.totalLine;
-      cvs.startFrame  = img.startFrame || undefined;
-      cvs.endFrame    = img.endFrame || undefined;
-      cvs.eachAnim    = img.eachAnim;
-      cvs.isReversed  = img.isReversed;
-      cvs.isAnimated  = img.isAnimated;
-      cvs.isPaused    = img.isPaused;
-      cvs.isLoop      = img.isLoop;
-      cvs.widthFrame  = cvs.width / cvs.totalFrame >> 0;
-      cvs.heightFrame = cvs.height / cvs.totalLine >> 0;
-      ctx.drawImage( img, 0, 0, cvs.width, cvs.height );
-      this.images[ img.name ] = cvs;
+      else
+      {
+        img.widthFrame  = img.width / img.totalFrame >> 0;
+        img.heightFrame = img.height / img.totalLine >> 0;
+      }
       this.imagesLoaded++;
       
       if ( this.imagesLoaded == this.imagesRequested )
-      {
-        States.down( 'isLoadingImages' );
-      }
+        States.down( 'isLoadingImages', img.name == "loader" );
       Event.trigger( "imageLoaded", this.imagesLoaded, this.imagesRequested, img.name );
     }
   };

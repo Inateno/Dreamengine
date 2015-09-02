@@ -219,7 +219,7 @@ function( CONFIG, COLORS, Time, Event, GameObject
         if ( !this.components[ i ].enable )
           continue;
         var component = this.components[ i ];
-        if (  component.checkState && component.checkState( mouse ) )
+        if ( component.checkState && component.checkState( mouse ) )
         {
           component.onMouseMove( mouse );
           return true;
@@ -288,7 +288,7 @@ function( CONFIG, COLORS, Time, Event, GameObject
     
     if ( !mouse.stopPropagation )
     {
-      for ( var i = 0, g; g = this.gameObjects[ i ]; ++i )
+      for ( var i = this.gameObjects.length - 1, g; g = this.gameObjects[ i ]; --i )
         if ( gameObjectMouseEvent( eventType, g, mouse, propagation ) )
           return true;
     }
@@ -318,9 +318,9 @@ function( CONFIG, COLORS, Time, Event, GameObject
    */
   Gui.prototype.remove = function( object )
   {
-    this.cleanObjectBinding( object );
     if ( this.gameObjects[ object ] )
     {
+      this.cleanObjectBinding( this.gameObjects[ object ] );
       this.gameObjects.splice( object, 1 );
     }
     else
@@ -331,6 +331,7 @@ function( CONFIG, COLORS, Time, Event, GameObject
         CONFIG.debug.log( "%cRemove gameObject not found", 1, "color:orange", object );
         return;
       }
+      this.cleanObjectBinding( this.gameObjects[ pos ] );
       this.gameObjects.splice( pos, 1 );
       // this.gameObjects.splice( object.GuiIndex, 1 ); // nope GuiIndex can change
     }

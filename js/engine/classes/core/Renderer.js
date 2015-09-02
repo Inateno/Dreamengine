@@ -56,6 +56,21 @@ function( COLORS, Vector2, CONFIG, Time )
       ,"done"    : true
     };
     
+    /**
+     * object used to apply scale on final Renderer rendering
+     * @protected
+     * @memberOf Renderer
+     * @type {Object}
+     */
+    this.scaleData = {
+      "fromx"    : 1
+      ,"tox"     : 0
+      ,"fromy"   : 1
+      ,"toy"     : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    
     /****
      * setScale@void( x@Int, y@Int )
       update scales
@@ -68,12 +83,6 @@ function( COLORS, Vector2, CONFIG, Time )
       this.sizes.setScale( x, y );
     }
     
-    /****
-     * scale@void( x@Int, y@Int )
-      TODO - WIP - not finished
-      will provide a scaling animation
-      (different from sizes.scaleTo because need update offsets)
-     */
     this.scale = function( x, y )
     {
       if ( !this.sizes )
@@ -161,9 +170,6 @@ function( COLORS, Vector2, CONFIG, Time )
    */
   Renderer.prototype.fade = function( from, to, duration )
   {
-    if ( to == this.alpha )
-      return;
-    
     this.sleep = false;
     var data = {
       from      : from || 1
@@ -226,6 +232,90 @@ function( COLORS, Vector2, CONFIG, Time )
     if ( force )
       this.alpha = 0;
     this.fade( this.alpha, 1, duration );
+  };
+  
+  /**
+   * create a fluid scale
+   * you can only have one at a time
+   * @public
+   * @memberOf Renderer
+   * @param {Object} scale give final x, and final y
+   * @param {Int} [duration=500] time duration
+   * @example // scale to 2,3 in 1 second
+   * myRenderer.scaleTo( { x: 2, y: 3 }, 1000 );
+   */
+  Renderer.prototype.scaleTo = function( scale, duration )
+  {
+    var dscale = {
+      "x"     : !isNaN( scale ) ? scale : scale.x
+      ,"y"    : !isNaN( scale ) ? scale : scale.y
+    };
+    this.scaleData = {
+      "valX"     : - ( this.sizes.scaleX - ( dscale.x !== undefined ? dscale.x : this.sizes.scaleX ) )
+      ,"valY"    : - ( this.sizes.scaleY - ( dscale.y !== undefined ? dscale.y : this.sizes.scaleY ) )
+      ,"dirX"     : this.sizes.scaleX > dscale.x ? 1 : -1
+      ,"dirY"     : this.sizes.scaleY > dscale.y ? 1 : -1
+      ,"duration" : duration || 500
+      ,"oDuration": duration || 500
+      ,"done"     : false
+      ,"stepValX" : 0
+      ,"stepValY" : 0
+      ,"destX"    : dscale.x
+      ,"destY"    : dscale.y
+      ,"scaleX"   : this.sizes.scaleX
+      ,"scaleY"   : this.sizes.scaleY
+    };
+    this.scaleData.leftX = this.scaleData.valX;
+    this.scaleData.leftY = this.scaleData.valY;
+  };
+  
+  /**
+   * apply the current scale
+   * @protected
+   * @memberOf Renderer
+   */
+  Renderer.prototype.applyScale = function()
+  {
+    if ( this.scaleData.done )
+      return;
+    
+    var scaleD = this.scaleData;
+    
+    if ( scaleD.valX != 0 )
+    {
+      scaleD.stepValX = Time.timeSinceLastFrame / scaleD.oDuration * scaleD.valX * Time.scaleDelta;
+      scaleD.leftX    -= scaleD.stepValX;
+      scaleD.scaleX   += scaleD.stepValX;
+    }
+    
+    if ( scaleD.valY != 0 )
+    {
+      scaleD.stepValY = Time.timeSinceLastFrame / scaleD.oDuration * scaleD.valY * Time.scaleDelta;
+      scaleD.leftY    -= scaleD.stepValY;
+      scaleD.scaleY   += scaleD.stepValY;
+    }
+    scaleD.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    
+    // check scale
+    if ( scaleD.dirX < 0 && scaleD.leftX < 0 )
+      scaleD.scaleX += scaleD.leftX;
+    else if ( scaleD.dirX > 0 && scaleD.leftX > 0 )
+      scaleD.scaleX -= scaleD.leftX;
+    
+    if ( scaleD.dirY < 0 && scaleD.leftY < 0 )
+      scaleD.scaleY += scaleD.leftY;
+    else if ( scaleD.dirY > 0 && scaleD.leftY > 0 )
+      scaleD.scaleY -= scaleD.leftY;
+    
+    this.sizes.setScale( scaleD.scaleX, scaleD.scaleY );
+    
+    if ( scaleD.duration <= 0 )
+    {
+      this.scaleData.done = true;
+      this.sizes.setScale( scaleD.destX, scaleD.destY );
+      if ( this.gameObject )
+        this.gameObject.trigger( "scaleEnd", this );
+    }
   };
   
   Renderer.prototype.render = function( ctx, physicRatio, ratioz ){}

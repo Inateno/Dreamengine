@@ -110,9 +110,23 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
       if ( !this.queue[ type ][ input ] )
       {
         console.log( '%cWARN:: Try to bind on a non existant input ::: ' + type + ' - ' + input, "color:red" );
-        return 
+        return;
       }
       this.queue[ type ][ input ].push( callback );
+      return this.queue[ type ][ input ].length;
+    }
+    
+    this.stopListening = function( type, input, index )
+    {
+      if ( index !== undefined )
+      {
+        this.queue[ type ][ input ][ index ] = null;
+        return;
+      }
+      
+      for ( var i = 0; i < this.queue[ type ][ input ].length; ++i )
+        delete this.queue[ type ][ input ][ i ];
+      this.queue[ type ][ input ] = [];
     }
     
     /****
@@ -128,10 +142,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         newInputs[ i ] = {};
         
         newInputs[ i ].inputs = new Array();
-        for ( var n = 0, I; I = customInputs[ i ].keycodes[ n ]; n++ )
+        for ( var n = 0, I; I = customInputs[ i ].keycodes[ n ]; ++n )
         {
           var type = ( I[ 0 ] == "K" || I[ 0 ] == "k" ) ? "KEYBOARD" : "MOUSE";
-          var data = I.split(".");
+          var data = I.split( "." );
           var gamePadID = 0;
           var name;
           if ( data[ 0 ][ 0 ] == "G" )
@@ -156,13 +170,13 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
             continue;
           }
           
-          if (type == "GAMEPADBUTTONS")
+          if ( type == "GAMEPADBUTTONS" )
           {
-            gamePad.plugBtnToInput(this, i, gamePadID, this.dbInputs[ type ][ name ] );
+            gamePad.plugBtnToInput( this, i, gamePadID, this.dbInputs[ type ][ name ] );
           }
-          else if (type == "GAMEPADAXES")
+          else if ( type == "GAMEPADAXES" )
           {
-            gamePad.plugAxeToInput(this, i, gamePadID, this.dbInputs[ type ][ name ] );
+            gamePad.plugAxeToInput( this, i, gamePadID, this.dbInputs[ type ][ name ] );
           }
           newInputs[ i ].inputs.push( { "code": this.dbInputs[ type ][ name ], "type": type } );
         }
@@ -190,6 +204,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         this.queue[ 'axeStart'][ i ]   = new Array();
         this.queue[ 'axeStop'][ i ]    = new Array();
        }
+       
+      this.queue[ 'axeMoved' ][ 'wheelTop' ]  = new Array();
+      this.queue[ 'axeMoved' ][ 'wheelDown' ] = new Array();
+      
       this.usedInputs = newInputs;
       this.toggleListeners();
     }
@@ -215,9 +233,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     {
       if ( Inputs.keyLocked && eventType.search( "mouse" ) == -1 )
         return;
-      for ( var ev in Inputs.queue[ eventType ][ keyName ] )
+      for ( var ev = 0; ev < Inputs.queue[ eventType ][ keyName ].length; ++ev )
       {
-        Inputs.queue[ eventType ][ keyName ][ ev ]( val );
+        if ( Inputs.queue[ eventType ][ keyName ][ ev ] )
+          Inputs.queue[ eventType ][ keyName ][ ev ]( val );
       }
     }
     
@@ -310,7 +329,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     /****
      * keyDown@Bool( event@KeyboardEvent )
       TODO - define if we have to put preventDefault and return false at the end
-      (I don't remeber why I comment but it was something with DOM Inputs)
+      (I don't remember why I comment but it was something with DOM Inputs)
      */
     this.keyDown = function( event )
     {
@@ -668,7 +687,8 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     
     /****
      * mouseWheel@void( e@MouseEvent )
-      trigger mouseWheel with good direction
+      trigger mouseWheel with good direction on axeMoved listener
+     * update - now use event binding like keys or gamepad so call in Inputs: M.wheelDown / wheelTop
      */
     this.mouseWheel = function( e )
     {
@@ -677,10 +697,16 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
       if ( e.detail )
         dir = e.detail < 0 ? 1 : -1;
       
+      var side = "Down";
       if ( dir == 1 )
-        Inputs.trigger( 'axeMoved', 'wheelTop' );
-      else
-        Inputs.trigger( 'axeMoved', 'wheelDown' );
+        side = "Top";
+      
+      var inputsDown = Inputs.findInputs( Inputs.dbInputs.MOUSE[ "wheel" + side ], "MOUSE" );
+      if ( inputsDown !== false )
+      {
+        for ( var i = 0, input; input = inputsDown[ i ]; ++i )
+          Inputs.trigger( 'axeMoved', input, 1 );
+      }
     }
   };
   

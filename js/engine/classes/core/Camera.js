@@ -194,7 +194,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       {
         var _gameObjects /*= this._gameObjects*/ = this.scene.gameObjects;
         this._visibleGameObjects = [];
-        for ( var i = 0, t = _gameObjects.length, g, rpx, rpy, ratioz; i < t; i++ )
+        for ( var i = 0, t = _gameObjects.length, g, rpx, rpy, ratioz; i < t; ++i )
         {
           g = _gameObjects[ i ];
           
@@ -890,7 +890,7 @@ function( CONFIG, Sizes, Vector2, CanvasBuffer, gameObjectMouseEvent
       mouse.scenePosition = undefined;
       mouse.fieldSizes    = undefined;
       
-      this.trigger( "onLastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
+      this.trigger( "lastMouse" + eventType, mouse, this._propagationEvent[ mouse.index ] );
       if ( this.gui && !this.gui.sleep )
         this.gui[ "oOnLastMouse" ]( eventType, mouse, this._propagationEvent[ mouse.index ] );
       this[ "onLastMouse" + eventType ]( mouse, this._propagationEvent[ mouse.index ] );

@@ -71,11 +71,13 @@ function( CONFIG, SaveSystem, Event )
       
       var savedQuality = SaveSystem.get( "settings" ).quality || undefined;
       var sizes = this.screenSizes;
-      this.currentSizeIndex = 0;
+      this.currentSizeIndex = this.conceptionSizeIndex;
+      
+      var offsetH = window.DEremoveUsableHeight || 0;
       this.screenSize.w = ( window.innerWidth || document.documentElement.clientWidth );
-      this.screenSize.h = ( window.innerHeight || document.documentElement.clientHeight );
+      this.screenSize.h = ( window.innerHeight || document.documentElement.clientHeight ) - offsetH;
       this.dpiSizeRatio.w = ( window.innerWidth || document.documentElement.clientWidth ) / this.dpi >> 0;
-      this.dpiSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight ) / this.dpi >> 0;
+      this.dpiSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight - offsetH ) / this.dpi >> 0;
       
       if ( sizes[ index ] || ( !isNaN( savedQuality ) && sizes[ savedQuality ] ) )
       {
@@ -83,7 +85,7 @@ function( CONFIG, SaveSystem, Event )
         {
           this.currentSizeIndex = index;
           SaveSystem.get( "settings" ).quality = index;
-          SaveSystem.save( "settings", SaveSystem.get( "settings" ) );
+          SaveSystem.save( "settings" );
         }
         else
           this.currentSizeIndex = savedQuality || index;

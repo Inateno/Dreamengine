@@ -21,7 +21,8 @@ function( CONFIG )
       } } ]
     
     // FX
-    ,[ "achievement-unlocked", "audio/achievement-unlocked", [ 'mp3' ], { "preload": true, "loop": false } ]
+    ,[ "achievement-unlocked", "audio/achievement-unlocked", [ 'mp3', 'ogg' ], { "preload": true, "loop": false } ]
+    ,[ "mouseclick1", "audio/mouseclick1", [ 'mp3', 'ogg' ], { "preload": true, "loop": false } ]
   ];
   CONFIG.debug.log( "audioList loaded", 3 );
   return audioList;

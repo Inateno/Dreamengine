@@ -34,6 +34,17 @@ function(  CollisionSystem, CONFIG, Time )
     // childs update
     for ( var c = 0; child = this.childrens[ c ]; c++ )
     {
+      if ( child.flag !== null )
+      {
+        switch( child.flag )
+        {
+          case "delete":
+            this.delete( c );
+            --c;
+            continue;
+            break;
+        }
+      }
       child.update( time );
     }
     

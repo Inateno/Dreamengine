@@ -61,6 +61,9 @@ function()
     ,achievementUnlockDuration: 8000
   };
   
+  CONFIG.MIN_SIZE_BUFFER_W = 1540;
+  CONFIG.MIN_SIZE_BUFFER_H = 1540;
+  
   CONFIG.debug.log( "CONFIG loaded", 3 );
   return CONFIG;
 } );

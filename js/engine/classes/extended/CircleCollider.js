@@ -24,7 +24,7 @@ function( Collider, CONFIG, CanvasBuffer, COLORS )
     params = params || {};
     params.type = CONFIG.COLLISION_TYPE.CIRCLE;
     
-    Collider.call( this , params );
+    Collider.call( this, params );
     
     this.radius = radius || 1;
     

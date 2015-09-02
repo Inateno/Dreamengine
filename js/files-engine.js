@@ -29,6 +29,7 @@ require.config( {
     , 'DE.States'          : 'engine/states'
     
     // core engine classes
+    , 'DE.DemoPopups'        : 'engine/classes/DemoPopups'
     , 'DE.Event'             : 'engine/classes/Event'
     , 'DE.Time'              : 'engine/classes/Time'
     , 'DE.ImageManager'      : 'engine/classes/ImageManager'
@@ -80,6 +81,7 @@ require.config( {
     , 'DE.TextRenderer.render'   : 'engine/classes/extended/TextRenderer/TextRenderer.render'
     , 'DE.TileRenderer'          : 'engine/classes/extended/TileRenderer/TileRenderer'
     , 'DE.TileRenderer.render'   : 'engine/classes/extended/TileRenderer/TileRenderer.render'
+    , 'DE.BufferRenderer'        : 'engine/classes/extended/BufferRenderer'
     
     , 'DE.Mid.gameObjectMouseEvent': 'engine/middlewares/gameObjectMouseEvent'
     

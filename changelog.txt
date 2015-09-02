@@ -1,3 +1,15 @@
+----0.25.1 ---
+* Input.stopListening 
+* add scaleTo on Renderer
+* add a BufferRenderer
+
+--Fix
+* Mouse wheel use classic declaration way, trigger a axeMoved
+* fix askToKill if object is children
+* fix event propagation order in GUI
+* renderer alpha fadeTo (was prevent if to value = current value)
+* camera.on("onLastMouseEvent") become camera.on("lastMouseEvent")
+
 ---- 0.25.0 ----
 * add rightClick / middleClick inside mouse events
 * change default DEBUG vector color
@@ -9,7 +21,7 @@
 
 -- Fix
 * Vector2.getAngle was giving wtf angle
-* fix Vecotr2.normalize, if Vector2 was 0-0 try 0/0 fixed
+* fix Vector2.normalize, if Vector2 was 0-0 try 0/0 fixed
 * other minor fix
 
 ---- 0.2.2 ----

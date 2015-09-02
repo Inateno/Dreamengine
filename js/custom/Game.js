@@ -269,6 +269,9 @@ function( DE, TouchControl )
       bullet.position.setRotation( this.position.rotation );
       bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
       Game.scene.add( bullet );
+      
+      // DE.AudioManager.fx.play("achievement-unlocked");
+      DE.AudioManager.fx.playRandom( [ "achievement-unlocked", "mouseclick1" ] );
     }
     
     Game.camera.gui = new DE.Gui();
@@ -286,8 +289,6 @@ function( DE, TouchControl )
     minus.onMouseUp = function(){ Game.camera.scenePosition.z -= 100; };
     Game.camera.gui.add( plus, minus );
     
-    
-    //
     // DE.Inputs.addActionInput( "fire", "launchMissile", function(){Game.ship.fire();}, "up" )
     setTimeout( function(){ DE.States.down( "isLoading" ); }, 500 );
   };

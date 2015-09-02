@@ -73,6 +73,27 @@ function( Collider, COLORS, CONFIG, CanvasBuffer )
       };
     }
     
+    this.resize = function( width, height, keepLocalPosition )
+    {
+      this.width = width != undefined ? width : this.width;
+      this.height= height != undefined ? height : this.height;
+      
+      if ( !keepLocalPosition )
+      {
+        this.localPosition.x = - this.width * 0.5;
+        this.localPosition.y = - this.height * 0.5;
+      }
+      
+      if ( CONFIG.DEBUG_LEVEL > 1 )
+      {
+        this.debugBuffer.clear();
+        this.debugBuffer.resize( this.width, this.height );
+        this.debugBuffer.ctx.lineWidth = 2;
+        this.debugBuffer.ctx.strokeStyle = COLORS.DEBUG.COLLIDER;
+        this.debugBuffer.ctx.strokeRect( 0, 0, this.width, this.height );
+      }
+    };
+    
     if ( CONFIG.DEBUG_LEVEL > 1 )
       this.createDebugRenderer();
   }

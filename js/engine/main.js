@@ -12,12 +12,13 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
        , 'DE.CollisionSystem', 'DE.Collider', 'DE.Renderer', 'DE.Scene', 'DE.Rigidbody'
        , 'DE.CanvasBuffer', 'DE.GameObject', 'DE.FixedBoxCollider', 'DE.OrientedBoxCollider'
        , 'DE.CircleCollider', 'DE.BoxRenderer', 'DE.CircleRenderer', 'DE.SpriteRenderer'
-       , 'DE.Render', 'DE.MainLoop', 'DE.Event', 'DE.States', 'DE.Inputs', 'DE.Camera'
-       , 'DE.TextRenderer', 'DE.TileRenderer', 'DE.AudioManager', 'DE.Gui'
+       , 'DE.BufferRenderer', 'DE.TextRenderer', 'DE.TileRenderer'
+       , 'DE.Render', 'DE.MainLoop', 'DE.Event', 'DE.States', 'DE.Inputs'
+       , 'DE.Camera', 'DE.AudioManager', 'DE.Gui'
        // , 'DE.BaseGui', 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage'
        , 'DE.LangSystem', 'DE.SystemDetection'
        , 'DE.GamePad', 'DE.Screen', 'DE.about', 'DE.SaveSystem', 'DE.Notifications'
-       , 'NebulaOffline', 'DE.AchievementSystem' ]
+       , 'NebulaOffline', 'DE.AchievementSystem', 'DE.DemoPopups' ]
 , function()
 {
   var DREAM_ENGINE = {};
@@ -52,13 +53,15 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     params = params || {};
     
     params.loader            = params.loader || {};
-    params.loader.name       = params.loader.name || "loader";
+    params.loader.name       = "loader";
     params.loader.url        = params.loader.url || "loader";
     params.loader.totalFrame = params.loader.totalFrame || 16;
     params.loader.eachAnim   = params.loader.eachAnim || 45;
     params.loader.ext        = params.loader.ext || "png";
     params.loader.isAnimated = true;
     params.loader.scale      = params.loader.scale || 1;
+    
+    DREAM_ENGINE.isDemo = params.isDemo || false;
     
     window.ENGINE_SETTING = window.ENGINE_SETTING || {}; // configuration trough html
     
@@ -78,6 +81,8 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       this.ImageManager.imageNotRatio     = sizes.notRatio || false;
       this.ImageManager.ratioToConception = ratioToConception;
       this.ImageManager.folderName        = params.images.folderName;
+      this.ImageManager.imagesLoaded      = 0;
+      this.ImageManager.imagesRequested   = 1;
       this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
     }, DREAM_ENGINE, false );
     
@@ -117,7 +122,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       {
         this.on( "nebula-hide", this.unPause, this );
         this.on( "nebula-show", this.pause, this );
-        NebulaOffline.init( params.nebulaElementId );
+        NebulaOffline.init( params.nebulaElementId, params.preventNebulaAutoStart );
       }
       DREAM_ENGINE.MainLoop.loader = new DREAM_ENGINE.GameObject( {
         renderers: [
@@ -134,6 +139,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
         ]
       } );
       
+      // for future screen update (manual call needed)
       DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
       {
         this.ImageManager.pathPrefix        = sizes.path;
@@ -142,11 +148,6 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
         this.ImageManager.arrayLoader( params.images.imagesList );
         this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
       }, DREAM_ENGINE );
-        
-      if ( params.onReady )
-        params.onReady();
-      else
-        console.log( "%cNo initialisation function given", "color:red" );
       
       if ( params.onStart )
       {
@@ -172,6 +173,9 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       else
         console.log( "%cNo start function given", "color:red" );
       
+      if ( DREAM_ENGINE.isDemo )
+        DREAM_ENGINE.DemoPopups.init();
+      
       DREAM_ENGINE.ImageManager.arrayLoader( params.images.imagesList );
       DREAM_ENGINE.AudioManager.loadAudios( params.audios );
       
@@ -180,6 +184,12 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       {
         DREAM_ENGINE.MainLoop.customLoop = params.customLoop;
       }
+      
+      if ( params.onReady )
+        params.onReady();
+      else
+        console.log( "%cNo initialisation function given", "color:red" );
+      
     }, DREAM_ENGINE, false );
     
     // adapt to the screen

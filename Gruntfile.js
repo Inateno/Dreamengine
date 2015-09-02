@@ -133,6 +133,8 @@ module.exports = function(grunt)
   // Default task is the require version
   grunt.registerTask( 'default', [ 'requirejs:requireVersion', 'string-replace:requireVersion'
                      , 'concat:requireVersion', 'jsdoc' ] );
+  grunt.registerTask( 'require', [ 'requirejs:requireVersion', 'string-replace:requireVersion'
+                     , 'concat:requireVersion' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone', 'jsdoc' ] );
   grunt.registerTask( 'doc', [ 'jsdoc' ] );
 };

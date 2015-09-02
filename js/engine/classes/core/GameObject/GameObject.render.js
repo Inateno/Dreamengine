@@ -39,6 +39,7 @@ function( CONFIG, COLORS, Time )
         continue;
       r.render( ctx, physicRatio, ratioz );
       r.applyFade();
+      r.applyScale();
     }
     
     // AXIS debug

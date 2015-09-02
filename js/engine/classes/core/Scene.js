@@ -35,7 +35,7 @@ function( CONFIG, COLORS, GameObject, Time, MainLoop, Event )
     this.objectsByName = {};
     
     // TODO - include default physic
-      /*this.colliders = new Array();
+      /*this.collideObjects = new Array();
         //physics attributes by using an octree with colliders inside
         this.maxObjectsPerGrid = 5;
         this.grid     = new Array(); // TODO - octree for collisions ? WIP

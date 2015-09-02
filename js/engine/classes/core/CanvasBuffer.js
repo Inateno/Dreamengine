@@ -23,7 +23,7 @@
 define( [ 'DE.CONFIG' ],
 function( CONFIG )
 {
-  function CanvasBuffer( width, height )
+  function CanvasBuffer( width, height, smoothingEnable )
   {
     if ( !width || !height )
       throw new Error( "CanvasBuffer :: can't instantiate a buffer with a width or a height 0 -- see the doc" );
@@ -54,11 +54,25 @@ function( CONFIG )
      * @public
      * @type {CanvasContext2D}
      */
-    this.ctx = this.canvas.getContext( '2d' );
+    if ( window.WebGL2D )
+    {
+      WebGL2D.enable( this.canvas );
+      this.ctx = this.canvas.getContext("webgl-2d");
+    }
+    else
+      this.ctx = this.canvas.getContext( '2d' );
     
     // disabling aliasing should improve quality but lower perfs (testing)
-    this.ctx.mozImageSmoothingEnabled = true;
-    this.ctx.webkitImageSmoothingEnabled = true;
+    if ( smoothingEnable !== undefined )
+    {
+      if ( this.ctx.imageSmoothingEnabled )
+        this.ctx.imageSmoothingEnabled = true;
+      else
+      {
+        this.ctx.mozImageSmoothingEnabled = true;
+        this.ctx.webkitImageSmoothingEnabled = true;
+      }
+    }
     
     /**
      * resize the buffer
