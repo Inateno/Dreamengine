@@ -18,7 +18,7 @@ Checkout the changelog.txt for updates details
 Update 0.25.1
 -------
 This update is the last one I did on the DreamEngine, here is lot of new stuff and bug changes !
-- now the repositories have 4 branches, the master contain all stuff, pixi is the branches with the DE pixi engine version inside + doc and canvas2d is the first DE version using canvas2d + doc (the old one, but I keep working on), and the branche "site" for the website only, for those who want to contribute on it you're welcome.
+- now the repositories have 4 branches, the master contain all stuff, pixi is the branches with the DE pixi engine version inside + doc and canvas2d is the first DE version using canvas2d + doc (the old one, but I keep working on), and the branch "site" for the website only, for those who want to contribute on it you're welcome.
 
 Check out samples
 -------
