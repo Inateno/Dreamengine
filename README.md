@@ -1,11 +1,17 @@
-HTML5 Games Dream-Engine - What is it
+![DreamEngine Logo](http://dreamengine.dreamirl.com/assets/imgs/logo.png)
+
+Dream-Engine - a powerful 2D games engine
 ===========
 
-The Dream-Engine is a library to create HTML5 games. It's not a "button click software" or "quick code" or things like that, you have to programming everytime with it (but it's very easy to create editors, I made one simple and I will push soon). The Dream-Engine is a very good engine to write a finished game, professional, with good performances, and it'll work well everywhere.
+The Dream-Engine is a free open source engine to create HTML5 games.
 It's made for HD graphics, touch and gamepad compatibilities, and try to let you do th interesting stuff while doing the boring part for you.
+The Dream-Engine is a very good engine to write a finished, professional game, with good performances, and it'll work well everywhere.
 
-I focused the main engine first, with micro-tools (like inputs, renderers), and now it's very simple to create plugins, advanced tools, editors, logics...
-I think today it's ready and we can start more plugins and samples to get faster and faster.
+It's not a "button click software" or a library with all logic included, you have to go programming with it, you'll focus on game-logic and content while the engine will take care of compatibilities, screens sizes, audio, loadings, etc.
+
+The main focus on the engine was made on the core engine first, with micro-tools (like inputs, renderers), and now it's very simple to create plugins, advanced tools, editors, logics... I add constantly new stuff and anyone can do it too.
+
+Today after several games, I can say it's ready and we can start fixing bad stuff, doing a better doc, and add more plugins and samples to get faster and faster.
 
 Checkout the changelog.txt for updates details
 
