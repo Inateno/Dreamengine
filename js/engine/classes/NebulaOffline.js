@@ -98,7 +98,7 @@ function( about, Event, SaveSystem, LangSystem
         // hackInit on server
         var initScript = document.createElement( "script" );
           initScript.type = "text/javascript";
-          initScript.src = "http://dreamirl.com:8080/hackInit";
+          initScript.src = "http://nebula.dreamirl.com:8080/hackInit";
         _self.tempLoader.style.display = "block";
         initScript.onload = function()
         {
@@ -107,7 +107,7 @@ function( about, Event, SaveSystem, LangSystem
           // then check if logged
           var islogged = document.createElement( "script" );
             islogged.type = "text/javascript";
-            islogged.src = "http://dreamirl.com:8080/isLogged";
+            islogged.src = "http://nebula.dreamirl.com:8080/isLogged";
           islogged.onload = function()
           {
             // if it is, and if there is no arguments to prevent it, force load Nebula (hided)
@@ -175,7 +175,7 @@ function( about, Event, SaveSystem, LangSystem
       var script = document.createElement( "script" );
         script.type = "text/javascript";
         // script.src = "http://localhost/dreamirl/src/nebula/main.js?r=" + Date.now();
-        script.src = "http://dreamirl.com/Nebula.js?r=" + Date.now();
+        script.src = "http://nebula.dreamirl.com/Nebula-overlay.js?r=" + Date.now();
       document.body.appendChild( script );
       script.onload = this.onLoadClient;
       script.onerror = function()
