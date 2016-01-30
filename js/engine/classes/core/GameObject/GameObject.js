@@ -306,7 +306,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.moveTo = function( pos, duration, callback, curveName )
   {
-    var myPos = this.position;
+    var myPos = this.getPos();
     
     this.moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
