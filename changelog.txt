@@ -1,4 +1,8 @@
-----0.25.1 ---
+----0.26 WIP ----
+* fix fade in Renderer
+* add missing npm in package
+
+----0.25.1 ----
 * Input.stopListening 
 * add scaleTo on Renderer
 * add a BufferRenderer
