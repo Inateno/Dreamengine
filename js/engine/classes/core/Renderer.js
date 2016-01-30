@@ -172,7 +172,7 @@ function( COLORS, Vector2, CONFIG, Time )
   {
     this.sleep = false;
     var data = {
-      from      : from || 1
+      from      : from !== undefined ? from : 1
       ,to       : to != undefined ? to : 0
       ,duration : duration || 500
       ,oDuration: duration || 500
