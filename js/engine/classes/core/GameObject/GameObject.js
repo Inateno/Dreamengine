@@ -297,6 +297,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @public
    * @memberOf GameObject
    * @param {Object} pos give x, y, and z destination
+   you can also give keepLocal as Boolean to prevent global position system
    * @param {Int} [duration=500] time duration
    * @param {Function} callback will be called in the current object context
    * @example // move to 100,100 in 1 second
@@ -306,7 +307,16 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.moveTo = function( pos, duration, callback, curveName )
   {
-    var myPos = this.getPos();
+    var myPos = this.position;
+    // convert pos to locale myPos
+    if ( this.parent && !pos.keepLocal )
+    {
+      var rPos = this.getPos();
+      if ( pos.x != undefined )
+        pos.x = myPos.x + ( pos.x - rPos.x );
+      if ( pos.y != undefined )
+        pos.y = myPos.y + ( pos.y - rPos.y );
+    }
     
     this.moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
