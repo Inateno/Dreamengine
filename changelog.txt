@@ -1,6 +1,9 @@
 ----0.26 WIP ----
 * fix fade in Renderer
 * add missing npm in package
+* GameObject.moveTo now work as global position by default and can keep running with local with "keepLocal" argument
+* in AudioManager add a forceLoop arguments, allowing to get a better control on musics loop (not waiting for the "ended" DOM event)
+- use forceLoop= true, startAt=float and loopPrecision=float helpers in your audio data.
 
 ----0.25.1 ----
 * Input.stopListening 

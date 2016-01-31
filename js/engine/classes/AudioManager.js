@@ -32,11 +32,14 @@ function( CONFIG, buzz, Event )
         au = audioList[ m ];
         params = au[ 3 ] || {};
         audio = {};
-        audio.name    = au[ 0 ] || 'noname';
-        audio.preload = params.preload || false;
-        audio.loop    = params.loop || false;
-        audio.formats = au[ 2 ] || [ 'mp3' ];
-        audio.autoplay= params.autoplay || false;
+        audio.name          = au[ 0 ] || 'noname';
+        audio.preload       = params.preload || false;
+        audio.loop          = params.loop || false;
+        audio.formats       = au[ 2 ] || [ 'mp3' ];
+        audio.autoplay      = params.autoplay || false;
+        audio.forceLoop     = params.forceLoop || false;
+        audio.loopPrecision = params.loopPrecision || 0.01;
+        audio.startAt       = params.startAt;
         
         audio.sound = new buzz.sound( au[ 1 ], {
           formats  : audio.formats
@@ -119,6 +122,24 @@ function( CONFIG, buzz, Event )
       this.volume = ( ( this.volume > 100 ) ? 100 : this.volume ) >> 0;
       this.volume = ( ( this.volume < 0 ) ? 0 : this.volume ) >> 0;
       return this;
+    }
+    
+    this.checkLoops = function()
+    {
+      var musics = this.music.getAll();
+      var m;
+      
+      for ( var i in musics )
+      {
+        if ( !musics[ i ].forceLoop )
+          continue;
+        
+        m = musics[ i ];
+        if ( m.sound.getTime() + m.loopPrecision >= m.sound.getDuration() )
+        {
+          m.sound.setTime( m.startAt || 0 );
+        }
+      }
     }
     
     this.applyFades = function()

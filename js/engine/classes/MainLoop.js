@@ -69,6 +69,7 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
         }
         
         AudioManager.applyFades();
+        AudioManager.checkLoops();
         
         while( Time.missedFrame >= 0 )
         {

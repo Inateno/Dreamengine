@@ -102,7 +102,7 @@ define( function()
                 }
                 this.sound.loop = "loop";
                 this.bind("ended.buzzloop", function() {
-                    this.currentTime = 0;
+                    this.currentTime = 0.01;
                     this.play();
                 });
                 return this;
