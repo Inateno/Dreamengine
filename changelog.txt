@@ -1,3 +1,19 @@
+---- 0.26.0 ----
+ - features
+  * add a CircleRenderer
+  * add a RectRenderer
+
+ - fix
+  * camera.on("onLastMouseEvent") become camera.on("lastMouseEvent")
+  * add missing npm in package
+  * LangSystem not failing if nothing in dictionary
+  * load event if no images is set in the main pool
+
+ - others
+  * create a migration process file
+  * add samples (missing plate-former)
+  * create more test scenes (better to tests all features quickly)
+
 ---- 0.25.0 ----
 * add rightClick / middleClick inside mouse events
 * change default DEBUG vector color
@@ -9,7 +25,7 @@
 
 -- Fix
 * Vector2.getAngle was giving wtf angle
-* fix Vecotr2.normalize, if Vector2 was 0-0 try 0/0 fixed
+* fix Vector2.normalize, if Vector2 was 0-0 try 0/0 fixed
 * other minor fix
 
 ---- 0.2.2 ----

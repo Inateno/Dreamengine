@@ -1,0 +1,34 @@
+Migration process:
+
+- datas/imagesDatas.js
+  > replace "folderName" by "baseUrl"
+  > in images declaration, you must remove the extension and precise it in the image path, like this
+    [ "resourceName", "resource/path", "png" ]
+    become
+    [ "resourceName", "resource/path.png" ]
+  > the imagesList must be changed to "main" and pushed inside an object named "pools" like this
+  before: imagesList: [ /* datas */ ]
+  now: pools: { main: [ /* datas */ ] }
+    
+- CircleRenderer
+  > all parameters go inside an object, just one parameters with all inside, for radius name it radius in the parameters object
+  > fillColor stay, strokeColor become lineColor
+
+- BoxRenderer become RectRenderer
+  > all parameters go inside an object, just one parameters with all inside, for width height name it width/height in the parameters object
+  > strokeColor become lineColor
+
+- TextRenderer
+  > text value is the first argument now
+  > all parameters go inside an objectjust as before
+  > you don't need anymore to precise width/height
+  > all calls to "setText" must be changed by text = "value"
+
+- GameObjects
+  > You can now directly set x/y/z without calling position.
+  > "childrens" mistake is fixed and renamed to gameObjects (do changes if you called "childrens" somewhere)
+
+- Render
+  > You have to precise a width/height waiting for a new version handling this as the previous one
+  > , width: 1920, height: 1080
+  > set a background color on the render (not working on the camera)

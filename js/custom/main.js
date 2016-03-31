@@ -50,5 +50,6 @@ function( files, gameLoop, Game, images, audios, inputs, achievements, dictionar
     , 'achievements': achievements
     , 'ignoreNebula': true
   } );
-  window.DREAM_E = DE;
+  // useful to learn/try/debug
+  window.DREAM_ENGINE = DE;
 } );

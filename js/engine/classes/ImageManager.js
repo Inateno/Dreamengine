@@ -93,6 +93,14 @@ function( PIXI, CONFIG, States, Event )
      */
     this.loadPool = function( poolId )
     {
+      if ( this.pools[ poolId ].length == 0 )
+      {
+        setTimeout( function()
+        {
+          PIXI.loader.emit( 'complete' );
+        }, 500 );
+        return;
+      }
       PIXI.loader.add( this.pools[ poolId ] ).load( this.onComplete );
     };
     

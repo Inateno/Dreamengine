@@ -12,7 +12,8 @@ define( [ 'PIXI', 'DE.COLORS', 'DE.CONFIG', 'DE.Time', 'DE.Vector2', 'DE.ImageMa
        , 'DE.CollisionSystem', 'DE.BaseRenderer', 'DE.Scene', 'DE.Rigidbody'
        , 'DE.GameObject', 'DE.FixedBoxCollider', 'DE.CircleCollider'
        , 'DE.TextRenderer', 'DE.SpriteRenderer', 'DE.SheetRenderer'
-       /*, 'DE.BoxRenderer', 'DE.CircleRenderer', 'DE.Sizes'
+       , 'DE.CircleRenderer', 'DE.RectRenderer'
+       /*, 'DE.BoxRenderer', 'DE.Sizes'
        , 'DE.BufferRenderer', 'DE.TileRenderer'
        , 'DE.BaseGui', 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage'*/
        , 'DE.Render', 'DE.MainLoop', 'DE.Event', 'DE.States', 'DE.Inputs'

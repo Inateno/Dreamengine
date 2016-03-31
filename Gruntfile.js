@@ -35,21 +35,22 @@ module.exports = function(grunt)
     }
     
     , requirejs: { // requirejs compil
-      standalone: {
-        options: {
-          findNestedDependencies : true
-          , mainConfigFile       : 'js/files-engine.js'
-          , baseUrl              : 'js/'
-          , name                 : 'standalonev'
-          , out                  : 'js/dist/DreamEngine-min.js'
-          , optimize             : 'uglify'
-          , uglify               : requireUglify
-          , closure              : requireClosure
-          , inlineText           : true
-          , useStrict            : false
-        }
-      }
-      , requireVersion: {
+      // standalone: {
+      //   options: {
+      //     findNestedDependencies : true
+      //     , mainConfigFile       : 'js/files-engine.js'
+      //     , baseUrl              : 'js/'
+      //     , name                 : 'standalonev'
+      //     , out                  : 'js/dist/DreamEngine-min.js'
+      //     , optimize             : 'uglify'
+      //     , uglify               : requireUglify
+      //     , closure              : requireClosure
+      //     , inlineText           : true
+      //     , useStrict            : false
+      //   }
+      // }
+      // ,
+      requireVersion: {
         options: {
           findNestedDependencies : true
           , mainConfigFile       : 'js/files-engine.js'
@@ -57,8 +58,8 @@ module.exports = function(grunt)
           , name                 : 'requirev'
           , out                  : 'js/dist/DreamEngine-min-require.js'
           , optimize             : 'uglify'
-          , uglify               : requireUglify
-          , closure              : requireClosure
+          , uglify               : null//requireUglify
+          , closure              : null//requireClosure
           , inlineText           : true
           , useStrict            : false
         }
@@ -133,6 +134,8 @@ module.exports = function(grunt)
   // Default task is the require version
   grunt.registerTask( 'default', [ 'requirejs:requireVersion', 'string-replace:requireVersion'
                      , 'concat:requireVersion', 'jsdoc' ] );
+  grunt.registerTask( 'require', [ 'requirejs:requireVersion', 'string-replace:requireVersion'
+                     , 'concat:requireVersion' ] );
   grunt.registerTask( 'standalone', [ 'requirejs:standalone', 'concat:standalone', 'jsdoc' ] );
   grunt.registerTask( 'doc', [ 'jsdoc' ] );
 };

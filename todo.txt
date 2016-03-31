@@ -1,0 +1,5 @@
+Todo:
+
+- refaire que la déclaration des Render marche comme avant (pas besoin de spécifier la taille car elle est précisée dans le imgsDatas)
+- refaire marcher les différentes tailles dans imgsDatas (et donc différentes textures)
+- il n'y a pas le onLastMouseXX sur la camera ?

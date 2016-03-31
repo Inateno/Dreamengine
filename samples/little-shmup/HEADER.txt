@@ -1,0 +1,4 @@
+/*
+  little shmup provided as a "how to" to start with the DreamEngine - by Inateno
+  arts come from Dreamirl and are not free to use
+*/

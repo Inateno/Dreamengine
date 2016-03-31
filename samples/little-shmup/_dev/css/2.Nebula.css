@@ -1,0 +1,136 @@
+/* v0.1.0 */
+/* Nebula Client Offline */
+  #NebulaClient {
+    position  : fixed;
+    top       : 0;
+    left      : 0;
+    right     : 0;
+    bottom    : 0;
+    background: rgba(0,0,0,0.9);
+    z-index   : 999999999;
+    -webkit-transition: all 0.25s linear;
+       -moz-transition: all 0.25s linear;
+         -o-transition: all 0.25s linear;
+            transition: all 0.25s linear;
+  }
+  #NebulaClient .centeredModal {
+    position     : absolute;
+    border       : 1px solid #C1BBBC;
+    background   : #242424;
+    padding      : 25px;
+    box-sizing   : border-box;
+    border-radius: 2px;
+  }
+  #NebulaClient .centeredModal .close {
+    position     : absolute;
+    top          : -10px;
+    right        : -10px;
+    width        : 26px;
+    height       : 26px;
+    background   : #343434;
+    border-radius: 40px;
+    text-align   : center;
+    padding      : 3px;
+    box-sizing   : border-box;
+    border       : 1px solid #C1BBBC;
+    cursor       : pointer;
+  }
+  #NebulaClient .centeredModal .close:hover {
+    background   : #545456;
+  }
+  #NebulaClient .btns {
+    position  : absolute;
+    bottom    : 35px;
+    left      : 0;
+    right     : 0;
+    text-align: center;
+  }
+  #NebulaClient button {
+    background-color: rgb(18, 18, 18);
+    color           : rgb(253, 253, 253);
+    border-color    : rgb(193, 187, 188);
+    border-radius   : 0px;
+    border-style    : solid;
+    border-width    : 1px;
+    box-sizing      : border-box;
+    cursor          : pointer;
+    display         : inline-block;
+    font-size       : 14px;
+    font-weight     : normal;
+    height          : 34px;
+    line-height     : 20px;
+    margin-bottom   : 0px;
+    margin-left     : -1px;
+    margin-right    : -1px;
+    padding-bottom  : 6px;
+    padding-left    : 12px;
+    padding-right   : 12px;
+    padding-top     : 6px;
+    position        : relative;
+    text-align      : center;
+    text-decoration : none solid rgb(253, 253, 253);
+    text-shadow     : none;
+    vertical-align  : middle;
+    white-space     : nowrap;
+    width           : 143px;
+    outline-color   : rgb(202, 202, 202);
+  }
+  #NebulaClient button:hover {
+    background-color: rgb(28, 28, 28);
+    color           : rgb(202, 202, 202);
+  }
+  #NebulaClient button:active {
+    box-shadow        : rgba(0, 0, 0, 0.121569) 0px 3px 5px 0px inset;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.121569) 0px 3px 5px 0px inset;
+  }
+  #NebulaClient.fading {
+    opacity: 0;
+  }
+  #NebulaClient.hided {
+    display: none;
+  }
+
+/* Vignet */
+  #NebulaVignet {
+    cursor                 : pointer;
+    position               : fixed;
+    bottom                 : -20px;
+    left                   : 50px;
+    width                  : 50px;
+    height                 : 74px;
+    background             : #242424;
+    padding                : 15px;
+    box-sizing             : border-box;
+    border-top-left-radius : 5px;
+    border-top-right-radius: 5px;
+    -webkit-transition: all 0.1s linear;
+       -moz-transition: all 0.1s linear;
+         -o-transition: all 0.1s linear;
+            transition: all 0.1s linear;
+  }
+  #NebulaVignet:hover {
+    background : #868686;
+    bottom     : 0;
+  }
+
+@media screen and (min-width: 550px) and (min-height: 350px) {
+  #NebulaClient .centeredModal {
+    top          : 50%;
+    left         : 50%;
+    right        : auto;
+    bottom       : auto;
+    width        : 500px;
+    height       : 300px;
+    margin-left  : -250px;
+    margin-top   : -150px;
+  }
+}
+
+@media screen and (max-width: 550px) and (min-height: 440px) {
+  #NebulaClient .centeredModal {
+    top       : 50%;
+    bottom    : auto;
+    height    : 400px;
+    margin-top: -200px;
+  }
+}

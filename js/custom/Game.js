@@ -35,7 +35,6 @@ function( DE, TouchControl )
   Game.start = function()
   {
     // scene
-    console.log( "coucou" )
     console.log( "game starto!!" );
     Game.scene = new DE.Scene( "Test" );
     
@@ -64,7 +63,7 @@ function( DE, TouchControl )
       x: 960
       ,y: 540
       ,zindex: 0
-      ,renderer: new DREAM_E.SpriteRenderer( { spriteName: "bg" } )
+      ,renderer: new DE.SpriteRenderer( { spriteName: "bg" } )
     } );
     Game.camera.interactive = true;
     Game.ship = new DE.GameObject( {
@@ -72,8 +71,8 @@ function( DE, TouchControl )
       ,y: 500
       ,zindex: 1
       ,renderers: [
-        new DREAM_E.SheetRenderer( "ship1.png" )
-        ,new DREAM_E.TextRenderer( "coco la patate\nyoupi", { fill: "red" } )
+        new DE.SheetRenderer( "ship1.png" )
+        ,new DE.TextRenderer( "coco la patate\nyoupi", { fill: "red" } )
       ]
       ,collider: new DE.CircleCollider( 100, 100 )
       ,cursorOnOver: true
@@ -82,7 +81,7 @@ function( DE, TouchControl )
       x: 0
       ,y: 100
       ,name: "reactor"
-      ,renderer: new DREAM_E.SheetRenderer( "ship4.png", { spriteName: "ship", scale: 0.5 } )
+      ,renderer: new DE.SheetRenderer( "ship4.png", { spriteName: "ship", scale: 0.5 } )
       ,collider: new DE.FixedBoxCollider( 50,50 )
     } );
     Game.ship.add( Game.reactor );
@@ -146,7 +145,7 @@ function( DE, TouchControl )
     // Game.ship2 = new DE.GameObject( {
     //   x: 600
     //   ,y: 500, zindex: 2
-    //   ,renderer: new DREAM_E.SpriteRenderer( { spriteName: "ship" } )
+    //   ,renderer: new DE.SpriteRenderer( { spriteName: "ship" } )
     //   ,collider: new DE.CircleCollider( 20 )
     // } );
     // Game.ship2.interactive = true;
@@ -251,7 +250,7 @@ function( DE, TouchControl )
     //   o = new DE.GameObject( {
     //     x: -5500 + Math.random() * 5520 >> 0
     //     ,y: -2000 + Math.random() * 3080 >> 0
-    //     ,renderer: new DREAM_E.SpriteRenderer( { spriteName: "ship" } )
+    //     ,renderer: new DE.SpriteRenderer( { spriteName: "ship" } )
     //     // ,collider: new DE.CircleCollider( 20 )
     //   } );
     //   o.renderer._nextAnim = Math.random() * 500 >> 0;

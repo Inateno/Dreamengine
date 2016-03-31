@@ -11,8 +11,8 @@
  - load all files
  this file isn't to load your custom files or to make production games
  it's usefull to load the unwrapped engine and work on.
- If you are making a game and don't want to work on the Engine, I recommand you to take a sample with
- wrapped dist version
+ If you are making a game and don't want to work on the Engine,
+ I recommand you to take a sample with wrapped dist version
 
 -- problem with require.js ? give a look on api doc --> http://requirejs.org/docs/api.html#jsfiles
 **/
@@ -75,8 +75,8 @@ require.config( {
     , 'DE.SpriteRenderer'        : 'engine/classes/extended/SpriteRenderer'
     , 'DE.TextRenderer'          : 'engine/classes/extended/TextRenderer'
     , 'DE.SheetRenderer'         : 'engine/classes/extended/SheetRenderer'
-    // , 'DE.BoxRenderer'           : 'engine/classes/extended/BoxRenderer'
-    // , 'DE.CircleRenderer'        : 'engine/classes/extended/CircleRenderer'
+    , 'DE.CircleRenderer'        : 'engine/classes/extended/CircleRenderer'
+    , 'DE.RectRenderer'          : 'engine/classes/extended/RectRenderer'
     // , 'DE.TileRenderer'          : 'engine/classes/extended/TileRenderer'
     // , 'DE.BufferRenderer'        : 'engine/classes/extended/BufferRenderer'
     

@@ -1,0 +1,34 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8" />
+    <title>Kill the bubble</title>
+    
+    <!-- Références WinJS -->
+    <link href="//Microsoft.WinJS.2.0/css/ui-dark.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+    
+    <meta name="description" content="A little game, kill bubbles">
+    <meta name="keywords" content="">
+    <meta name="author" content="Dreamirl">
+    <meta name="viewport" 
+      content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="img/logo64.png" />
+    
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+    <body>
+      <div id="render" style="position:relative"></div>
+      <div id="notifsContainer"></div>
+      
+      <div id="notificationTemplate">
+        <div class="notification">
+          <span class="content"></span>
+          <div class="notifClose">X</div>
+        </div>
+      </div>
+      <script type="text/javascript" src="require.js" data-main="game"></script>
+    </body>
+</html>

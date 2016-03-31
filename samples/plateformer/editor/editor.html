@@ -1,0 +1,57 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Editor</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+    <body>
+      <div id="render">
+        <div id="notifsContainer"></div>
+      </div>
+      
+      <div id="t_textarea">*
+        <br />
+        <textarea id="load_textarea" style="width:80%" rows="10"></textarea>
+        <br />
+        <button id="t_ok">OK</button>
+        <button id="t_loadjson">Load JSON</button>
+      </div>
+      
+      <div id="tools">
+        <h4>Tools</h4>
+        <label for="gridsize">Grid size</label><input id="gridsize" name="gridsize" value="32" />
+        <br />
+        <button id="getjson">Get JSON</button>
+        <br />
+        <button id="loadjson">Load JSON</button>
+      </div>
+      
+      <div id="elGui">
+        <h4>Selected GameObject</h4>
+        x: <input id="el_x" type="text" name="x" value="0" style="width:30px" /> - y :<input id="el_y" type="text" name="y" value="0" style="width:30px" />
+        <br />
+        z: <input id="el_z" type="text" name="z" value="0" style="width:30px" />
+        <br />
+        zindex: <input id="el_zindex" type="text" name="zindex" value="0" style="width:50px"/>
+        <br />
+        <button id="el_zindex+" class="plus">+</button><button id="el_zindex-" class="moins">-</button>
+        <br />
+        <br />
+        <button id="el_lock">Locker</button>
+        <br /><br />
+        <button id="el_delete">Delete</button>
+      </div>
+      
+      <div id="components">
+      </div>
+      
+      <div id="notificationTemplate" class="dreamTemplate">
+        <div>
+          <span class="content"></span>
+          <div class="notifClose">X</div>
+        </div>
+      </div>
+      
+    <script type="text/javascript" src="js/ext_libs/require.js" data-main="js/files"></script>
+    </body>
+</html>
