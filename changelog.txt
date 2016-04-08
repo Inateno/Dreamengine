@@ -1,3 +1,9 @@
+---- 0.26.1 ----
+ - others
+  * add tests in the main stress_test.html file
+  * minor comments/changes
+  * clean folders
+  
 ---- 0.26.0 ----
  - features
   * add a CircleRenderer

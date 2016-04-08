@@ -48,7 +48,7 @@ function( Time )
       for ( var i = 0; i < _attributes.length; ++i )
         target[ _attributes[ i ] ] = this[ _attributes[ i ] ];
     };
-  }
+  };
   
   BaseRenderer.center = function()
   {
@@ -114,29 +114,29 @@ function( Time )
    */
   BaseRenderer.applyFade = function()
   {
-    if ( !this.fadeData.done )
+    if ( this.fadeData.done )
+      return;
+  
+    this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration
+                            * this.fadeData.dir * this.fadeData.fadeScale;
+    this.alpha += this.fadeData.stepVal * Time.scaleDelta;
+    this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    if ( ( this.fadeData.dir < 0 && this.alpha <= this.fadeData.to )
+        || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
+        || this.alpha < 0 || this.alpha > 1 )
     {
-      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration
-                              * this.fadeData.dir * this.fadeData.fadeScale;
-      this.alpha += this.fadeData.stepVal * Time.scaleDelta;
-      this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
-      if ( ( this.fadeData.dir < 0 && this.alpha <= this.fadeData.to )
-          || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
-          || this.alpha < 0 || this.alpha > 1 )
+      this.alpha = this.fadeData.to;
+    }
+    if ( this.fadeData.duration <= 0 )
+    {
+      this.fadeData.done = true;
+      if ( this.alpha == 1 || this.alpha == 0 )
       {
-        this.alpha = this.fadeData.to;
+        if ( this.alpha == 0 )
+          this.sleep = true;
       }
-      if ( this.fadeData.duration <= 0 )
-      {
-        this.fadeData.done = true;
-        if ( this.alpha == 1 || this.alpha == 0 )
-        {
-          if ( this.alpha == 0 )
-            this.sleep = true;
-        }
-        if ( this.gameObject )
-          this.gameObject.trigger( "fadeEnd", this );
-      }
+      if ( this.gameObject )
+        this.gameObject.trigger( "fadeEnd", this );
     }
   };
   

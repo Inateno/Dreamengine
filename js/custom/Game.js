@@ -46,7 +46,7 @@ function( DE, TouchControl )
     var guiob = new DE.GameObject( {
       x: 500, y: 500
       ,cursorOnOver: true
-      ,renderer: new DE.TextRenderer( "Coucou la GUI" )
+      ,renderer: new DE.TextRenderer( "This is inside GUI layer" )
       ,collider: new DE.FixedBoxCollider( 100,100 )
     } );
     guiob.onMouseMove = function( m )
@@ -57,12 +57,22 @@ function( DE, TouchControl )
     Game.camera.onMouseMove = function( data )
     {
         // console.log( data );
+      cursor.position.setPosition( data );
     };
+    // after all other events
+    Game.camera.onLastMouseUp = function( data )
+    {
+      Game.box.moveTo( data, 500 );
+    };
+    
+    var cursor = new DE.GameObject( {
+      renderer: new DE.CircleRenderer( { fillColor: "0xff0000", radius: 20 } )
+    } );
     
     Game.bg = new DE.GameObject( {
       x: 960
       ,y: 540
-      ,zindex: 0
+      ,zindex: -1
       ,renderer: new DE.SpriteRenderer( { spriteName: "bg" } )
     } );
     Game.camera.interactive = true;
@@ -72,7 +82,7 @@ function( DE, TouchControl )
       ,zindex: 1
       ,renderers: [
         new DE.SheetRenderer( "ship1.png" )
-        ,new DE.TextRenderer( "coco la patate\nyoupi", { fill: "red" } )
+        ,new DE.TextRenderer( "This is a line\nreturn", { fill: "red" } )
       ]
       ,collider: new DE.CircleCollider( 100, 100 )
       ,cursorOnOver: true
@@ -121,12 +131,16 @@ function( DE, TouchControl )
       ,renderer: new DE.TextRenderer( "Collision" )
     } )
     Game.txt.enable = false;
+    
+    // goes where you click
     Game.box = new DE.GameObject( {
       x: 800, y: 500
       ,collider: new DE.FixedBoxCollider( 150, 120 )
+      ,renderer: new DE.TextRenderer( "Click somewhere" )
     } );
     Game.box.check = function()
     {
+      // TODO multi-type collision
       if ( DE.CollisionSystem.checkCollisionWith( this.collider, Game.ship.collider ) )
       {
         Game.txt.enable = true;
@@ -134,131 +148,83 @@ function( DE, TouchControl )
       }
       else
         Game.txt.enable = false;
+    };
+    Game.box.addAutomatism( "check", "check" );
+    
+    // this one will ping-pong from right to left inside the Game.box
+    var boxch = new DE.GameObject( {
+      renderer: new DE.RectRenderer( { "fillColor": "random", "width": 20, "height": 20 } )
+      ,y: 30
+    } );
+    boxch.moveMeSm = function()
+    {
+      if ( this.x > 0 )
+        this.moveTo( { x: -50 }, 500 );
+      else
+        this.moveTo( { x: 50 }, 500 );
     }
+    boxch.addAutomatism( "moveMeSm", "moveMeSm", { interval: 500 } );
+    Game.box.add( boxch );
+    
     var verifCircle = new DE.GameObject( {
       x: 800, y: 500, collider: new DE.CircleCollider( 96 )
     } )
-    Game.box.addAutomatism( "check", "check" );
     Game.scene.add( Game.box, Game.txt, verifCircle );
-    // Game.ship.buttonMode = true;
     
-    // Game.ship2 = new DE.GameObject( {
-    //   x: 600
-    //   ,y: 500, zindex: 2
-    //   ,renderer: new DE.SpriteRenderer( { spriteName: "ship" } )
-    //   ,collider: new DE.CircleCollider( 20 )
-    // } );
-    // Game.ship2.interactive = true;
-    // // Game.ship2.buttonMode = true;
-    // Game.scene.add( Game.ship2 );
-    // Game.ship2.mousedown = Game.ship2.touchstart = function(data)
-    // {
-    //   this.data = data;
-    //   this.alpha = 0.9;
-    //   this.dragging = true;
-    // };
-    // Game.ship2.mouseup = Game.ship2.mouseupoutside = Game.ship2.touchend = Game.ship2.touchendoutside = function(data)
-    // {
-    //   this.alpha = 1
-    //   this.dragging = false;
-    //   // set the interaction data to null
-    //   this.data = null;
-    // };
+    var so = new DE.GameObject( {
+      x: 1300, y: 400
+      // ,zindex: 100
+      ,collider: new DE.FixedBoxCollider( 100, 50 )
+    } );
+    so.add( new DE.GameObject( {
+      x: 100
+      ,cursorOnOver: true
+      ,collider: new DE.CircleCollider( 20 )
+    } ), new DE.GameObject( {
+      x: -100, y: 20
+      ,cursorOnOver: true
+      ,collider: new DE.CircleCollider( 40 )
+    } ) );
     
-    // // set the callbacks for when the mouse or a touch moves
-    // Game.ship2.mousemove = Game.ship2.touchmove = function(data)
-    // {
-    //   if(this.dragging)
-    //   {
-    //     // need to get parent coords..
-    //     var newPosition = this.data.data.getLocalPosition(this.parent);
-    //     this.position.x = newPosition.x;
-    //     this.position.y = newPosition.y;
-    //   }
-    // };
+    var inout = new DE.GameObject( {
+      renderer: new DE.TextRenderer( "In !" )
+      ,zindex: 10
+    } )
+    inout.focus( so );
+    inout.enable = false;
+    so.onMouseEnter = function(){ inout.enable = true; };
+    so.onMouseLeave = function(){ inout.enable = false; };
     
-    // Game.simpleObject.add( new DE.GameObject( {
-    //   x: 100
-    // } ), new DE.GameObject( {
-    //   x: -100, y: 20
-    //   ,collider: new DE.CircleCollider( 50, 70 )
-    // } ) );
-    // Game.simpleObject.gameObjects[ 1 ].add( new DE.GameObject( {
-    //   x: 150, y: -27
-    // } ) );
-    // // Game.simpleObject.gameObjects[ 0 ].addAutomatism( "rotate", "rotate", { value1: 0.01 } );
-    // Game.simpleObject.gameObjects[ 1 ].addAutomatism( "rotate", "rotate", { value1: -0.05 } );
+    var soc = so.gameObjects[ 1 ];
+    soc.add( new DE.GameObject( {
+      x: 150, y: -27
+      ,collider: new DE.CircleCollider( 20 )
+    } ) );
+    so.gameObjects[ 0 ].addAutomatism( "rotate", "rotate", { value1: 0.03 } );
+    so.gameObjects[ 0 ].onMouseMove = function( e ){ console.log( "move on first" ); };
     
-    // var gs = Game.simpleObject;
-    // // enable object to be interactive.. this will allow it to respond to mouse and touch events 
-    // gs.interactive = true;
-    // // this button mode will mean the hand cursor appears when you rollover the bunny with your mouse
-    // gs.buttonMode = true;
-    // // use the mousedown and touchstart
-    // gs.mousedown = gs.touchstart = function(data)
-    // {
-    //   //    data.originalEvent.preventDefault()
-    //   // store a refference to the data
-    //   // The reason for this is because of multitouch
-    //   // we want to track the movement of this particular touch
-    //   this.data = data;
-    //   this.alpha = 0.9;
-    //   this.dragging = true;
-    // };
+    soc.addAutomatism( "rotate", "rotate", { value1: -0.01 } );
+    soc.onMouseMove = function( e ){ console.log( "move on second" ); };
+    soc.gameObjects[ 0 ].onMouseMove = function( e ){ console.log( "move on child" ); };
     
-    // // set the events for when the mouse is released or a touch is released
-    // gs.mouseup = gs.mouseupoutside = gs.touchend = gs.touchendoutside = function(data)
-    // {
-    //   this.alpha = 1
-    //   this.dragging = false;
-    //   // set the interaction data to null
-    //   this.data = null;
-    // };
+    Game.scene.add( so, inout );
     
-    // // set the callbacks for when the mouse or a touch moves
-    // gs.mousemove = gs.touchmove = function(data)
-    // {
-    //   if(this.dragging)
-    //   {
-    //     // need to get parent coords..
-    //     var newPosition = this.data.data.getLocalPosition(this.parent);
-    //     this.position.x = newPosition.x;
-    //     this.position.y = newPosition.y;
-    //   }
-    // };
+    Game.scene.add( new DE.GameObject( {
+      x: 960, y: 100
+      ,zindex: 1000
+      ,renderer: new DE.TextRenderer( "Open the console to see debug message" )
+    } ) );
     
-    // Game.otherObject = new DE.GameObject( {
-    //   x: 800, y: 400
-    //   ,zindex: 20
-    //   ,collider: new DE.CircleCollider( 150, 150 )
-    // } );
-    // Game.otherObject.buttonMode = true;
-    // Game.otherObject.interactive = true;
-    // Game.otherObject.logic = function()
-    // {
-    //   if ( DE.CollisionSystem.pointColliderCollision( Game.simpleObject.gameObjects[ 1 ].gameObjects[ 0 ], this.collider ) )
-    //   {
-    //     console.log( "wouuw colision" );
-    //   }
-    // };
-    // Game.otherObject.addAutomatism( "logic", "logic" );
+    var lookCursor = new DE.GameObject( {
+      x: 150, y: 150,
+      renderer: new DE.RectRenderer( { fillColor: "0x220066", width: 20, height: 200 } )
+    } );
+    lookCursor.customUpdate = function(){
+      this.lookAt( cursor );
+    };
+    lookCursor.addAutomatism( "customUpdate", "customUpdate" );
     
-    // Game.scene.add( Game.simpleObject, Game.otherObject );
-    
-    // for ( var i = 0, o; i < 20; ++i )
-    // {
-    //   o = new DE.GameObject( {
-    //     x: -5500 + Math.random() * 5520 >> 0
-    //     ,y: -2000 + Math.random() * 3080 >> 0
-    //     ,renderer: new DE.SpriteRenderer( { spriteName: "ship" } )
-    //     // ,collider: new DE.CircleCollider( 20 )
-    //   } );
-    //   o.renderer._nextAnim = Math.random() * 500 >> 0;
-    //   o.addAutomatism( "rotate", "rotate", { value1: -0.05 + Math.random() * 0.1 } );
-    //   o.addAutomatism( "translateY", "translateY", { value1: -4 } );
-    //   Game.scene.add( o );
-    // }
-    
+    Game.scene.add( cursor, lookCursor );
     setTimeout( function(){ DE.States.down( "isLoading" ); }, 500 );
   };
   window.Game = Game; // debug

@@ -5,16 +5,16 @@
 /**
  * @constructor Camera
  * @class the eyes used to see in your scenes :)<br>
- * you have to append it to a Render and have to give it a scene to look in<br>
+ * you have to append it to a Render and have to give it a scene to look at<br>
  * you can move your camera inside a render as you want<br>
  * also you can make more than one camera in a Render or looking in a scene<br>
  * <br><br>
  * example: if you want to make a mini-map, you can make a camera with big sizes (FHD), but little scale(0.2) 
  * and maybe override the render method to call custom rendering for mini-map<br>
  * then you got two camera, these two are looking at the same scene, and are in the same Render 
- * your "mini-map" camera is over the first carmera
+ * your "mini-map" camera is over the first camera
  * <br><br>
- * example2: on a split-screen multiplayer game, you can make one camera by player, with input for each cameras
+ * example2: on a split-screen local multi-player game, you can make one camera by player, with input for each cameras
  * @example Game.camera = new DE.Camera( 1920, 1080, 0, 0, { "name": "mainGame", "backgroundColor": "green" } );
  * @param {Int} width initial width inside the render
  * @param {Int} height initial height inside the render
@@ -30,68 +30,6 @@ define( [ 'PIXI', 'DE.CONFIG', 'DE.Vector2', 'DE.Mid.gameObjectMouseEvent'
 function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
         , ImageManager, Event, Time )
 {
-  function SceneContainer()
-  {
-    PIXI.Container.call( this );
-    this.position.z = 0;
-  }
-  SceneContainer.prototype = Object.create( PIXI.Container.prototype );
-  SceneContainer.prototype.constructor = SceneContainer;
-  Object.defineProperties( SceneContainer.prototype, {
-    // redefine getter setter to invert pos to work has excepted
-    x: {
-      get: function()
-      {
-        return -this.position.x;
-      }
-      , set: function( v )
-      {
-        this.position.x = -v;
-        this.parent.needUpdateVisible = true;
-      }
-    }
-    
-    ,y: {
-      get: function()
-      {
-        return -this.position.y;
-      }
-      , set: function( v )
-      {
-        this.position.y = -v;
-        this.parent.needUpdateVisible = true;
-      }
-    }
-    
-    ,z: {
-      get: function()
-      {
-        return this.position.z;
-      }
-      , set: function( v )
-      {
-        var ratioz  = ( 10 / ( v - -10 ) );
-        this.scale.set( ratioz, ratioz );
-        this.position.z = v;
-        this.parent.needUpdateVisible = true;
-      }
-    }
-    
-    ,pos: {
-      get: function()
-      {
-        return { x: -this.position.x, y: -this.position.y, z: this.position.z };
-      }
-      ,set: function( o )
-      {
-        this.position.x = -o.x;
-        this.position.y = -o.y;
-        this.z = o.z !== undefined ? o.z : this.position.z || 0;
-        this.parent.needUpdateVisible = true;
-      }
-    }
-  } );
-  
   // Camera is a PIXI container append in the render, it had an other container for scene
   function Camera( width, height, x, y, params )
   {
@@ -118,6 +56,7 @@ function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
       this.addChild( this.background );
     }
     
+    // look at the end of this file for the SceneContainer
     this.sceneContainer = new SceneContainer();
     this.addChild( this.sceneContainer );
     this.sceneContainer.pos = {
@@ -816,7 +755,7 @@ function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
   };
   
   /**
-   * convert mouse pos with harmonics and ratio
+   * convert mouse pos to correspond to your camera position with harmonics and ratio
    * You shouldn't call or change this method
    * @protected
    * @memberOf Camera
@@ -1014,6 +953,75 @@ function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
   
   // Event.addEventCapabilities( Camera );
   Camera.prototype.DEName = "Camera";
+  
+  /***
+   * the SceneContainer is used to display scene's GameOjects
+   * this is because we can add a "gui" (as an other Container) and we need 2 different containers to manage each things aside
+   * so, a Camera is a Container that contain:
+    - a SceneContainer
+    - a gui Container
+   */
+  function SceneContainer()
+  {
+    PIXI.Container.call( this );
+    this.position.z = 0;
+  }
+  SceneContainer.prototype = Object.create( PIXI.Container.prototype );
+  SceneContainer.prototype.constructor = SceneContainer;
+  Object.defineProperties( SceneContainer.prototype, {
+    // redefine getter setter to invert pos to work has excepted
+    x: {
+      get: function()
+      {
+        return -this.position.x;
+      }
+      , set: function( v )
+      {
+        this.position.x = -v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,y: {
+      get: function()
+      {
+        return -this.position.y;
+      }
+      , set: function( v )
+      {
+        this.position.y = -v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,z: {
+      get: function()
+      {
+        return this.position.z;
+      }
+      , set: function( v )
+      {
+        var ratioz  = ( 10 / ( v - -10 ) );
+        this.scale.set( ratioz, ratioz );
+        this.position.z = v;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+    
+    ,pos: {
+      get: function()
+      {
+        return { x: -this.position.x, y: -this.position.y, z: this.position.z };
+      }
+      ,set: function( o )
+      {
+        this.position.x = -o.x;
+        this.position.y = -o.y;
+        this.z = o.z !== undefined ? o.z : this.position.z || 0;
+        this.parent.needUpdateVisible = true;
+      }
+    }
+  } );
   
   CONFIG.debug.log( "Camera loaded", 3 );
   return Camera;
