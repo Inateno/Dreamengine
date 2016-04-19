@@ -10,7 +10,7 @@
  * @example var hello = new DE.GameObject( {
  *   x: 500, y: 500,
  *   TextRenderer: new DE.TextRenderer( {
- *     "fillColor": "white", "fontSize": "25",
+ *     "fill": "white", "fontSize": "25",
  *     "textAlign": "left", "font": "Calibri", // lol
  *     "paddingX": 5, "backgroundColor": "blue",
  *     "borderSize": 2, "borderColor": "white"
@@ -25,6 +25,9 @@ function( PIXI, CONFIG, ImageManager, BaseRenderer )
     params = params || {};
     
     params.align = params.align || "center";
+    
+    if ( params.fillColor )
+      params.fill = params.fillColor;
     
     if ( params.font && params.fontSize )
     {

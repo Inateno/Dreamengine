@@ -46,7 +46,7 @@ function( PIXI, CONFIG, COLORS, Time, Event, GameObject
      * @memberOf Gui
      * @type {Array}
      */
-    this.children = params.children || [];
+    this.gameObjects = this.children = params.children || [];
     
     /**
      * store timers

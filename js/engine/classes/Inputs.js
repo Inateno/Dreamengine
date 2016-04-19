@@ -54,7 +54,8 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         ,"shift":16
         ,"caps":20
         ,"tab":9
-        ,"escape": 27
+        ,"ctrl":17
+        ,"0": 48,"1": 49,"2": 50,"3": 51,"4": 52,"5": 53,"6": 54,"7": 55,"8": 56,"9": 57,"°": 219,"=": 187,"²": 222
         ,"d":68,"q":81,"z":90,"s":83,"a":65,"e":69,"r":82,"t":84,"y":89,"u":85,"i":73,"o":79,"p":80,"f":70
         ,"g":71,"h":72,"j":74,"k":75,"l":76,"m":77,"w":87,"x":88,"c":67,"v":86,"b":66,"n":78
         ,"enter":13,"return":8
@@ -73,10 +74,10 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
         ,"D-Bot" : 13
         ,"select": 8
         ,"start" : 9
-        ,"RBS" : 7
-        ,"RTS" : 5
-        ,"LBS" : 6
-        ,"LTS" : 4
+        ,"RTS" : 7
+        ,"RBS" : 5
+        ,"LTS" : 6
+        ,"LBS" : 4
         ,"power" : 16
       }
       ,"GAMEPADAXES":
@@ -335,6 +336,7 @@ function( CONFIG, Event, gamePad, LangSystem, Time )
     {
       var e = event || window.event;
       var code = e.which || e.keyCode;
+      // console.log( code );
       if ( Inputs.ignoreKeys.indexOf( code ) != -1 )
       {
         if ( Inputs.debugKeys.indexOf( code ) != -1 )

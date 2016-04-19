@@ -58,8 +58,8 @@ module.exports = function(grunt)
           , name                 : 'requirev'
           , out                  : 'js/dist/DreamEngine-min-require.js'
           , optimize             : 'uglify'
-          , uglify               : null//requireUglify
-          , closure              : null//requireClosure
+          , uglify               : requireUglify
+          , closure              : null
           , inlineText           : true
           , useStrict            : false
         }
@@ -110,14 +110,20 @@ module.exports = function(grunt)
             pattern: 'define("main",[],function(',
             replacement: ""
           }, {
-            pattern: '){}),',
-            replacement: ""
-          }, {
             pattern: ',define("requirev",function(){});',
             replacement: ";"
           }, {
             pattern: ',define("standalonev",[],function(){});',
             replacement: ";"
+          // this can appear depending the grunt process (previously this happened a lot but it seems to be fixed)
+          // if the build fail, uncomment these 2 last replacement
+          // }, {
+          //   pattern: '){}),',
+          //   replacement: ""
+          // }, {
+          //   // this one is needed too
+          //   pattern: 'function(r()',
+          //   replacement: 'function(){}),r()'
           }]
         }
       }

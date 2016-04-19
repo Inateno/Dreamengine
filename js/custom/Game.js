@@ -52,12 +52,14 @@ function( DE, TouchControl )
     guiob.onMouseMove = function( m )
     {
       // console.log( m );
+      this.askToKill();
     }
     Game.camera.gui.add( guiob );
     Game.camera.onMouseMove = function( data )
     {
         // console.log( data );
       cursor.position.setPosition( data );
+      // console.log( lookCursor.position.rotation );
     };
     // after all other events
     Game.camera.onLastMouseUp = function( data )
@@ -200,7 +202,7 @@ function( DE, TouchControl )
       x: 150, y: -27
       ,collider: new DE.CircleCollider( 20 )
     } ) );
-    so.gameObjects[ 0 ].addAutomatism( "rotate", "rotate", { value1: 0.03 } );
+    so.gameObjects[ 0 ].addAutomatism( "rotate", "rotate", { value1: Math.PI * 0.5, interval: 650, value2: true } );
     so.gameObjects[ 0 ].onMouseMove = function( e ){ console.log( "move on first" ); };
     
     soc.addAutomatism( "rotate", "rotate", { value1: -0.01 } );

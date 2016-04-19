@@ -312,6 +312,11 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
       }
       , set: function( value )
       {
+        
+        // this is useful for dynamic pools (feature incoming)
+        if ( this.enable != value )
+          this.trigger( value ? 'active' : 'unactive' );
+        
         this.updatable  = value;
         this.renderable = value;
         this.visible    = value;
@@ -749,10 +754,10 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
    * if absolute, object will move on world axis instead this own axis
    * @example myObject.translate( { "x": 10, "y": 5 }, false );
    */
-  GameObject.prototype.translate = function( vector2, absolute )
+  GameObject.prototype.translate = function( vector2, absolute, ignoreDelta )
   {
     absolute = absolute || false;
-    this.position.translate( vector2, absolute );
+    this.position.translate( vector2, absolute, ignoreDelta );
   };
   
   /**
@@ -763,10 +768,10 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
    * @param {Boolean} absolute
    * if absolute, object will move on world axis instead this own axis
    */
-  GameObject.prototype.translateX = function( distance, absolute )
+  GameObject.prototype.translateX = function( distance, absolute, ignoreDelta )
   {
     absolute = absolute || false;
-    this.translate( { x: distance, y: 0 }, absolute );
+    this.translate( { x: distance, y: 0 }, absolute, ignoreDelta );
   };
 
   /**
@@ -777,10 +782,10 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
    * @param {Boolean} absolute
    * if absolute, object will move on world axis instead this own axis
    */
-  GameObject.prototype.translateY = function( distance, absolute )
+  GameObject.prototype.translateY = function( distance, absolute, ignoreDelta )
   {
     absolute = absolute || false;
-    this.translate( { x: 0, y: distance }, absolute );
+    this.translate( { x: 0, y: distance }, absolute, ignoreDelta );
   };
   
   /**
@@ -864,9 +869,9 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
    * @memberOf GameObject
    * @param {Float} angle
    */
-  GameObject.prototype.rotate = function( angle )
+  GameObject.prototype.rotate = function( angle, ignoreDelta )
   {
-    this.position.rotate( angle );
+    this.position.rotate( angle, ignoreDelta );
   };
   
   /**
@@ -885,6 +890,10 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
                                 , vector2.y - ( pos.y ) ) - ( this.parent.getRotation() ) );
       return;
     }
+    // this line give a rotation from 0 to 6.28 (PI*2)
+    //this.position.setRotation( PI * 2 + ( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) ) );
+    
+    // this line give a rotation from -PI to +PI
     this.position.setRotation( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) );
   };
   
@@ -1348,6 +1357,8 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
   GameObject.prototype.addAutomatism = function( id, methodName, params )
   {
     params = params || {};
+    methodName = methodName || id;
+    
     // if using the old way - TODO - remove it on version 0.2.0
     if ( methodName.type )
     {
@@ -1400,6 +1411,21 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
   {
     for ( var i in this.automatism )
       delete this.automatism[ i ];
+  };
+  
+  /**
+   * inverse values of an automatism
+   * useful for "ping-pong" moves, fades, snaking, and patrols logics
+   * @public
+   * @memberOf GameObject
+   * @example
+   * myObject.inverseAutomatism( "translateY" ); // this will inverse the value applied on the automatized translateY action
+   */
+  GameObject.prototype.inverseAutomatism = function( autoName )
+  {
+    var at = this.automatism[ autoName ];
+    at.value1 = -at.value1;
+    at.value2 = -at.value2;
   };
   
   // todo check if we need custom event or not

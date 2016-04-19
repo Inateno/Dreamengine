@@ -1,3 +1,10 @@
+---- 0.26.2 ----
+ Fix during Ludum Dare #35
+  * add keyboard Inputs keyCodes
+  * add pingPongMode on SpriteRenderer
+  * add inverseAutomatism
+  * add active/unactive trigger event on GameObject when change enable flag
+  
 ---- 0.26.1 ----
  - others
   * add tests in the main stress_test.html file

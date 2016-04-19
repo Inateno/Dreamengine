@@ -68,14 +68,15 @@ function( PIXI, CONFIG, States, Event )
             if ( data[ 2 ] && ( data[ 2 ].totalFrame || data[ 2 ].totalLine ) )
             {
               this.spritesData[ data[ 0 ] ] = {
-                totalLine  : data[ 2 ].totalLine || 1
-                ,totalFrame: data[ 2 ].totalFrame || 1
-                ,startFrame: data[ 2 ].startFrame || 0
-                ,endFrame  : data[ 2 ].endFrame || data[ 2 ].totalFrame || 1
-                ,eachAnim  : data[ 2 ].eachAnim || 16
-                ,isReversed: data[ 2 ].isReversed || false
-                ,isLoop    : data[ 2 ].isLoop !== undefined ? data[ 2 ].isLoop : true
-                ,isAnimated: data[ 2 ].isAnimated !== undefined ? data[ 2 ].isAnimated : true
+                totalLine    : data[ 2 ].totalLine || 1
+                ,totalFrame  : data[ 2 ].totalFrame || 1
+                ,startFrame  : data[ 2 ].startFrame || 0
+                ,endFrame    : data[ 2 ].endFrame || data[ 2 ].totalFrame || 1
+                ,eachAnim    : data[ 2 ].eachAnim || 16
+                ,isReversed  : data[ 2 ].isReversed || false
+                ,isLoop      : data[ 2 ].isLoop !== undefined ? data[ 2 ].isLoop : true
+                ,isAnimated  : data[ 2 ].isAnimated !== undefined ? data[ 2 ].isAnimated : true
+                ,pingPongMode: data[ 2 ].pingPongMode !== undefined ? data[ 2 ].pingPongMode : false
               };
             }
             this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] } );

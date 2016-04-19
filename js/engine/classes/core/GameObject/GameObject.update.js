@@ -22,7 +22,12 @@ function(  CollisionSystem, CONFIG, Time )
     {
       var auto = this.automatism[ a ];
       if ( auto.interval && time - auto.lastCall < auto.interval / Time.scaleDelta ){ continue;}
-      auto.lastCall = time;
+      
+      auto.timeSinceLastCall = time - auto.lastCall;
+      if ( auto.timeSinceLastCall - auto.interval / Time.scaleDelta < auto.interval / Time.scaleDelta )
+        auto.lastCall = time - ( auto.timeSinceLastCall - auto.interval / Time.scaleDelta );
+      else
+        auto.lastCall = time;
       // only 2 vals max, I could make a this[ auto.methodName ].apply( this, args ) but it's slower
       // I think
       this[ auto.methodName ]( auto.value1, auto.value2 );

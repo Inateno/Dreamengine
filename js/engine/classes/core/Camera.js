@@ -459,7 +459,6 @@ function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
       || ( this.alpha == 0 && bufferApply ) )
       return;
     
-    this.enable = false;
     var data = {
       from      : from || 1
       ,to       : to != undefined ? to : 0

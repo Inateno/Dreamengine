@@ -43,8 +43,10 @@ function( Time )
         target.prototype[ _inherits[ i ] ] = this[ _inherits[ i ] ];
     };
     
-    this.instantiate = function( target )
+    this.instantiate = function( target, params )
     {
+      if ( params )
+        target.alpha = params.alpha || params.opacity || 1;
       for ( var i = 0; i < _attributes.length; ++i )
         target[ _attributes[ i ] ] = this[ _attributes[ i ] ];
     };

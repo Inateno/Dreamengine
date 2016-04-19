@@ -26,7 +26,7 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
       throw new Error( "SpriteRenderer :: Can't find image " + this.spriteName + " in imagesDatas" );
     
     PIXI.Sprite.call( this, PIXI.utils.TextureCache[ PIXI.loader.resources[ this.spriteName ].url ] );
-    BaseRenderer.instantiate( this );
+    BaseRenderer.instantiate( this, params );
     
     /**
      * @public
@@ -136,6 +136,14 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     
     /**
      * @public
+     * @memberOf SpriteRenderer
+     * @type {Boolean}
+     * if true animation will play normal then reversed then normal....
+     */
+    this.pingPongMode = false;
+    
+    /**
+     * @public
      * This function is called when the animation is over. Overwrite this function
      * @memberOf SpriteRenderer
      */
@@ -235,7 +243,14 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     if ( this._currentFrame >= this.endFrame )
     {
       if ( this.isLoop )
+      {
         this._currentFrame = this.startFrame;
+        if ( this.pingPongMode )
+        {
+          this.isReversed = true;
+          this._currentFrame = this.endFrame - 1;
+        }
+      }
       else
       {
         this._currentFrame = this.endFrame - 1;
@@ -246,7 +261,14 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     else if ( this._currentFrame < this.startFrame )
     {
       if ( this.isLoop )
+      {
         this._currentFrame = this.endFrame - 1;
+        if ( this.pingPongMode )
+        {
+          this.isReversed = false;
+          this._currentFrame = this.startFrame;
+        }
+      }
       else
       {
         this._currentFrame = this.startFrame;
@@ -377,12 +399,12 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     this.scale.x = params.scaleX || params.scale || 1;
     this.scale.y = params.scaleY || params.scale || 1;
     
-    this.startFrame   = params.startFrame || d.startFrame || 0;
-    this.endFrame     = params.endFrame || d.endFrame
+    this.startFrame    = params.startFrame || d.startFrame || 0;
+    this.endFrame      = params.endFrame || d.endFrame
                         || d.totalFrame || 0;
     this._currentFrame = this.startFrame || 0;
     this._currentLine  = params.startLine || 0;
-    this.startLine    = params.startLine || 0;
+    this.startLine     = params.startLine || 0;
     
     this.totalFrame   = d.totalFrame || 0;
     this.totalLine    = params.totalLine || d.totalLine || 0;
@@ -394,6 +416,9 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     this.isPaused     = params.paused !== undefined ? params.paused : params.isPaused || this.isPaused;
     this.isReversed   = params.reversed !== undefined ? params.reversed : params.isreversed != undefined ? params.isreversed :
                         params.isReversed != undefined ? params.isReversed : d.isReversed || this.isReversed;
+    
+    this.pingPongMode = params.pingPongMode !== undefined ? params.pingPongMode : d.pingPongMode || this.pingPongMode;
+    
     this.isOver       = false;
     this.isLoop       = ( params.isLoop != undefined ) ? params.isLoop : d.isLoop || this.isLoop;
     
@@ -406,9 +431,9 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
       this.baseNormalTexture = PIXI.utils.TextureCache[ PIXI.loader.resources[ params.normal ].url ]
     }
     
-    this.fw = this.baseTexture.width / d.totalFrame >> 0;
-    this.fh = this.baseTexture.height / d.totalLine >> 0;
-    var size = new PIXI.Rectangle( this.currentFrame * this.fw, this.currentLine * this.fh, this.fw, this.fh );
+    this.fw      = this.baseTexture.width / d.totalFrame >> 0;
+    this.fh      = this.baseTexture.height / d.totalLine >> 0;
+    var size     = new PIXI.Rectangle( this.currentFrame * this.fw, this.currentLine * this.fh, this.fw, this.fh );
     this.texture = new PIXI.Texture( this.baseTexture, size, size.clone(), null, null );
     this._originalTexture = this.texture;
     

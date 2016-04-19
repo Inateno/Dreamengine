@@ -375,7 +375,11 @@ function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs )
       if ( CONFIG.DEBUG_LEVEL )
       {
         this.pixiContainer.addChild( this.debugRender );
-        this.debugRender.text = "DeltaTime: " + Time.deltaTime + "\nMissedFrame: " + Time.missedFrame + "\nFPS: " + Time.fps;
+        
+        if ( CONFIG.DEBUG_LEVEL == "FPS_ONLY" )
+          this.debugRender.text = "FPS: " + Time.fps;
+        else
+          this.debugRender.text = "DeltaTime: " + Time.deltaTime + "\nMissedFrame: " + Time.missedFrame + "\nFPS: " + Time.fps;
       }
       
       this.pixiRenderer.render( this.pixiContainer );
