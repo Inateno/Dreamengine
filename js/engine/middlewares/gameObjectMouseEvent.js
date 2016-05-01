@@ -47,9 +47,9 @@ function( CollisionSystem )
       }
     }
     
-    for ( var c = g.childrens.length - 1, co; c >= 0; --c )
+    for ( var c = g.gameObjects.length - 1, co; c >= 0; --c )
     {
-      if ( _gameObjectMouseEvent( eventType, g.childrens[ c ], mouse, propagationEvent ) )
+      if ( _gameObjectMouseEvent( eventType, g.gameObjects[ c ], mouse, propagationEvent ) )
         return true;
     }
   }

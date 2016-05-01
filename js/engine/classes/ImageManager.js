@@ -34,19 +34,31 @@ function( CONFIG, States, Event, CanvasBuffer )
     {
       if ( !imagesDatas )
       {
-        CONFIG.debug.log( "%cno images loaded", 1, "color:red" );
+        CONFIG.debug.log( "%cno images loaded", -1, "color:red" );
         return;
       }
       
       _loadingImages = imagesDatas;
       _indexLoading = 0;
       
-      // var imgs = imagesDatas;
       this.imagesLoaded = 0;
-      this.imagesRequested = imagesDatas.length;
       
-      if ( imagesDatas.length > 0 )
-        this.pushImage( imagesDatas[ 0 ][ 0 ], imagesDatas[ 0 ][ 1 ], imagesDatas[ 0 ][ 2 ], imagesDatas[ 0 ][ 3 ])
+      if ( imagesDatas.length === undefined )
+      {
+        // support for "pools declaration" from DE.PIXI Version
+        _loadingImages = [];
+        for ( var i in imagesDatas )
+          _loadingImages = _loadingImages.concat( imagesDatas[ i ] );
+      }
+      this.imagesRequested = _loadingImages.length;
+      
+      if ( _loadingImages.length > 0 )
+      {
+        this.pushImage( _loadingImages[ 0 ][ 0 ]
+                       , _loadingImages[ 0 ][ 1 ]
+                       , _loadingImages[ 0 ][ 2 ].length ? _loadingImages[ 0 ][ 2 ] : null
+                       , _loadingImages[ 0 ][ 3 ] || _loadingImages[ 0 ][ 2 ]  );
+      }
       else
       {
         setTimeout( function()
@@ -75,7 +87,7 @@ function( CONFIG, States, Event, CanvasBuffer )
       this.images[ name ] = new Image();
       
       var img  = this.images[ name ];
-      img.src  = this.folderName + "/" + this.pathPrefix + url + "." + extension;
+      img.src  = this.folderName + "/" + this.pathPrefix + url + ( extension ? "." + extension : "" );
       img.name = name;
       img.totalFrame = params.totalFrame || 1;
       img.startFrame = params.startFrame || undefined;
@@ -96,8 +108,10 @@ function( CONFIG, States, Event, CanvasBuffer )
       {
         if ( _loadingImages && _indexLoading + 1 < _loadingImages.length )
         {
-          ImageManager.pushImage( _loadingImages[ ++_indexLoading ][ 0 ], _loadingImages[ _indexLoading ][ 1 ]
-            , _loadingImages[ _indexLoading ][ 2 ], _loadingImages[ _indexLoading ][ 3 ] );
+          ImageManager.pushImage( _loadingImages[ ++_indexLoading ][ 0 ]
+                                , _loadingImages[ _indexLoading ][ 1 ]
+                                , _loadingImages[ _indexLoading ][ 2 ].length ? _loadingImages[ _indexLoading ][ 2 ] : null
+                                , _loadingImages[ _indexLoading ][ 3 ] || _loadingImages[ _indexLoading ][ 2 ]  );
         }
         ImageManager.imageLoaded( this );
       }

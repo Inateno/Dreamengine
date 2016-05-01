@@ -112,7 +112,10 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      * @memberOf GameObject
      * @type {Array-GameObject}
      */
-    this.childrens = params.childrens || new Array();
+    this.gameObjects = params.childrens || params.children || params.gameObjects || new Array();
+    
+    // DEPRECATED
+    this.childrens = this.gameObjects;
     
     /**
      * @protected
@@ -621,7 +624,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     
     object.parent = this;
     // object.parentPosition = this.position;
-    this.childrens.push( object );
+    this.gameObjects.push( object );
     
     if ( object.renderers.length > 0 )
     {
@@ -655,7 +658,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       }
     }
   };
-    
+  
   /**
    * remove a the given child in this GameObject childrens
    * @public
@@ -667,19 +670,19 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   {
     if ( isNaN( object ) )
     {
-      var index = this.childrens.indexOf( object );
+      var index = this.gameObjects.indexOf( object );
       
       if ( index !== - 1 )
       {
         object.parent = undefined;
         // object.parentPosition = null;
-        this.childrens.splice( index, 1 );
+        this.gameObjects.splice( index, 1 );
       }
     }
     else
     {
       object.parent = undefined;
-      this.childrens.splice( object, 1 );
+      this.gameObjects.splice( object, 1 );
     }
   };
   
@@ -695,7 +698,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   GameObject.prototype.getChildByName = function( name, recursive )
   {
     var c, child;
-    for ( c = 0; child = this.childrens[ c ]; c ++ )
+    for ( c = 0; child = this.gameObjects[ c ]; c ++ )
     {
       if ( child.name === name )
         return child;
@@ -738,7 +741,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.sortChildrens = function()
   {
-    this.childrens.sort( function( a, b )
+    this.gameObjects.sort( function( a, b )
     {
       if ( b.position.z == a.position.z )
         return a.zindex - b.zindex;
@@ -837,20 +840,20 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   GameObject.prototype.delete = function( object )
   {
     // if its an index
-    if ( this.childrens[ object ] )
+    if ( this.gameObjects[ object ] )
     {
-      this.childrens[ object ].killMePlease();
-      delete this.childrens[ object ];
-      this.childrens.splice( object, 1 );
+      this.gameObjects[ object ].killMePlease();
+      delete this.gameObjects[ object ];
+      this.gameObjects.splice( object, 1 );
       return;
     }
-    var index = this.childrens.indexOf( object );
+    var index = this.gameObjects.indexOf( object );
     
     if ( index !== - 1 )
     {
       object.killMePlease();
-      this.childrens[ index ] = null;
-      this.childrens.splice( index, 1 );
+      this.gameObjects[ index ] = null;
+      this.gameObjects.splice( index, 1 );
       return;
     }
   };
@@ -986,11 +989,11 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     }
     delete this.collider;
     
-    for ( i = 0; i < this.childrens.length; ++i )
+    for ( i = 0; i < this.gameObjects.length; ++i )
     {
-      this.childrens[ i ].killMePlease();
-      delete this.childrens[ i ];
-      this.childrens.splice( i, 1 );
+      this.gameObjects[ i ].killMePlease();
+      delete this.gameObjects[ i ];
+      this.gameObjects.splice( i, 1 );
     }
   };
   
@@ -1120,7 +1123,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     {
       for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
         r.fade( from, to, duration );
-      for ( i = 0; child = this.childrens[ i ]; ++i )
+      for ( i = 0; child = this.gameObjects[ i ]; ++i )
         child.fade( from, to, duration );
     };
     
@@ -1136,7 +1139,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     {
       for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
         r.fadeTo( to, duration );
-      for ( i = 0; child = this.childrens[ i ]; ++i )
+      for ( i = 0; child = this.gameObjects[ i ]; ++i )
         child.fadeTo( to, duration );
     };
     
@@ -1154,7 +1157,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     {
       for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
         r.fadeOut( duration, force );
-      for ( i = 0; child = this.childrens[ i ]; ++i )
+      for ( i = 0; child = this.gameObjects[ i ]; ++i )
         child.fadeOut( duration, force );
     };
     
@@ -1175,7 +1178,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       
       for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
         r.fadeIn( duration, force );
-      for ( i = 0; child = this.childrens[ i ]; ++i )
+      for ( i = 0; child = this.gameObjects[ i ]; ++i )
         child.fadeIn( duration, force );
     };
     

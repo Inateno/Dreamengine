@@ -43,7 +43,7 @@ function()
   CONFIG.debug = {
     log: function( msg, level )
     {
-      if ( CONFIG.DEBUG && ( !level || CONFIG.DEBUG_LEVEL >= level ) )
+      if ( level == -1 || ( CONFIG.DEBUG && ( !level || CONFIG.DEBUG_LEVEL >= level ) ) )
       {
         var arg = [];
         for ( var i in arguments )

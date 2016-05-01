@@ -25,8 +25,8 @@ function( COLORS, Vector2, CONFIG, Time )
     this.gameObject  = params.gameObject || undefined;
     
     this.alpha       = params.alpha !== undefined ? params.alpha : 1;
-    this.fillColor   = params.fillColor  || COLORS.defaultColor;
-    this.strokeColor = params.strokeColor  || COLORS.defaultColor;
+    this.fillColor   = params.fillColor || params.fill || COLORS.defaultColor;
+    this.strokeColor = params.strokeColor || COLORS.defaultColor;
     this.method      = params.method || "fill";
     this.lineWidth   = params.lineWidth || 1;
     

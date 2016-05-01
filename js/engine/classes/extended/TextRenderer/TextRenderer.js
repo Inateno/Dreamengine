@@ -22,12 +22,21 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
 {
   function TextRenderer( params, width, height, text )
   {
+    if ( params.length !== undefined )
+    {
+      var _h = text;
+      text   = params || {};
+      params = width;
+      width  = height || 400;
+      height = _h || 140;
+    }
+    
     Renderer.call( this, params );
     
     if ( !params || !width || !height || text == undefined )
       throw new Error( "TextRenderer :: Can't instantiate without params, width, height, text" );
     
-    this.text         = text;
+    this._text        = text;
     this.textAlign    = params.textAlign || "center";
     this.textBaseline = params.textBaseline || "middle";
     this.fontSize = params.fontSize || 20;
@@ -70,7 +79,7 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
     this.clearBuffer = function()
     {
       this.buffer.ctx.clearRect( 0, 0, this.sizes.width, this.sizes.height );
-      this.buffer.ctx.font         = this.fontStyle + ' ' + ( this.fontSize ) + 'pt ' + ( this.font );
+      this.buffer.ctx.font         = this.fontStyle + ' ' + ( this.fontSize ) + 'px ' + ( this.font );
       this.buffer.ctx.textAlign    = this.textAlign;
       this.buffer.ctx.textBaseline = this.textBaseline;
       if ( this.background )
@@ -100,9 +109,9 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
       {
         this.buffer.ctx.fillStyle = this.fillColor;
         if ( this.forceWidth )
-          this.buffer.ctx.fillText( this.text, x, y, this.sizes.width );
+          this.buffer.ctx.fillText( this._text, x, y, this.sizes.width );
         else
-          this.buffer.ctx.fillText( this.text, x, y );
+          this.buffer.ctx.fillText( this._text, x, y );
       }
       
       if ( this.method == "stroke" || this.method == "fillAndStroke" )
@@ -112,29 +121,11 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
           this.buffer.ctx.globalAlpha = 0.8;
         this.buffer.ctx.strokeStyle = this.strokeColor;
         if ( this.forceWidth )
-          this.buffer.ctx.strokeText( this.text, x, y, this.sizes.width );
+          this.buffer.ctx.strokeText( this._text, x, y, this.sizes.width );
         else
-          this.buffer.ctx.strokeText( this.text, x, y );
+          this.buffer.ctx.strokeText( this._text, x, y );
       }
     }
-    
-    this.setText = function( text )
-    {
-      this.text = text;
-      this.clearBuffer();
-      this.onSetText( text );
-    }
-    
-    this.onSetText = function( text ){}
-      
-    /***
-    * @changeSizes
-    ***/
-    this.setSizes = function( newWidth, newHeight )
-    {
-      this.sizes.setSizes( newWidth, newHeight );
-    }
-    /* // */
     
     this.init( params );
   }
@@ -142,9 +133,44 @@ function( Renderer, TextRender, CONFIG, Sizes, CanvasBuffer, ImageManager )
   TextRenderer.prototype = new Renderer();
   TextRenderer.prototype.constructor = TextRenderer;
   TextRenderer.prototype.supr        = Renderer.prototype;
-  TextRenderer.prototype.DEName      = "TextRenderer";
   
+  Object.defineProperties( TextRenderer.prototype, {
+    text: {
+      get: function()
+      {
+        return this._text;
+      },
+      set: function ( text )
+      {
+        text = text.toString() || ' ';
+        if ( this._text === text )
+        {
+          return;
+        }
+        this._text = text;
+        this.setText( text );
+      }
+    }
+  } );
+  
+  TextRenderer.prototype.DEName = "TextRenderer";
   TextRenderer.prototype.render = TextRender;
+  
+  TextRenderer.prototype.setText = function( text )
+  {
+    this.clearBuffer();
+    this.onSetText( text );
+  };
+  
+  TextRenderer.prototype.onSetText = function( text ){}
+    
+  /***
+   * @changeSizes
+   */
+  TextRenderer.prototype.setSizes = function( newWidth, newHeight )
+  {
+    this.sizes.setSizes( newWidth, newHeight );
+  };
   
   CONFIG.debug.log( "TextRenderer loaded", 3 );
   return TextRenderer;
