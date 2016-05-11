@@ -39,6 +39,7 @@ function( files, gameLoop, Game, images, audios, inputs, achievements, dictionar
 {
   console.log( "My Custom loads - stress test" );
   var DE = DreamEngine;
+  DE.CONFIG.version = "1.0.0";
   DE.init(
   {
     'customLoop': gameLoop, 'onReady': Game.init

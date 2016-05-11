@@ -79,7 +79,7 @@ function( PIXI, CONFIG, States, Event )
                 ,pingPongMode: data[ 2 ].pingPongMode !== undefined ? data[ 2 ].pingPongMode : false
               };
             }
-            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] } );
+            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] + "?v" + CONFIG.version } );
           }
           else
           {
@@ -103,6 +103,7 @@ function( PIXI, CONFIG, States, Event )
         return;
       }
       PIXI.loader.add( this.pools[ poolId ] ).load( this.onComplete );
+      this.numToLoad = PIXI.loader._numToLoad;
     };
     
     /**

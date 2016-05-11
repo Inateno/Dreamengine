@@ -17,7 +17,7 @@ function()
   CONFIG.DEName = "CONFIG";
   CONFIG.DEBUG  = 0;
   CONFIG.DEBUG_LEVEL = 0; // 0 = disable -- 1 = DEBUG SIMPLE -- 2 = DEBUG ADVANCED -- 3 = FULL INFOS and LOAD MODULES/IMAGES
-  
+  CONFIG.version = "1.0.0";
   CONFIG.CLICK_DELAY = 200; // delay between a down and a up to be considered as a click
   
   /* COLLISION */
@@ -47,7 +47,7 @@ function()
   CONFIG.debug = {
     log: function( msg, level )
     {
-      if ( CONFIG.DEBUG && ( !level || CONFIG.DEBUG_LEVEL >= level ) )
+      if ( level == -1 || ( CONFIG.DEBUG && ( !level || CONFIG.DEBUG_LEVEL >= level ) ) )
       {
         var arg = [];
         for ( var i in arguments )

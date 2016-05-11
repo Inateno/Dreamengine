@@ -1,3 +1,8 @@
+---- 0.26.3 ----
+  * add Timer plugin
+  * add version in CONFIG and ImageManager to force cache reload
+  * fix loader
+  
 ---- 0.26.2 ----
  Fix during Ludum Dare #35
   * add keyboard Inputs keyCodes

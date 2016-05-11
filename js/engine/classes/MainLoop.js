@@ -30,7 +30,7 @@ function( PIXI, Time, CONFIG, States, Inputs, GamePad, ImageManager
     {
       this.loader = new GameObject( {
         renderers: [
-          new PIXI.Text( "Loading..", { font: "35px Snippet", fill: "white", align: "left" } )
+          new PIXI.Text( "Loading...", { font: "35px Snippet", fill: "white", align: "left" } )
           ,new SpriteRenderer( { spriteName: "loader" } )
           // loader
         ]
@@ -38,13 +38,11 @@ function( PIXI, Time, CONFIG, States, Inputs, GamePad, ImageManager
       this.loader.renderer.y += 150;
       PIXI.loader.on( 'progress', function()
       {
-        console.log( "progress load" );
-        MainLoop.loader.renderer.text = ( PIXI.loader.progress / PIXI.loader._numToLoad * 100 ).toString().slice( 0, 5 ) + "%";
+        MainLoop.loader.renderer.text = ( ( ImageManager.numToLoad - PIXI.loader._numToLoad ) / ImageManager.numToLoad * 100 ).toString().slice( 0, 5 ) + "%";
       } );
       PIXI.loader.on( 'complete', function()
       {
-        console.log( "complete load" );
-        MainLoop.loader.renderer.text = "...";
+        MainLoop.loader.renderer.text = "100%";
       } );
     };
     

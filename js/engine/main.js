@@ -25,7 +25,7 @@ define( [ 'PIXI', 'DE.COLORS', 'DE.CONFIG', 'DE.Time', 'DE.Vector2', 'DE.ImageMa
 {
   var DREAM_ENGINE = {};
   var NebulaOffline = null;
-  
+    window.PIXI = undefined;
   /** PIXI overwrite */
     DREAM_ENGINE.PIXI = PIXI;
     PIXI.IS_PIXI = true;
