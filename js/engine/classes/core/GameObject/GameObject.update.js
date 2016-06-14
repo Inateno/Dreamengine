@@ -32,7 +32,7 @@ function(  CollisionSystem, CONFIG, Time )
     }
     
     // childs update
-    for ( var c = 0; child = this.childrens[ c ]; c++ )
+    for ( var c = 0; child = this.gameObjects[ c ]; c++ )
     {
       if ( child.flag !== null )
       {

@@ -80,7 +80,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       this.ImageManager.pathPrefix        = sizes.path;
       this.ImageManager.imageNotRatio     = sizes.notRatio || false;
       this.ImageManager.ratioToConception = ratioToConception;
-      this.ImageManager.folderName        = params.images.folderName;
+      this.ImageManager.folderName        = params.images.folderName || params.images.baseUrl;
       this.ImageManager.imagesLoaded      = 0;
       this.ImageManager.imagesRequested   = 1;
       this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
@@ -145,7 +145,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
         this.ImageManager.pathPrefix        = sizes.path;
         this.ImageManager.imageNotRatio     = sizes.notRatio || false;
         this.ImageManager.ratioToConception = ratioToConception;
-        this.ImageManager.arrayLoader( params.images.imagesList );
+        this.ImageManager.arrayLoader( params.images.imagesList || params.images.pools );
         this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
       }, DREAM_ENGINE );
       
@@ -176,7 +176,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       if ( DREAM_ENGINE.isDemo )
         DREAM_ENGINE.DemoPopups.init();
       
-      DREAM_ENGINE.ImageManager.arrayLoader( params.images.imagesList );
+      DREAM_ENGINE.ImageManager.arrayLoader( params.images.imagesList || params.images.pools );
       DREAM_ENGINE.AudioManager.loadAudios( params.audios );
       
       DREAM_ENGINE.Inputs.init( params.inputs );

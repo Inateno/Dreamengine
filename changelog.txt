@@ -1,4 +1,7 @@
-----0.26 WIP ----
+----0.3----
+* add support for DE.PIXI version (no need to do all the reverse-migration process)
+This is useful when you want to come back to Canvas2D version (still more powerful on mobile than PIXI)
+----0.26 ----
 * fix fade in Renderer
 * add missing npm in package
 * GameObject.moveTo now work as global position by default and can keep running with local with "keepLocal" argument

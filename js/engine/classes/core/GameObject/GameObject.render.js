@@ -59,7 +59,7 @@ function( CONFIG, COLORS, Time )
     
     var child;
     // childs rendering
-    for ( i = 0; child = this.childrens[ i ]; ++i )
+    for ( i = 0; child = this.gameObjects[ i ]; ++i )
       child.render( ctx, physicRatio, camPosition, camSizes, ratioz );
     
     ctx.rotate( -this.position.rotation );
