@@ -64,10 +64,7 @@ function( CONFIG, SaveSystem, Event )
     
     this.updateScreenSizes = function( index )
     {
-      this.dpi = 1;
-      var devicePixelRatio = devicePixelRatio || 1;
-      if ( devicePixelRatio )
-        this.dpi = devicePixelRatio;
+      this.dpi = window.devicePixelRatio || 1;
       
       var savedQuality = SaveSystem.get( "settings" ).quality || undefined;
       var sizes = this.screenSizes;

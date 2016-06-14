@@ -220,7 +220,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         {
           lastResize && window.clearTimeout( lastResize );
           lastResize = window.setTimeout( recallMethod, 200 );
-        }, false ); 
+        }, false );
       }
       else if ( window.attachEvent )
       {

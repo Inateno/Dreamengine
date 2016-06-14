@@ -19,9 +19,9 @@ function( DE )
   Game.init = function()
   {
     console.log( "game init" );
-    // DE.CONFIG.DEBUG = 1;
-    DE.CONFIG.DEBUG_LEVEL = 1;
-    // DE.CONFIG.DEBUG_LEVEL = 2;
+    DE.CONFIG.DEBUG = 1;
+    // DE.CONFIG.DEBUG_LEVEL = 1;
+    DE.CONFIG.DEBUG_LEVEL = 2;
     // render
     Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
     Game.render.init();
