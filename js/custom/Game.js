@@ -18,103 +18,15 @@ function( DE, TouchControl )
   Game.ship  = null;
   Game.obj = null;
   
-  function addFire( object )
-  {
-    object.bulletSpeed = 3;
-    object.fire = function( target, distance )
-    {
-      if ( DE.CollisionSystem.pointCircleCollision( target.getPos(), this.collider ) )
-      {
-        var pos = this.getPos();
-        var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-        var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "renderer": sprite } );
-        bullet.position.setRotation( this.getRotation() );
-        bullet.moving = function( value )
-        {
-          this.translateY( value );
-          if ( this.position.x < -50 || this.position.y < -50 || this.position.x > 1920 || this.position.y > 1080 )
-          {
-            this.askToKill();
-          }
-        }
-        bullet.addAutomatism( "moving", "moving", { "value1": this.bulletSpeed } );
-        Game.scene.add( bullet );
-      }
-    }
-  }
-  
-  function addEnemy( object, x, y, player )
-  {
-    // STEP 1 enemy and components
-    var enemy = new DE.GameObject( {
-     'x': x, 'y': y
-      , 'collider': new DE.CircleCollider( 30 )
-      , "renderer":new DE.BoxRenderer( { "fillColor": "rgb(20,20,20)" }, 50, 80 )
-    } );
-    enemy.onMouseDown = function(){ console.log( "enemy down" ); }
-    enemy.onMouseEnter = function(){ console.log( "enemy enter" ); }
-    enemy.onMouseLeave = function(){ console.log( "enemy leave" ); }
-    object.scene.add( enemy );
-    object.enemies.push( enemy );
-    
-    
-    enemy.arm = new DE.GameObject( {
-      "name": "arm", "tag":"time", "x": 00, "y": 40
-      , "renderer":new DE.BoxRenderer( { "fillColor": "green", "offsetY": 0 }, 120, 20 )
-    } );
-    var canon = new DE.GameObject( { 'x': 50, 'y': 0
-      , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
-    } );
-    var gatling = new DE.GameObject( { 'x': 0, 'y': 50
-      , 'collider': new DE.CircleCollider( 200 )
-    } );
-    gatling.onMouseDown = function(){ console.log( "%cgatling gun down", "color:orange" ); }
-    gatling.onMouseEnter = function(){ console.log( "%cgatling gun enter", "color:orange" ); }
-    gatling.onMouseLeave = function(){ console.log( "%cgatling gun leave", "color:orange" ); }
-    canon.add( gatling );
-    
-    var canon2 = new DE.GameObject( { 'x': -50, 'y': 0
-      , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
-    } );
-    var rocketo = new DE.GameObject( { 'x': 0, 'y': 50
-      , 'collider': new DE.CircleCollider( 300 )
-    } );
-    canon2.add( rocketo );
-    
-    enemy.arm.add( canon2 );
-    enemy.arm.add( canon );
-    enemy.add( enemy.arm );
-    
-    enemy.target = player;
-    // STEP 2
-    enemy.move = function()
-    {
-      this.translateY( 4 );
-      this.rotate( 0.01 );
-      // this.arm.lookAt( this.target.position );
-      // this.lookAt( this.target.position );
-      this.arm.lookAt( this.target.position );
-    }
-    enemy.addAutomatism( "gameLogic", "move" );
-    
-    // STEP 3
-    addFire( gatling );
-    // gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-    addFire( rocketo );
-    // rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-    rocketo.bulletSpeed = 7;
-    return enemy;
-  }
-  
   // init
   Game.init = function()
   {
     console.log( "game init" );
     DE.CONFIG.DEBUG = 1;
-    // DE.CONFIG.DEBUG_LEVEL = 1;
     DE.CONFIG.DEBUG_LEVEL = 2;
+    // DE.CONFIG.DEBUG_LEVEL = 2;
     // render
-    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+    Game.render = new DE.Render( "render", { backgroundColor: "0x880044", fullScreen: "ratioStretch", width: 1920, height: 1080 } );
     Game.render.init();
     
     DE.start();
@@ -126,170 +38,195 @@ function( DE, TouchControl )
     console.log( "game starto!!" );
     Game.scene = new DE.Scene( "Test" );
     
-    
-    /* GAME SHIP SAMPLE */
-      var shipRender = new DE.SpriteRenderer( { "spriteName": "ship", "scaleX":0.2, "scaleY":0.2 } );
-      var collider = new DE.CircleCollider( 50 );
-      Game.ship = new DE.GameObject( { "name":"Ayera", "tag":"Player"
-                                        , "cursorOnOver": true
-                                        , "x": 980, "y":500, "z": 0, "zindex": 1
-                                        , "renderer": shipRender
-                                        , "collider":collider } );
-      Game.ship.onMouseUp= function()
-      {
-        this.position.z += 1;
-        Game.scene.sortGameObjects();
-        // Game.camera.scenePosition.z += 0.1 * dir;
-      };
-      Game.ship.axes = { x: 0, y: 0 };
-      Game.ship.logic = function()
-      {
-        this.translateX( this.axes.x * 5 );
-        this.translateY( this.axes.y * 5 );
-      };
-      Game.ship.addAutomatism( "logic", "logic" );
-      
-      Game.obj = new DE.GameObject( {
-        "x": 100, "y": 100
-      } );
-      
-      // add a children
-      var reactorfx = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.4, "scaleY":0.4 } );
-      var reactor = new DE.GameObject( { "name":"Reactor", "tag":"FX", "z": 0, "y":108, "renderer": reactorfx } );
-      Game.ship.add( reactor );
-      reactor.position.setRotation( Math.PI );
-      
-      // add ship in scene
-      Game.scene.add( Game.ship, Game.obj );
-    
-    // camera
-    // Game.camera = new DE.Camera( 1400, 880, 420, 100, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
     Game.camera = new DE.Camera( 1920, 1080, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
-    // Game.camera.sizes.scaleX = 0.8;
-    // Game.camera.sizes.scaleY = 0.8;
-    // Game.camera = new DE.Camera( 1280, 720, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
     Game.camera.scene = Game.scene;
-    Game.camera.gui = new DE.Gui( Game.camera, { 'id': "Test" } );
-    
-    // Game.camera.gui.add( new DE.GameObject( {
-    //   "x": 1160, "y": 740
-    //   , "renderer": new DE.SpriteRenderer( { spriteName: "reactor" } )
-    //   , "collider": new DE.CircleCollider( 30 )
-    // } ) );
-    // Game.camera.gui.gameObjects[ 0 ].onMouseUp = function(){ console.log( "coucou" ); return true }
-    
     Game.render.add( Game.camera );
     
-    var touchInput = new TouchControl({
-        "x": 100
-        ,"y": 100
-        ,"zindex": 100
-      },{
-        "collider": { 'radius': 60 }
-        ,"camera": Game.camera
-        ,appearOnTouch: true
-        , onStickMove: function( position )
-        {
-          Game.ship.axes.x = position.x;
-          Game.ship.axes.y = position.y;
-        }
-      } );
-      
-    Game.touchInput = touchInput;
-    Game.scene.add( touchInput );
-    
-    // Create Enemies
-    Game.enemies = new Array();
-    var n = 5;
-    // for ( var i = 0, e; i < n; ++i )
-    // {
-    //   e = addEnemy( Game, 900, 500, Game.ship );
-    //   e.position.z = i;
-    // }
-    var container = new DE.GameObject( { z: 10 });
-    var bg =new DE.GameObject( {
-      "x": 960, "y": 540, "z": 20
-      ,"renderer": new DE.SpriteRenderer( { spriteName: "bg", scale: 3 } )
-    } );
-    for ( var i = 0, grass, canyon, canyon2, c3; i < 4; ++i )
-    {
-      canyon =new DE.GameObject( {
-        "x": 1800 * i, "y": 580, "z": 10
-        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
-      } );
-      canyon2 =new DE.GameObject( {
-        "x": 1800 * i + 100, "y": 580, "z": 15
-        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
-      } );
-      c3 =new DE.GameObject( {
-        "x": 1800 * i - 100, "y": 580, "z": 18
-        ,"renderer": new DE.SpriteRenderer( { spriteName: "canyon" } )
-      } );
-      grass =new DE.GameObject( {
-      "x": 1900 * i, "y": 640, "z": 1, "zindex": -1
-      ,"renderer": new DE.SpriteRenderer( { spriteName: "grass", scale: 1 } )
-    } );
-      Game.scene.add( canyon, canyon2, c3, grass );
-    }
-    Game.scene.add( bg );
-    
-    // for ( var i = 0; i < n; ++i )
-    //   addEnemy( Game, 180 + i*80, 0+i%2*100, Game.ship );
-    // for ( var i = 0; i < n; ++i )
-    //   addEnemy( Game, 180 + i*80, 200+i%2*100, Game.ship );
-    // for ( var i = 0; i < n; ++i )
-      // addEnemy( Game, 180 + i*80, 400+i%2*100, Game.ship );
-    // for ( var i = 0; i < n; ++i )
-    //   addEnemy( Game, 180 + i*80, 600+i%2*100, Game.ship );
-    // for ( var i = 0; i < n; ++i )
-    //   addEnemy( Game, 180 + i*80, 800+i%2*100, Game.ship );
-    // for ( var i = 0; i < n; ++i )
-    //   addEnemy( Game, 180 + i*80, 1000+i%2*100, Game.ship );
-    
-    // Game.camera.focus( Game.ship );
-    Game.camera.limits.minY = 0;
-    Game.camera.limits.maxY = 1080;
-    // Game.camera.limits.minX = -500;
-    // Game.camera.limits.maxX = 2400;
-    var banane = new DE.GameObject( {
-      'x': 600, 'y': 500, 'collider': new DE.FixedBoxCollider( 200, 200 )
-    } );
-    banane.onMouseDown = function(){ console.log( "banane" ) };
-    var patate = new DE.GameObject( {
-      'x': 700, 'y': 400, 'collider': new DE.FixedBoxCollider( 200, 200 ), "z": 10
-    } );
-    patate.onMouseDown = function(){ console.log( "patate" ) };
-    Game.scene.add( banane, patate );
-    //add Fire on the ship
-    Game.ship.fire = function( dir )
-    {
-      var pos = this.getPos();
-      var sprite = new DE.SpriteRenderer( { "spriteName": "reactor", "scaleX":0.2, "scaleY":0.2 } );
-      var bullet = new DE.GameObject( { "name": "bullet", "tag":"time", "x": pos.x, "y": pos.y, "z": pos.z, "renderer": sprite } );
-      bullet.position.setRotation( this.position.rotation );
-      bullet.addAutomatism( "bouge", "translateY", { "value1": -3 } );
-      Game.scene.add( bullet );
-      
-      // DE.AudioManager.fx.play("achievement-unlocked");
-      DE.AudioManager.fx.playRandom( [ "achievement-unlocked", "mouseclick1" ] );
-    }
-    
     Game.camera.gui = new DE.Gui();
-    var plus = new DE.GameObject( {
-      "x": 230, "y": 20
-      , "renderer": new DE.TextRenderer( { fillColor: "white", fontSize: 30 }, 100, 100, "+" )
-      , "collider": new DE.CircleCollider( 20 )
+    var guiob = new DE.GameObject( {
+      x: 500, y: 500
+      ,cursorOnOver: true
+      ,renderer: new DE.TextRenderer( "This is inside GUI layer" )
+      ,collider: new DE.FixedBoxCollider( 100,100 )
     } );
-    plus.onMouseUp = function(){ Game.camera.scenePosition.z += 100; };
-    var minus = new DE.GameObject( {
-      "x": 230, "y": 60
-      , "renderer": new DE.TextRenderer( { fillColor: "white", fontSize: 30 }, 100, 100, "-" )
-      , "collider": new DE.CircleCollider( 20 )
-    } );
-    minus.onMouseUp = function(){ Game.camera.scenePosition.z -= 100; };
-    Game.camera.gui.add( plus, minus );
+    guiob.onMouseMove = function( m )
+    {
+      // console.log( m );
+      this.askToKill();
+    }
+    Game.camera.gui.add( guiob );
+    Game.camera.onMouseMove = function( data )
+    {
+        // console.log( data );
+      cursor.position.setPosition( data );
+      // console.log( lookCursor.position.rotation );
+    };
+    // after all other events
+    Game.camera.onLastMouseUp = function( data )
+    {
+      Game.box.moveTo( data, 500 );
+    };
     
-    // DE.Inputs.addActionInput( "fire", "launchMissile", function(){Game.ship.fire();}, "up" )
+    var cursor = new DE.GameObject( {
+      renderer: new DE.CircleRenderer( { fillColor: "0xff0000", radius: 20 } )
+    } );
+    
+    Game.bg = new DE.GameObject( {
+      x: 960
+      ,y: 540
+      ,zindex: -1
+      ,renderer: new DE.SpriteRenderer( { spriteName: "bg" } )
+    } );
+    Game.camera.interactive = true;
+    Game.ship = new DE.GameObject( {
+      x: 650 
+      ,y: 500
+      ,zindex: 1
+      ,renderers: [
+        new DE.SheetRenderer( "ship1.png" )
+        ,new DE.TextRenderer( "This is a line\nreturn", { fill: "red" } )
+      ]
+      ,collider: new DE.CircleCollider( 100, 100 )
+      ,cursorOnOver: true
+    } );
+    Game.reactor = new DE.GameObject( {
+      x: 0
+      ,y: 100
+      ,name: "reactor"
+      ,renderer: new DE.SheetRenderer( "ship4.png", { spriteName: "ship", scale: 0.5 } )
+      ,collider: new DE.FixedBoxCollider( 50,50 )
+    } );
+    Game.ship.add( Game.reactor );
+    Game.reactor.interactive = true;
+    Game.reactor.onMouseMove = function( data )
+    {
+        this.setPositionFromAbsolute( data );
+    }
+    Game.scene.add( Game.bg, Game.ship );
+    Game.ship.onMouseDown = function( mouse, prevent )
+    {
+      this.data = mouse;
+      this.alpha = 0.9;
+      this.dragging = true;
+    };
+    Game.ship.onMouseUp = Game.ship.onMouseLeave = function( mouse )
+    {
+      this.alpha = 1
+      this.dragging = false;
+      // set the interaction data to null
+      this.data = null;
+    };
+    Game.ship.onMouseMove = function(data)
+    {
+      if( this.dragging )
+      {
+        // need to get parent coords..
+        // var newPosition = this.data.getLocalPosition(this.parent);
+        this.position.x = data.x;
+        this.position.y = data.y;
+      }
+    };
+    Game.ship.interactive = true;
+    
+    Game.txt = new DE.GameObject( {
+      x: 800, y: 400
+      ,renderer: new DE.TextRenderer( "Collision" )
+    } )
+    Game.txt.enable = false;
+    
+    // goes where you click
+    Game.box = new DE.GameObject( {
+      x: 800, y: 500
+      ,collider: new DE.FixedBoxCollider( 150, 120 )
+      ,renderer: new DE.TextRenderer( "Click somewhere" )
+    } );
+    Game.box.check = function()
+    {
+      // TODO multi-type collision
+      if ( DE.CollisionSystem.checkCollisionWith( this.collider, Game.ship.collider ) )
+      {
+        Game.txt.enable = true;
+        console.log( "collision wouhou" );
+      }
+      else
+        Game.txt.enable = false;
+    };
+    Game.box.addAutomatism( "check", "check" );
+    
+    // this one will ping-pong from right to left inside the Game.box
+    var boxch = new DE.GameObject( {
+      renderer: new DE.RectRenderer( { "fillColor": "random", "width": 20, "height": 20 } )
+      ,y: 30
+    } );
+    boxch.moveMeSm = function()
+    {
+      if ( this.x > 0 )
+        this.moveTo( { x: -50 }, 500 );
+      else
+        this.moveTo( { x: 50 }, 500 );
+    }
+    boxch.addAutomatism( "moveMeSm", "moveMeSm", { interval: 500 } );
+    Game.box.add( boxch );
+    
+    var verifCircle = new DE.GameObject( {
+      x: 800, y: 500, collider: new DE.CircleCollider( 96 )
+    } )
+    Game.scene.add( Game.box, Game.txt, verifCircle );
+    
+    var so = new DE.GameObject( {
+      x: 1300, y: 400
+      // ,zindex: 100
+      ,collider: new DE.FixedBoxCollider( 100, 50 )
+    } );
+    so.add( new DE.GameObject( {
+      x: 100
+      ,cursorOnOver: true
+      ,collider: new DE.CircleCollider( 20 )
+    } ), new DE.GameObject( {
+      x: -100, y: 20
+      ,cursorOnOver: true
+      ,collider: new DE.CircleCollider( 40 )
+    } ) );
+    
+    var inout = new DE.GameObject( {
+      renderer: new DE.TextRenderer( "In !" )
+      ,zindex: 10
+    } )
+    inout.focus( so );
+    inout.enable = false;
+    so.onMouseEnter = function(){ inout.enable = true; };
+    so.onMouseLeave = function(){ inout.enable = false; };
+    
+    var soc = so.gameObjects[ 1 ];
+    soc.add( new DE.GameObject( {
+      x: 150, y: -27
+      ,collider: new DE.CircleCollider( 20 )
+    } ) );
+    so.gameObjects[ 0 ].addAutomatism( "rotate", "rotate", { value1: Math.PI * 0.5, interval: 650, value2: true } );
+    so.gameObjects[ 0 ].onMouseMove = function( e ){ console.log( "move on first" ); };
+    
+    soc.addAutomatism( "rotate", "rotate", { value1: -0.01 } );
+    soc.onMouseMove = function( e ){ console.log( "move on second" ); };
+    soc.gameObjects[ 0 ].onMouseMove = function( e ){ console.log( "move on child" ); };
+    
+    Game.scene.add( so, inout );
+    
+    Game.scene.add( new DE.GameObject( {
+      x: 960, y: 100
+      ,zindex: 1000
+      ,renderer: new DE.TextRenderer( "Open the console to see debug message" )
+    } ) );
+    
+    var lookCursor = new DE.GameObject( {
+      x: 150, y: 150,
+      renderer: new DE.RectRenderer( { fillColor: "0x220066", width: 20, height: 200 } )
+    } );
+    lookCursor.customUpdate = function(){
+      this.lookAt( cursor );
+    };
+    lookCursor.addAutomatism( "customUpdate", "customUpdate" );
+    
+    Game.scene.add( cursor, lookCursor );
     setTimeout( function(){ DE.States.down( "isLoading" ); }, 500 );
   };
   window.Game = Game; // debug

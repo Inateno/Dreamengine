@@ -30,11 +30,12 @@ function( CONFIG )
     , conceptionSizeIndex: 0
     
     // images folder name 
-    , folderName: "img"
+    , baseUrl: "img"
     
     // usage name, real name (can contain subpath), extension, parameters
-    , imagesList: [
-    ]
+    , pools: {
+      main: []
+    }
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );
   return datas;

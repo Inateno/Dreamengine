@@ -26,7 +26,7 @@ function( DE )
     console.log( "init Engine" );
     DE.CONFIG.DEBUG_LEVEL = 5;
     // render
-    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+    Game.render = new DE.Render( "render", { backgroundColor: "0x880044", fullScreen: "ratioStretch", width: screenW, height: screenH } );
     Game.render.init();
     
     DE.start();
@@ -52,9 +52,9 @@ function( DE )
     // Create Balls
     Game.enemies = 0;
     _counter = new DE.GameObject( {
-      "x"         : 50
-      , "y"       : 100
-      , "renderer": new DE.TextRenderer( {}, 200, 100, "Balls" )
+      "x"         : 100
+      , "y"       : 150
+      , "renderer": new DE.TextRenderer( { text: "Balls: 50" } )
     } );
     _counter.renderer.onSetText = function( txt )
     {
@@ -74,11 +74,11 @@ function( DE )
   {
     var ball = new DE.GameObject( {
       "tag": "Ball", "x": x, "y": y
-      , "renderer": new DE.CircleRenderer(
-          { "method": "fillAndStroke"
-            , "strokeColor": "white"
-            , "fillColor": "rgb("+(Math.random()*255>>0)+","+(Math.random()*255>>0)+","+(Math.random()*255>>0)+")"
-          }, 70, 0, Math.PI*2, true )
+      , "renderer": new DE.CircleRenderer( {
+          "lineColor": "white"
+          , "fillColor": "random"
+          , "radius": 70
+        } )
       , "collider": new DE.CircleCollider( 80 )
     } );
     ball.speedx = ( Math.random() * 5 + Math.random() * -5 ) * 2;
@@ -128,10 +128,10 @@ function( DE )
     ball.onKill = function()
     {
       Game.enemies--;
-      _counter.renderer.setText( Game.enemies );
+      _counter.renderer.text = "Balls: " + Game.enemies;
     }
     Game.enemies++;
-    _counter.renderer.setText( Game.enemies );
+    _counter.renderer.text = "Balls: " + Game.enemies;
     object.scene.add( ball );
   }
   window.Game = Game; // debug

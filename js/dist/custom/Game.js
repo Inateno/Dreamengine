@@ -48,8 +48,12 @@ function( DE )
       var enemy = new DE.GameObject( {
        'x': x, 'y': y
         , 'collider': new DE.CircleCollider( 30 )
-        , "renderer":new DE.BoxRenderer( { "fillColor": "rgb(20,20,20)" }, 50, 80 )
+        , "renderer":new DE.PIXI.Graphics()
       } );
+      enemy.renderer.beginFill(0xFF0000, 1);
+      enemy.renderer.drawRect(0,0,100,40);
+      enemy.renderer.x = -50;
+      
       enemy.onMouseDown = function(){ console.log( "enemy down" ); }
       enemy.onMouseEnter = function(){ console.log( "enemy enter" ); }
       enemy.onMouseLeave = function(){ console.log( "enemy leave" ); }
@@ -59,13 +63,18 @@ function( DE )
       
       enemy.arm = new DE.GameObject( {
         "name": "arm", "tag":"time", "x": 0, "y": 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "green", "offsetY": 0 }, 120, 20 )
+        , "renderer":new DE.PIXI.Graphics()
       } );
+      enemy.arm.renderer.beginFill(0x888877, 1);
+      enemy.arm.renderer.drawRect(0,0,80,40);
+      enemy.arm.renderer.x = -40;
       var canon = new DE.GameObject( { 'x': 50, 'y': 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
+        , "renderer":new DE.PIXI.Graphics()
       } );
+      canon.renderer.beginFill(0x00FF00, 1);
+      canon.renderer.drawRect(0,0,15,50);
       var gatling = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 50 )
+        , 'collider': new DE.CircleCollider( 250 )
       } );
       gatling.onMouseDown = function(){ console.log( "%cgatling gun down", "color:orange" ); }
       gatling.onMouseEnter = function(){ console.log( "%cgatling gun enter", "color:orange" ); }
@@ -73,10 +82,12 @@ function( DE )
       canon.add( gatling );
       
       var canon2 = new DE.GameObject( { 'x': -50, 'y': 0
-        , "renderer":new DE.BoxRenderer( { "fillColor": "red", "offsetY": 15 }, 15, 50 )
+        , "renderer":new DE.PIXI.Graphics()
       } );
+      canon2.renderer.beginFill(0x00FF00, 1);
+      canon2.renderer.drawRect(0,0,15,50);
       var rocketo = new DE.GameObject( { 'x': 0, 'y': 50
-        , 'collider': new DE.CircleCollider( 50 )
+        , 'collider': new DE.CircleCollider( 10 )
       } );
       canon2.add( rocketo );
       
@@ -88,18 +99,18 @@ function( DE )
       // STEP 2
       enemy.move = function()
       {
-        this.translateY( 4 );
-        this.rotate( 0.01 );
-        // this.arm.lookAt( this.targetObject.position );
+        // this.translateY( 4 );
+        // this.rotate( 0.01 );
+        this.lookAt( this.targetObject.position );
         // this.arm.rotate( 0.008 ); //lookAt( this.targetObject.position );
       }
       enemy.addAutomatism( "gameLogic", "move" );
       
       // STEP 3
-      // addFire( gatling );
-      // gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
-      // addFire( rocketo );
-      // rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+      addFire( gatling );
+      gatling.addAutomatism( "fire", "fire", { "value1":player, "value2":300, "interval":150+( Math.random()*100 ) >> 0 } );
+      addFire( rocketo );
+      rocketo.addAutomatism( "fire", "fire", { "value1":player, "value2":100, "interval":150+( Math.random()*100 ) >> 0 } );
       rocketo.bulletSpeed = 7;
   }
   
@@ -111,7 +122,7 @@ function( DE )
     // DE.CONFIG.DEBUG_LEVEL = 1;
     DE.CONFIG.DEBUG_LEVEL = 2;
     // render
-    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch", width: 1920, height: 1080, backgroundColor: "0x442288" } );
     Game.render.init();
     
     DE.start();
@@ -124,7 +135,7 @@ function( DE )
     Game.scene = new DE.Scene( "Test" );
     
     /* GAME SHIP SAMPLE */
-      var shipRender = new DE.SpriteRenderer( { "spriteName": "ship", "scaleX":0.2, "scaleY":0.2 } );
+      var shipRender = new DE.SpriteRenderer( { "spriteName": "ship" } );
       var collider = new DE.CircleCollider( 50 );
       Game.ship = new DE.GameObject( { "name":"Ayera", "tag":"Player"
                                         , "x": 980, "y":500, "z": 0
@@ -158,16 +169,16 @@ function( DE )
     // Game.scene.add( new DE.GameObject( { "x": 1580, "y": 750 } ) );
     // Game.scene.add( new DE.GameObject( { "x": 1580, "y": 10 } ) );
     
-    var rotateCol = new DE.GameObject( { "x": 1080, "y": 0, "collider": new DE.OrientedBoxCollider( 200, 100, {} ) } );
-    Game.scene.add( rotateCol );
+    // var rotateCol = new DE.GameObject( { "x": 1080, "y": 0, "collider": new DE.OrientedBoxCollider( 200, 100, {} ) } );
+    // Game.scene.add( rotateCol );
     
-    Game.pp = new DE.GameObject( { "x": 500, "y": 500, "renderer": new DE.BoxRenderer( { "fillColor": "pink" }, 50, 50 ) } );
-    Game.scene.add( Game.pp );
-    Game.camera.onMouseMove = function( e )
-    {
-      Game.pp.position.x = e.x;
-      Game.pp.position.y = e.y;
-    }
+    // Game.pp = new DE.GameObject( { "x": 500, "y": 500, "renderer": new DE.BoxRenderer( { "fillColor": "pink" }, 50, 50 ) } );
+    // Game.scene.add( Game.pp );
+    // Game.camera.onMouseMove = function( e )
+    // {
+    //   Game.pp.position.x = e.x;
+    //   Game.pp.position.y = e.y;
+    // }
     Game.camera.onMouseUp = Game.camera.onMouseMove;
     Game.camera.onMouseDown = Game.camera.onMouseMove;
     
@@ -181,7 +192,7 @@ function( DE )
     //   addEnemy( Game, 180 + i*80, 0+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 200+i%2*100, Game.ship );
-    for ( var i = 0; i < n; ++i )
+    // for ( var i = 0; i < n; ++i )
       // addEnemy( Game, 180 + i*80, 400+i%2*100, Game.ship );
     // for ( var i = 0; i < n; ++i )
     //   addEnemy( Game, 180 + i*80, 600+i%2*100, Game.ship );

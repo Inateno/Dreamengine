@@ -15,6 +15,7 @@ function( DE, Player, Enemy, datas )
 {
   var Game = {};
   
+  Game.screen = { w: 1000, h: 1080 };
   // init
   Game.init = function()
   {
@@ -22,7 +23,8 @@ function( DE, Player, Enemy, datas )
     DE.CONFIG.DEBUG_LEVEL = 3; // 5 for all debug
     
     // create render
-    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+    Game.render = new DE.Render( "render", { fullScreen: "ratioStretch"
+      , width: 1000, height: 1080, backgroundColor: "0x880044" } );
     Game.render.init();
     
     // create scene - name it only
@@ -40,7 +42,8 @@ function( DE, Player, Enemy, datas )
     DE.start();
   }
   
-  Game.screen = { w: 1000, h: 1080 };
+  window.DE = DE;
+  
   // start
   Game.start = function()
   {
@@ -56,9 +59,9 @@ function( DE, Player, Enemy, datas )
           /*new DE.BoxRenderer( {
             "fillColor": "rgb(200,100,100)", "strokeColor": "white", "method": "fillAndStroke"
           }, 300, 100 )*/
-          , new DE.TextRenderer( {
+          , new DE.TextRenderer( DE.LangSystem.get( "play" ), {
             "fontSize": 32, "font": "Arial Black" // not a nice font but just to show you how to :)
-          }, 500, 60, DE.LangSystem.get( "play" ) )
+          } )
         ]
         , "collider": new DE.FixedBoxCollider( 550, 70 )
       } );
@@ -77,9 +80,9 @@ function( DE, Player, Enemy, datas )
         "x": Game.screen.w / 2, "y": Game.screen.h / 2 + 50
         , "renderers": [
           new DE.SpriteRenderer( { "spriteName": "btn" } )
-          , new DE.TextRenderer( {
+          , new DE.TextRenderer( DE.LangSystem.get( "benchmark" ), {
             "fontSize": 32, "font": "Arial Black" // not a nice font but just to show you how to :)
-          }, 500, 60, DE.LangSystem.get( "benchmark" ) )
+          } )
         ]
         , "collider": new DE.FixedBoxCollider( 550, 70 )
       } );

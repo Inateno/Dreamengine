@@ -54,7 +54,7 @@ function( DE )
     
     var player = new DE.GameObject( {
       x: 500, y: 300, zindex: 2
-      ,renderer: new DE.BoxRenderer( { fillColor: "white" }, 50, 50 )
+      ,renderer: new DE.RectRenderer( { fillColor: "0xFFF", width: 50, height: 50 } )
     } );
     
     player.speed = 10;
@@ -84,7 +84,7 @@ function( DE )
     var angle = ( Math.PI * 2 ) / 3;
     var fireBall = new DE.GameObject( {
       zindex: 10
-      ,renderer: new DE.BoxRenderer( { fillColor: "orange" }, 20, 20 )
+      ,renderer: new DE.RectRenderer( { fillColor: "0xFF3333", width: 20, height: 20 } )
       ,collider: new DE.CircleCollider( 20 )
     } );
     fireBall.position.setRotation( angle );
@@ -95,7 +95,7 @@ function( DE )
     var fireBall2 = new DE.GameObject( {
       zindex: 10
       ,collider: new DE.CircleCollider( 20 )
-      ,renderer: new DE.BoxRenderer( { fillColor: "orange" }, 20, 20 )
+      ,renderer: new DE.RectRenderer( { fillColor: "0xFF3333", width: 20, height: 20 } )
     } );
     fireBall2.position.setRotation( angle * 2 );
     fireBall2.translateX( 100 );
@@ -104,7 +104,7 @@ function( DE )
     
     var fireBall3 = new DE.GameObject( {
       zindex: 10
-      ,renderer: new DE.BoxRenderer( { fillColor: "orange" }, 20, 20 )
+      ,renderer: new DE.RectRenderer( { fillColor: "0xFF3333", width: 20, height: 20 } )
       ,collider: new DE.CircleCollider( 20 )
     } );
     fireBall3.position.setRotation( angle * 3 );
@@ -117,19 +117,17 @@ function( DE )
     
     var enemy = new DE.GameObject( {
       x: 1000, y: 300
-      ,renderer: new DE.CircleRenderer( { fillColor: "blue" }, 25 )
+      ,renderer: new DE.CircleRenderer( { fillColor: "0x0000FF" }, 25 )
       ,collider: new DE.CircleCollider( 30 )
     } );
     enemy.logic = function()
     {
       this.lookAt( player.position );
-      this.translateY( -2 );
-      for ( var i = 0; i < center.childrens.length; ++i )
+      this.translateY( 2 );
+      for ( var i = 0; i < center.gameObjects.length; ++i )
       {
-        if ( DE.CollisionSystem.circleCollision( this.collider, center.childrens[ i ].collider ) )
-        {
+        if ( DE.CollisionSystem.circleCollision( this.collider, center.gameObjects[ i ].collider ) )
           this.askToKill();
-        }
       }
     }
     enemy.addAutomatism( "logic", "logic" );
@@ -142,10 +140,10 @@ function( DE )
   {
     var fire = new DE.GameObject( {
       "x": player.position.x, "y": player.position.y
-      ,"renderer": new DE.BoxRenderer( { fillColor: "red" }, 15, 30 )
+      ,"renderer": new DE.RectRenderer( { fillColor: "0xFF0000", width: 15, height: 30 } )
     } );
     fire.position.setRotation( player.position.rotation );
-    fire.addAutomatism( "move", "translateY", { value1: -10 } );
+    fire.addAutomatism( "move", "translateY", { value1: 10 } );
     Game.camera.scene.add( fire );
   }
   

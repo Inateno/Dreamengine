@@ -11,8 +11,8 @@
  - load all files
  this file isn't to load your custom files or to make production games
  it's usefull to load the unwrapped engine and work on.
- If you are making a game and don't want to work on the Engine, I recommand you to take a sample with
- wrapped dist version
+ If you are making a game and don't want to work on the Engine,
+ I recommand you to take a sample with wrapped dist version
 
 -- problem with require.js ? give a look on api doc --> http://requirejs.org/docs/api.html#jsfiles
 **/
@@ -43,15 +43,16 @@ require.config( {
     , 'DE.Notifications'     : 'engine/classes/Notifications'
     , 'DE.AchievementSystem' : 'engine/classes/AchievementSystem'
     
-    , 'DE.Sizes'        : 'engine/classes/core/Sizes'
+    // , 'DE.Sizes'        : 'engine/classes/core/Sizes'
+    // , 'DE.Collider'     : 'engine/classes/core/Collider'
+    // , 'DE.Renderer'     : 'engine/classes/core/Renderer'
     , 'DE.Vector2'      : 'engine/classes/core/Vector2'
-    , 'DE.Collider'     : 'engine/classes/core/Collider'
-    , 'DE.Renderer'     : 'engine/classes/core/Renderer'
+    , 'DE.BaseRenderer' : 'engine/classes/core/BaseRenderer'
     , 'DE.Render'       : 'engine/classes/core/Render'
     , 'DE.Camera'       : 'engine/classes/core/Camera'
     , 'DE.Scene'        : 'engine/classes/core/Scene'
     , 'DE.Rigidbody'    : 'engine/classes/core/Rigidbody'
-    , 'DE.CanvasBuffer' : 'engine/classes/core/CanvasBuffer'
+    // , 'DE.CanvasBuffer' : 'engine/classes/core/CanvasBuffer'
     , 'DE.GamePad'      : 'engine/classes/gamepad'
     , 'DE.Inputs'       : 'engine/classes/Inputs'
     , 'DE.Gui'          : 'engine/classes/core/Gui'
@@ -62,26 +63,22 @@ require.config( {
 
     // GameObject
     , 'DE.GameObject': 'engine/classes/core/GameObject/GameObject'
-    , 'DE.GameObject.render': 'engine/classes/core/GameObject/GameObject.render'
+    // , 'DE.GameObject.render': 'engine/classes/core/GameObject/GameObject.render'
     , 'DE.GameObject.update': 'engine/classes/core/GameObject/GameObject.update'
 
     // colliders
     , 'DE.FixedBoxCollider'    : 'engine/classes/extended/FixedBoxCollider'
-    , 'DE.OrientedBoxCollider' : 'engine/classes/extended/OrientedBoxCollider'
     , 'DE.CircleCollider'      : 'engine/classes/extended/CircleCollider'
-
+    // , 'DE.OrientedBoxCollider' : 'engine/classes/extended/OrientedBoxCollider'
+    
     // renderers
-    , 'DE.BoxRenderer'           : 'engine/classes/extended/BoxRenderer/BoxRenderer'
-    , 'DE.BoxRenderer.render'    : 'engine/classes/extended/BoxRenderer/BoxRenderer.render'
-    , 'DE.CircleRenderer'        : 'engine/classes/extended/CircleRenderer/CircleRenderer'
-    , 'DE.CircleRenderer.render' : 'engine/classes/extended/CircleRenderer/CircleRenderer.render'
-    , 'DE.SpriteRenderer'        : 'engine/classes/extended/SpriteRenderer/SpriteRenderer'
-    , 'DE.SpriteRenderer.render' : 'engine/classes/extended/SpriteRenderer/SpriteRenderer.render'
-    , 'DE.TextRenderer'          : 'engine/classes/extended/TextRenderer/TextRenderer'
-    , 'DE.TextRenderer.render'   : 'engine/classes/extended/TextRenderer/TextRenderer.render'
-    , 'DE.TileRenderer'          : 'engine/classes/extended/TileRenderer/TileRenderer'
-    , 'DE.TileRenderer.render'   : 'engine/classes/extended/TileRenderer/TileRenderer.render'
-    , 'DE.BufferRenderer'        : 'engine/classes/extended/BufferRenderer'
+    , 'DE.SpriteRenderer'        : 'engine/classes/extended/SpriteRenderer'
+    , 'DE.TextRenderer'          : 'engine/classes/extended/TextRenderer'
+    , 'DE.SheetRenderer'         : 'engine/classes/extended/SheetRenderer'
+    , 'DE.CircleRenderer'        : 'engine/classes/extended/CircleRenderer'
+    , 'DE.RectRenderer'          : 'engine/classes/extended/RectRenderer'
+    // , 'DE.TileRenderer'          : 'engine/classes/extended/TileRenderer'
+    // , 'DE.BufferRenderer'        : 'engine/classes/extended/BufferRenderer'
     
     , 'DE.Mid.gameObjectMouseEvent': 'engine/middlewares/gameObjectMouseEvent'
     
@@ -90,6 +87,7 @@ require.config( {
     , 'HowlLib'       : 'ext_libs/howler'
     , 'stash'         : 'ext_libs/stash-require'
     , 'handjs'        : 'ext_libs/hand-require'
+    , 'PIXI'          : 'ext_libs/pixi.dev'
     
     // used by grunt when compiling in "require" or "standalone" version
     // the require version call the function return by your main file

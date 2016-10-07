@@ -15,8 +15,8 @@ function( CONFIG )
   var about = {};
   
   about.DEName = "about";
-  about.version= "0.25.0";
-  about.gameName    = "DreamGame";
+  about.version= "0.26.3";
+  about.gameName    = "MySuperGame";
   about.gameVersion = "0.1.0";
   about.gameAuthor  = "Dreamirl";
   

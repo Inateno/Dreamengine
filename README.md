@@ -1,7 +1,17 @@
 ![DreamEngine Logo](http://dreamengine.dreamirl.com/assets/imgs/logo.png)
 
-Dream-Engine - a powerful 2D games engine
+Dream-Engine - a powerful 2D games engine - PIXI Version
 ===========
+
+This is the PIXI version of the Dream-Engine, it use PIXI.js inside to enhance rendering and allow you use of shaders with a WebGL renderer.
+The main differences with the Canvas2D version is based on Renderer class, it doesn't exist and extended renderers inherits from PIXI.Sprite, PIXI.Text.
+If you already made a game with the engine in Canvas2D version the migration is easy, you have to change your DE.Render declaration and each SpriteRenderer or TextRenderer.
+
+If you are familiar with PIXI you'll find things inside the engine that aren't used because of an architecture choice, or differences like the events in PIXI.
+Some choice where made to keep the "Dream-Engine" coding logic and it's faster (to create a SpriteRenderer with 6 frames and 60ms delay between each, as example).
+Don't worry if you really want use the engine + PIXI "native" declaration you can still do it, but I strongly recommend you to use DE.GameObject in the DE.Scene and not trying to add a Renderer (PIXI or not) directly in the Scene.
+
+Nb: because PIXI is using WebGL you have to run a local web-server on your computer to try your game, it was possible to do it without on the Canvas2D version, this is a security issue.
 
 The Dream-Engine is a free open source engine to create HTML5 games.
 It's made for HD graphics, touch and gamepad compatibilities, and try to let you do th interesting stuff while doing the boring part for you.
@@ -18,8 +28,7 @@ Checkout the changelog.txt for updates details
 Update 0.25.1
 -------
 This update is the last one I did on the DreamEngine, here is lot of new stuff and bug changes !
-- now the repositories have 4 branches, the master contain all stuff, pixi is the branches with the DE pixi engine version inside + doc and canvas2d is the first DE version using canvas2d + doc (the old one, but I keep working on), and the branch "site" for the website only, for those who want to contribute on it you're welcome.
-=======
+- now the repositories have 4 branches, the master contain all stuff, pixi is the branches with pixi version inside and canvas2d is the version with canvas2d (the old one, but I keep working on), and the branch "site" contain doc and website only, for those who want to contribute on it you're welcome.
 
 Check out samples
 -------

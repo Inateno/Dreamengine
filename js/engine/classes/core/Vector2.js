@@ -14,12 +14,16 @@
  * @param {Float} [y=0]
  * @param {Float} [z=0]
  */
-define( [ 'DE.Time', 'DE.CONFIG' ],
-function( Time, CONFIG )
+define( [ 'PIXI', 'DE.Time', 'DE.CONFIG' ],
+function( PIXI, Time, CONFIG )
 {
   var _PI = Math.PI;
   function Vector2( x, y, z )
   {
+    PIXI.Point.call( this );
+    
+    this.gameObject = null;
+    
     /**
      * @public
      * @memberOf Vector2
@@ -82,31 +86,12 @@ function( Time, CONFIG )
         _sinAngle = Math.sin( this.rotation );
         _cosAngle = Math.cos( this.rotation );
       }
+      
+      if ( this.gameObject )
+        this.gameObject._updateRotation();
       return this.rotation;
     }
     
-    /**
-     * set precise position
-     * @public
-     * @memberOf Vector2
-     * @param {Vector2|Float} Vector2 or x
-     * @returns {Vector2} this current instance
-     */
-    this.setPosition = function( first, y, z )
-    {
-      if ( first.x !== undefined || first.y !== undefined )
-      {
-        this.x = first.x != undefined ? first.x : this.x;
-        this.y = first.y != undefined ? first.y : this.y;
-        this.z = first.z != undefined ? first.z : this.z;
-        return this;
-      }
-      this.x = first != undefined ? first : this.x;
-      this.y = y != undefined ? y : this.y;
-      this.z = z != undefined ? z : this.z;
-      return this;
-    }
-
     /**
      * apply the given angle to rotation
      * @public
@@ -332,6 +317,56 @@ function( Time, CONFIG )
     
     return this;
   }
+  
+  Vector2.prototype = Object.create( PIXI.Point.prototype );
+  Vector2.prototype.constructor = Vector2;
+  
+  Object.defineProperties( Vector2.prototype, {
+    z: {
+      get: function()
+      {
+        return this._z || 0;
+      }
+      , set: function( value )
+      {
+        this._z = value;
+        if ( this.gameObject )
+        {
+          this.gameObject._updateZScale();
+          this.gameObject.sortChildren();
+        }
+      }
+    }
+  } );
+  
+  /**
+   * set precise position
+   * @public
+   * @memberOf Vector2
+   * @param {Vector2|Float} Vector2 or x
+   * @returns {Vector2} this current instance
+   */
+  Vector2.prototype.setPosition = function( first, y, z )
+  {
+    if ( first.x !== undefined || first.y !== undefined )
+    {
+      this.x = first.x != undefined ? first.x : this.x;
+      this.y = first.y != undefined ? first.y : this.y;
+      this.z = first.z != undefined ? first.z : this.z;
+      return this;
+    }
+    this.x = first != undefined ? first : this.x;
+    this.y = y != undefined ? y : this.y;
+    this.z = z != undefined ? z : this.z;
+    return this;
+  };
+  Vector2.prototype.set = Vector2.prototype.setPosition;
+  
+  Vector2.prototype.clone = function()
+  {
+      return new Vector2( this.x, this.y, this._z );
+  };
+  
   Vector2.prototype.DEName = "Vector2";
   
   CONFIG.debug.log( "Vector2 loaded", 3 );

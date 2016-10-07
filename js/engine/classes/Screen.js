@@ -64,17 +64,18 @@ function( CONFIG, SaveSystem, Event )
     
     this.updateScreenSizes = function( index )
     {
-      this.dpi = window.devicePixelRatio || 1;
+      this.dpi = 1;
+      var devicePixelRatio = devicePixelRatio || 1;
+      if ( devicePixelRatio )
+        this.dpi = devicePixelRatio;
       
       var savedQuality = SaveSystem.get( "settings" ).quality || undefined;
       var sizes = this.screenSizes;
       this.currentSizeIndex = this.conceptionSizeIndex;
-      
-      var offsetH = window.DEremoveUsableHeight || 0;
       this.screenSize.w = ( window.innerWidth || document.documentElement.clientWidth );
-      this.screenSize.h = ( window.innerHeight || document.documentElement.clientHeight ) - offsetH;
+      this.screenSize.h = ( window.innerHeight || document.documentElement.clientHeight );
       this.dpiSizeRatio.w = ( window.innerWidth || document.documentElement.clientWidth ) / this.dpi >> 0;
-      this.dpiSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight - offsetH ) / this.dpi >> 0;
+      this.dpiSizeRatio.h = ( window.innerHeight || document.documentElement.clientHeight ) / this.dpi >> 0;
       
       if ( sizes[ index ] || ( !isNaN( savedQuality ) && sizes[ savedQuality ] ) )
       {

@@ -5,29 +5,31 @@
 /**
  * @constructor Gui
  * @class Gui class is used to create a CanvasGui binded on the given camera.
- * It work like a Scene but Gui is binded to the given Camera and all GameObjects inside will follow the camera's moves.
+ * It work like a Scene but Gui is binded to the given Camera and all children inside will follow the camera's moves.
  * Gui copy the Sizes of the Camera, but at any moment you can disable it or change alpha only for Gui.
  * <b>Warning:</b> CanvasGui isn't always the best choice. Don't forget DOM is more powerful
- * As example, Gui with GameObjects allow you to use dynamics animations, and logics inside your objects like you do to make the game.
+ * As example, Gui with children allow you to use dynamics animations, and logics inside your objects like you do to make the game.
  * If you want only simple button with hover and active effect, DOM seems to be a better choice. Try both and choose.
  * so make a CanvasGui if it's easier for you or if you use tricky graphics
  * @example myCamera.gui = new DE.Gui( myCamera );
  * @param {Camera} Camera the parent camera
  */
-define( [ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Event', 'DE.GameObject'
-        , 'DE.CanvasBuffer', 'DE.Mid.gameObjectMouseEvent' ],
-function( CONFIG, COLORS, Time, Event, GameObject
-        , CanvasBuffer, gameObjectMouseEvent )
+define( [ 'PIXI', 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Event', 'DE.GameObject'
+        , 'DE.Mid.gameObjectMouseEvent' ],
+function( PIXI, CONFIG, COLORS, Time, Event, GameObject
+        , gameObjectMouseEvent )
 {
   function Gui( params )
   {
     params = params || {};
     
+    PIXI.Container.call( this );
+    
     /**
      * @public
      * @memberOf Gui
      * @type {String}
-     */
+     /
     this.id        = params.id || undefined;
     
     /**
@@ -35,19 +37,16 @@ function( CONFIG, COLORS, Time, Event, GameObject
      * @public
      * @memberOf Gui
      * @type {Boolean}
-     */
+     /
     this.alpha     = params.alpha || 1;
     
     /**
-     * store GameObjects
+     * store children
      * @protected
      * @memberOf Gui
      * @type {Array}
      */
-    this.gameObjects = params.gameObjects || [];
-    
-    // var _buffer = new CanvasBuffer( camera.renderSizes.width, camera.renderSizes.height );
-    // this.renderSizes = camera.renderSizes;
+    this.gameObjects = this.children = params.children || [];
     
     /**
      * store timers
@@ -63,7 +62,7 @@ function( CONFIG, COLORS, Time, Event, GameObject
      * @memberOf Gui
      * @type {Boolean}
      */
-    this.sleep = false;
+    this.enable = true;
     
     /**
      * store global events, exist for Down, Move, Up and Click with all versions of Last
@@ -81,41 +80,17 @@ function( CONFIG, COLORS, Time, Event, GameObject
     this.onLastGlobalMouseClick = {};
     
     /**
-     * render the gui
-     * @protected
-     * @memberOf Gui
-     * @type {Array}
-     */
-    this.render = function( ctx, drawRatio, physicRatio, renderSizes )
-    {
-      if ( this.sleep )
-        return;
-      var oldAlpha = ctx.globalAlpha;
-      ctx.globalAlpha = oldAlpha * this.alpha;
-      
-      for ( var i = 0; i < this.gameObjects.length; ++i )
-        this.gameObjects[ i ].render( ctx, physicRatio, { x: 0, y: 0, z: -10 }, renderSizes );
-      
-      // ctx.drawImage( _buffer.canvas
-      //               , -this.renderSizes.width * sizes.scaleX * drawRatio * 0.5 >> 0
-      //               , -sizes.height * sizes.scaleY * drawRatio * 0.5 >> 0
-      //               , sizes.width * sizes.scaleX * drawRatio >> 0
-      //               , sizes.height * sizes.scaleY * drawRatio >> 0 );
-      ctx.globalAlpha = oldAlpha;
-    };
-    
-    /**
      * gui update
      * @protected
      * @memberOf Gui
      */
     this.update = function()
     {
-      if ( this.sleep )
+      if ( !this.enable )
         return;
-      for ( var i = 0, t = this.gameObjects.length, g; i < t; ++i )
+      for ( var i = 0, t = this.children.length, g; i < t; ++i )
       {
-        g = this.gameObjects[ i ];
+        g = this.children[ i ];
         if ( !g )
           continue;
         if ( g.flag !== null )
@@ -135,12 +110,12 @@ function( CONFIG, COLORS, Time, Event, GameObject
       for ( var i = 0, t = this.timers.length; i < t; ++tk )
         this.timers[ i ].update();
       
-      if ( this.waitSortGameObjects )
-        this.sortGameObjects();
+      if ( this.waitSortchildren )
+        this.sortchildren();
     };
     
     /**
-     * add all given gameObjects inside the gui, if you add only one gameObject, call addOne
+     * add all given children inside the gui, if you add only one gameObject, call addOne
      * you can call this method with array, single object, or multi arguments objects, look at examples.
      * @public
      * @memberOf Gui
@@ -179,24 +154,24 @@ function( CONFIG, COLORS, Time, Event, GameObject
     {
       if ( !( gameObject instanceof GameObject ) )
       {
-        CONFIG.debug.log( "%cIt's not or not herits from a GameObjects", 1, "color:red" );
+        CONFIG.debug.log( "%cIt's not or not herits from a children", 1, "color:red" );
         return;
       }
       gameObject.scene = this;
-      this.gameObjects.push( gameObject );
+      this.addChild( gameObject );
       
       ++this.maxObjects;
-      this.waitSortGameObjects = true;
+      this.waitSortchildren = true;
     };
     
     /**
-     * sort gameObjects in the Gui along using z-index, or from lower to higher x
+     * sort children in the Gui along using z-index, or from lower to higher x
      * @protected
      * @memberOf Gui
      */
-    this.sortGameObjects = function()
+    this.sortchildren = function()
     {
-      this.gameObjects.sort( function( a, b )
+      this.children.sort( function( a, b )
       {
         if ( b.zindex == a.zindex )
           return b.position.x - a.position.x;
@@ -204,35 +179,21 @@ function( CONFIG, COLORS, Time, Event, GameObject
           return a.zindex - b.zindex;
       } );
       
-      for ( var i = 0, go; go = this.gameObjects[ i ]; ++i )
-        go.sortChildrens();
-      this.waitSortGameObjects = false;
+      for ( var i = 0, go; go = this.children[ i ]; ++i )
+        go.sortChildren();
+      
+      this.waitSortchildren = false;
     };
     
-    /***
-     * @EVENTS @onMouseMove
-     */
-    this.onMouseMove = function( mouse )
-    {
-      for ( var i in this.components )
-      {
-        if ( !this.components[ i ].enable )
-          continue;
-        var component = this.components[ i ];
-        if ( component.checkState && component.checkState( mouse ) )
-        {
-          component.onMouseMove( mouse );
-          return true;
-        }
-      }
-      return false;
-    };
-    
-    Event.addEventComponents( this );
+    this.trigger = this.emit; // copy emit reference
+    // Event.addEventComponents( this );
   }
   
-  Gui.prototype = Gui.prototype || {};
-  Event.addEventCapabilities( Gui );
+  Gui.prototype = Object.create( PIXI.Container.prototype );
+  Gui.prototype.constructor = Gui;
+  Object.defineProperties( Gui.prototype, {
+  } );
+  // Event.addEventCapabilities( Gui );
   
   /**
    * Look at Camera events, it's the same
@@ -288,8 +249,8 @@ function( CONFIG, COLORS, Time, Event, GameObject
     
     if ( !mouse.stopPropagation )
     {
-      for ( var i = this.gameObjects.length - 1, g; g = this.gameObjects[ i ]; --i )
-        if ( gameObjectMouseEvent( eventType, g, mouse, propagation ) )
+      for ( var i = this.children.length - 1, g; g = this.children[ i ]; --i )
+        if ( gameObjectMouseEvent( eventType, g, mouse, mouse, propagation ) )
           return true;
     }
   };
@@ -314,26 +275,25 @@ function( CONFIG, COLORS, Time, Event, GameObject
    * Remove an object on this gui (it is not deleted !).
    * @public
    * @memberOf Gui
-   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
+   * @param {GameObject} object can be the index of the GameObject in the children array
    */
   Gui.prototype.remove = function( object )
   {
-    if ( this.gameObjects[ object ] )
+    if ( this.children[ object ] )
     {
-      this.cleanObjectBinding( this.gameObjects[ object ] );
-      this.gameObjects.splice( object, 1 );
+      this.cleanObjectBinding( this.children[ object ] );
+      this.removeChildAt( object );
     }
     else
     {
-      var pos = this.gameObjects.indexOf( object );
+      var pos = this.children.indexOf( object );
       if ( pos == -1 )
       {
         CONFIG.debug.log( "%cRemove gameObject not found", 1, "color:orange", object );
         return;
       }
-      this.cleanObjectBinding( this.gameObjects[ pos ] );
-      this.gameObjects.splice( pos, 1 );
-      // this.gameObjects.splice( object.GuiIndex, 1 ); // nope GuiIndex can change
+      this.cleanObjectBinding( this.children[ pos ] );
+      this.removeChildAt( pos );
     }
     this.maxObjects--;
   };
@@ -343,26 +303,26 @@ function( CONFIG, COLORS, Time, Event, GameObject
    * You should prefer askToKill GameObject's method because it's safer (if you know what you do go crazy).
    * @public
    * @memberOf Gui
-   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
+   * @param {GameObject} object can be the index of the GameObject in the children array
    */
   Gui.prototype.delete = function( object )
   {
     // if its an index
-    if ( this.gameObjects[ object ] )
-      this.gameObjects[ object ].killMePlease();
+    if ( this.children[ object ] )
+      this.children[ object ].killMePlease();
     else
       object.killMePlease();
     this.remove( object );
   };
   
   /**
-   * Delete and remove all gameObjects in the gui.
+   * Delete and remove all children in the gui.
    * @public
    * @memberOf Gui
    */
   Gui.prototype.deleteAll = function()
   {
-    var objs = this.gameObjects;
+    var objs = this.children;
     while ( objs.length > 0 )
       this.delete( 0 );
     this.maxObjects = 0;

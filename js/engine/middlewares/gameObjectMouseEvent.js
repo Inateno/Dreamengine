@@ -4,7 +4,7 @@ function( CollisionSystem )
   /****
    * _gameObjectMouseEvent@bool( eventType@string, g@GameObject, mouse@MouseVector2 )
    */
-  function _gameObjectMouseEvent( eventType, g, mouse, propagationEvent )
+  function _gameObjectMouseEvent( eventType, g, mouse, mouseInScene, propagationEvent )
   {
     if ( !g.enable )
       return false;
@@ -18,9 +18,9 @@ function( CollisionSystem )
         g.indexMouseOver[ mouse.index ] = true;
         if ( g.cursorOnOver )
           propagationEvent.cursor = "pointer";
-        if ( !wasOver && g.onMouseEnter && g.onMouseEnter( mouse, propagationEvent ) )
+        if ( !wasOver && g.onMouseEnter && g.onMouseEnter( mouseInScene, propagationEvent ) )
           return true;
-        if ( g[ "onMouse" + eventType ] && g[ "onMouse" + eventType ]( mouse, propagationEvent ) )
+        if ( g[ "onMouse" + eventType ] && g[ "onMouse" + eventType ]( mouseInScene, propagationEvent ) )
           return true;
       }
       // no collision but was over last frame, there is a leave event
@@ -29,7 +29,7 @@ function( CollisionSystem )
         if ( g.cursorOnOver )
           propagationEvent.cursor = "default";
         g.indexMouseOver[ mouse.index ] = false;
-        if ( g.onMouseLeave && g.onMouseLeave( mouse, propagationEvent ) )
+        if ( g.onMouseLeave && g.onMouseLeave( mouseInScene, propagationEvent ) )
           return true;
       }
     }
@@ -49,7 +49,7 @@ function( CollisionSystem )
     
     for ( var c = g.gameObjects.length - 1, co; c >= 0; --c )
     {
-      if ( _gameObjectMouseEvent( eventType, g.gameObjects[ c ], mouse, propagationEvent ) )
+      if ( _gameObjectMouseEvent( eventType, g.gameObjects[ c ], mouse, mouseInScene, propagationEvent ) )
         return true;
     }
   }

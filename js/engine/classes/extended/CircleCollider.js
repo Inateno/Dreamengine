@@ -16,48 +16,62 @@
  * @example // adding a collider later
  * myObject.collider = new DE.CircleCollider( 70 );
  */
-define( [ 'DE.Collider', 'DE.CONFIG', 'DE.CanvasBuffer', 'DE.COLORS' ],
-function( Collider, CONFIG, CanvasBuffer, COLORS )
+define( [ 'PIXI', 'DE.CONFIG', 'DE.COLORS' ],
+function( PIXI, CONFIG, COLORS )
 {
   function CircleCollider( radius, params )
   {
     params = params || {};
-    params.type = CONFIG.COLLISION_TYPE.CIRCLE;
     
-    Collider.call( this, params );
+    PIXI.Circle.call( 0, 0, radius );
+    
+    this.type = CONFIG.COLLISION_TYPE.CIRCLE;
+    this.enable = true;
+    this.gameObject = params.gameObject || undefined;
     
     this.radius = radius || 1;
     
-    this.createDebugRenderer = function()
+    this.x = params.x || params.offsetX || params.offsetLeft || 0;
+    this.y = params.y || params.offsetY || params.offsetTop || 0;
+    
+  
+    this._createDebugRender = function()
     {
-      this.debugBuffer = new CanvasBuffer( this.radius*2, this.radius*2 );
-      this.debugBuffer.ctx.lineWidth = 2;
-      this.debugBuffer.ctx.strokeStyle = COLORS.DEBUG.CIRCLE_COLLIDER;
-      this.debugBuffer.ctx.beginPath();
-      this.debugBuffer.ctx.arc( this.radius, this.radius,
-            this.radius, 0, Math.PI*2, true );
-      this.debugBuffer.ctx.stroke();
-      this.debugBuffer.ctx.closePath();
+      if ( !this.debugRender )
+        this.debugRender = new PIXI.Graphics();
+      else
+        this.debugRender.clear();
+      
+      this.debugRender.lineStyle( 2, COLORS.DEBUG.COLLIDER, 0.6 );
+      this.debugRender.drawCircle( this.x, this.y, this.radius );
+      this.debugRender.zindex = 99999991;
     }
     
-    this.debugRender = function( ctx, physicRatio, ratioz )
+    // get worldTransform from PIXI for global scale
+    // a = complete scale x and d = complete scale y
+    this.getWorldTransform = function()
     {
-      if ( !this.debugBuffer )
-        return;
-      ctx.drawImage( this.debugBuffer.canvas
-                      , this.localPosition.x - this.debugBuffer.canvas.width * 0.5 * physicRatio * ratioz >> 0
-                      , this.localPosition.y - this.debugBuffer.canvas.height * 0.5 * physicRatio * ratioz >> 0
-                      , this.debugBuffer.canvas.width * physicRatio * ratioz >> 0
-                      , this.debugBuffer.canvas.height * physicRatio * ratioz >> 0 );
+      var pos = this.gameObject.getPos();
+      return {
+        x       : this.x + pos.x
+        , y     : this.y + pos.y
+        , z     : pos.z
+        , radius: this.radius * ( this.gameObject.worldScale.x > this.gameObject.worldScale.y
+                                  ? this.gameObject.worldScale.x : this.gameObject.worldScale.y )
+      };
     }
     
-    if ( CONFIG.DEBUG_LEVEL > 1 )
-      this.createDebugRenderer();
+    this.resize = function( radius )
+    {
+      this.radius = radius;
+      
+      if ( CONFIG.DEBUG_LEVEL > 1 )
+        this._createDebugRender();
+    };
   }
 
-  CircleCollider.prototype = new Collider();
+  CircleCollider.prototype = Object.create( PIXI.Circle.prototype );
   CircleCollider.prototype.constructor = CircleCollider;
-  CircleCollider.prototype.supr        = Collider.prototype;
   CircleCollider.prototype.DEName      = "CircleCollider";
   
   CONFIG.debug.log( "CircleCollider loaded", 3 );

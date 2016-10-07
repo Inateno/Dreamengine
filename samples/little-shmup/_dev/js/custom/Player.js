@@ -14,7 +14,7 @@ function( datas, DE, GamePad, Bullet )
     this.add( new DE.GameObject( {
       "x": 0, "y": 120, "renderer": new DE.SpriteRenderer( { "spriteName": "reactor", "scale": 0.7 } )
     } ) );
-    this.childrens[ 0 ].position.setRotation( Math.PI );
+    this.gameObjects[ 0 ].position.setRotation( Math.PI );
     
     this.speed = 10;
     this.axes  = { x: 0, y: 0 };
@@ -113,6 +113,7 @@ function( datas, DE, GamePad, Bullet )
       rd.restartAnim();
       this.flipping = true;
     }
+    
     // on anim end kill the flip
     this.renderers[ 0 ].onAnimEnd = function()
     {
@@ -129,8 +130,10 @@ function( datas, DE, GamePad, Bullet )
       for ( var i = 0; i < this.life; ++i )
       {
         var heart = new DE.GameObject( {
-          "x": i * 65 + 40, "y": _screenSizes.h - 60, "zindex": 20
-          , "renderer": new DE.SpriteRenderer( { "spriteName": "heart", "scale": 0.6 } )
+          "x"         : i * 65 + 40
+          ,"y"        : _screenSizes.h - 60
+          ,"zindex"   : 20
+          ,"renderer" : new DE.SpriteRenderer( { "spriteName": "heart", "scale": 0.6 } )
         } );
         this.hearts.push( heart );
         this.scene.add( heart );
@@ -140,17 +143,20 @@ function( datas, DE, GamePad, Bullet )
       // so for menus I recommend you to make a independent singleton
       this.gui = new DE.GameObject( { "x": _screenSizes.w / 2, "y": _screenSizes.h / 2, "zindex": 25 } );
       var loose = new DE.GameObject( {
-        "renderer": new DE.TextRenderer( {
-           "fontSize": 64, "font": "Arial Black" // not a nice font but just to show you how to :)
-        }, 700, 100, DE.LangSystem.get( "loose" ) )
+        "renderer": new DE.TextRenderer( DE.LangSystem.get( "loose" ), {
+          // not a nice font but just to show you how to :)
+          "fontSize": 64
+          ,"font"   : "Arial Black"
+        } )
       } );
       this.gui.restartBtn = new DE.GameObject( {
         "y": 150
         , "renderers": [
           new DE.SpriteRenderer( { "spriteName": "btn" } )
-          , new DE.TextRenderer( {
-            "fontSize": 32, "font": "Arial Black"
-          }, 300, 60, DE.LangSystem.get( "replay" ) )
+          , new DE.TextRenderer( DE.LangSystem.get( "replay" ), {
+            "fontSize": 32
+            ,"font"   : "Arial Black"
+          } )
         ]
         , "collider": new DE.FixedBoxCollider( 550, 70 )
       } );
@@ -212,7 +218,7 @@ function( datas, DE, GamePad, Bullet )
       return;
     }
     this.hearts[ this.life ].enable = false;
-  }
+  };
   
   // here update axes, and flip intention
   Player.prototype.updateAxes = function( x, y )
@@ -223,7 +229,7 @@ function( datas, DE, GamePad, Bullet )
       'x': x !== undefined ? x : this.axes.x
       ,'y': y !== undefined ? y : this.axes.y
     };
-  }
+  };
   
   return Player;
 } );

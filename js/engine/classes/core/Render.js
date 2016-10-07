@@ -1,35 +1,53 @@
 ﻿/**
- * @author Inateno / http://inateno.com / http://dreamirl.com
- */
+* @author Inateno / http://inateno.com / http://dreamirl.com
+*/
 
 /**
- * @constructor Render
- * @class this create the canvas, buffers, and manage resizing
- * @example Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
- * Game.render.init();
- */
-define( [ 'DE.CONFIG', 'DE.Sizes', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs', 'DE.CanvasBuffer', 'DE.Event' ],
-function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, Event )
+* @constructor Render
+* @class this create the canvas, buffers, and manage resizing
+* @example Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
+* Game.render.init();
+*/
+define( [ 'PIXI', 'DE.CONFIG', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs' ],
+function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs )
 {
+  // TODO use PIXI renderer
   function Render( divId, params )
   {
     params      = params || {};
-    this.id     = 0;
+    
+    var _drawRatio = 1;
+    
+    // create a renderer instance
+    this.pixiRenderer = new PIXI.autoDetectRenderer(
+      params.width || CONFIG.defaultRenderWidth || 100
+      , params.height || CONFIG.defaultRenderHeight || 100
+      , params
+    );
+    this.pixiRenderer.plugins[ 'interaction' ].removeEvents();
+    this.pixiRenderer.plugins[ 'interaction' ].destroy();
+    delete this.pixiRenderer.plugins[ 'interaction' ];
+    
+    this.pixiContainer = new PIXI.Container();
+    
+    this.cameras = new Array();
+    this._renderedObjects = new Array();
+    
+    this.debugRender = new PIXI.Text( "DeltaTime: 1.2\nMissedFrame: 0\nFPS: 60\n", {font: "25px Snippet", fill: "white", align: "left"} );
+    this.debugRender.y = 10;
+    this.debugRender.x = 10;
+    
+    this.id     = "render-" + Date.now() + "-" + ( Math.random() * Date.now() >> 0 );
     this.divId  = divId || undefined;
-    this.canvas = null;
-    this.ctx    = null;
-    
-    this.sizes       = new Sizes( params.width || CONFIG.defaultRenderWidth || 100, params.height || CONFIG.defaultRenderHeight || 100, params.scaleX || 1, params.scaleY || 1 );
-    this.savedSizes  = new Sizes( params.width || CONFIG.defaultRenderWidth || 100, params.height || CONFIG.defaultRenderHeight || 100, params.scaleX || 1, params.scaleY || 1 );
-    
-    var _drawRatio   = 1;
+
+    this.sizes       = new PIXI.Point( params.width || CONFIG.defaultRenderWidth || 100, params.height || CONFIG.defaultRenderHeight || 100 );
+    this.savedSizes  = new PIXI.Point( params.width || CONFIG.defaultRenderWidth || 100, params.height || CONFIG.defaultRenderHeight || 100 );
     this.physicRatio = 1;
-    this.alpha       = params.alpha || 1;
-    
-    this.conserveSizes  = params.conserveSizes || false;
+
+    // this.conserveSizes  = params.conserveSizes || false;
     this.fullScreenMode = params.fullScreen || null;
-    this.cameras        = new Array();
-    this.maxCameras     = 0;
+    // this.maxCameras     = 0;
+    this.enable = true;
     
     this.events = {};
     /**
@@ -41,7 +59,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
     this.isFullscreen = false;
     
     this.freeze = false;
-
+    
     /****
      * init@void
       create canvas render, buffer, init ctx, and append in the dom
@@ -51,7 +69,6 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
     {
       if ( this.inited )
         return;
-      MainLoop.addRender( this );
       
       if ( !this.divId )
       {
@@ -68,22 +85,17 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         }
       }
       
-      this.canvas = document.createElement( "canvas" );
-      this.div.appendChild( this.canvas );
-      Inputs.addRender( this );
-      
-      if ( window.WebGL2D )
-      {
-        WebGL2D.enable( this.canvas );
-        this.ctx = this.canvas.getContext("webgl-2d");
-      }
-      else
-        this.ctx = this.canvas.getContext( '2d' );
-      
-      this.buffer = new CanvasBuffer( this.sizes.width, this.sizes.height );
+      this.div = document.getElementById( divId );
+      this.div.appendChild( this.pixiRenderer.view );
+      this.view = this.pixiRenderer.view;
       this.inited = true;
-      this.updateSizes();
       
+      MainLoop.addRender( this );
+      
+      this.pixiRenderer.view.setAttribute( "id", this.id );
+      Inputs.addRender( this );
+      this.updateSizes();
+
       var self = this;
       this.div.addEventListener( "fullscreenchange", function( e )
       {
@@ -103,6 +115,9 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
       }, false );
     };
     
+    /***
+     * toggle fullScreen API
+     */
     this.goFullscreen = function()
     {
       if ( !this.isFullscreen )
@@ -127,8 +142,8 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         else if ( document.webkitCancelFullScreen )
           document.webkitCancelFullScreen();
       }
-    }
-    
+    };
+
     /****
      * updateSizes@void
       change size, used for init and when change quality
@@ -139,44 +154,49 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         return;
       if ( this.conserveSizes )
       {
-        this.sizes.width  = this.div.offsetWidth.valueOf();
-        this.sizes.height = this.div.offsetHeight.valueOf();
+        this.sizes.x = this.div.offsetWidth.valueOf();
+        this.sizes.y = this.div.offsetHeight.valueOf();
       }
       else
       {
-        this.div.style.width  = this.sizes.width + "px";
-        this.div.style.height = this.sizes.height + "px";
+        this.div.style.width  = this.sizes.x + "px";
+        this.div.style.height = this.sizes.y + "px";
       }
       
-      this.canvas.width = this.sizes.width.valueOf();
-      this.canvas.height= this.sizes.height.valueOf();
-      this.canvas.id = this.id;
+      this.view.width = this.savedSizes.x.valueOf() >> 0;
+      this.view.height= this.savedSizes.y.valueOf() >> 0;
+      
+      this.view.style.width = this.sizes.x.valueOf() + "px";
+      this.view.style.height= this.sizes.y.valueOf() + "px";
+      this.view.id = this.id;
       
       if ( this.fullScreenMode )
       {
-        this.fullScreen( this.fullScreenMode );
+        this.changeFullScreenMode( this.fullScreenMode );
+        this.fullScreenMethod();
         this.resizeOnEventResize();      
       }
-      this.buffer.resize( this.sizes.width, this.sizes.height );
+      // this.buffer.resize( this.sizes.x, this.sizes.y );
     }
-    
+
     /***
      * screenChangedSizeIndex@void
       when Screen class change index size, update sizes and ratios
      */
     this.screenChangedSizeIndex = function( physicRatio, newSizes )
     {
-      this.savedSizes.width  = newSizes.w;
-      this.savedSizes.height = newSizes.h;
+      this.savedSizes.x = newSizes.w;
+      this.savedSizes.y = newSizes.h;
       this.physicRatio = physicRatio;
       this.updateSizes();
-      
+
       for ( var i = 0, c; c = this.cameras[ i ]; ++i )
       {
         c.screenChangedSizeIndex( physicRatio, newSizes );
       }
     }
-    
+
+    // deprecated, using resize from pixi (almost the same) ??
     /****
      * resize@void
      */
@@ -187,31 +207,31 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         this.div.style.width  = w + "px";
         this.div.style.height = h + "px";
       }
-      
-      this.canvas.width  = w;
-      this.canvas.height = h;
-      this.sizes.width   = w;
-      this.sizes.height  = h;
-      
+
+      this.view.style.width  = w + "px";
+      this.view.style.height = h + "px";
+      this.sizes.x   = w;
+      this.sizes.y  = h;
+
       /*if ( !stretch )
       {
       }*/
     }
-    
+
     /****
      * resizeOnEventResize@void
       bind window resize event if wanted
      */
     this.resizeOnEventResize = function()
     {
-      if ( !this.fullScreenMode )
+      if ( !this.fullScreenMode || this.resizeEventBinded )
         return;
-      
+        
+      this.resizeEventBinded = true;
       var o = this;
       var lastResize = undefined;
       var recallMethod = function()
       {
-        Event.trigger( "screenSizeChange" );
         o.fullScreenMethod.call( o );
       };
       if ( window.addEventListener )
@@ -220,7 +240,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         {
           lastResize && window.clearTimeout( lastResize );
           lastResize = window.setTimeout( recallMethod, 200 );
-        }, false );
+        }, false ); 
       }
       else if ( window.attachEvent )
       {
@@ -231,17 +251,17 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         } );
       }
     }
-    
+
     /***
      * resizeRatio@void
       resize with ratio, stretched or not
      */
     this.resizeRatio = function( w, h , stretch )
     {
-      var baseW = this.savedSizes.width;
-      var baseH = this.savedSizes.height;
+      var baseW = this.savedSizes.x;
+      var baseH = this.savedSizes.y;
       var calcRatio = w / baseW;
-      
+
       if ( calcRatio * baseH > h )
       {
         calcRatio = h / baseH;
@@ -250,7 +270,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
       var newW = calcRatio * baseW >> 0;
       var newH = calcRatio * baseH >> 0;
       this.resize( newW, newH, stretch );
-      
+
       if ( this.isFullscreen )
       {
         this.div.style.marginLeft = 0;
@@ -262,7 +282,7 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
       }
       
-      _drawRatio = newW / this.savedSizes.width;
+      _drawRatio = newW / this.savedSizes.x;
     }
 
     var _fullScreenMethod;
@@ -278,19 +298,19 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         case "ratioStretch" : 
           _fullScreenMethod = function( screenW, screenH )
           {
-            this.resizeRatio(screenW, screenH, true);
+            this.resizeRatio( screenW, screenH, true );
           };
         break;
         case "fullStretch" : 
           _fullScreenMethod = function( screenW, screenH )
           {
-            this.resize(screenW, screenH, true);
+            this.resize( screenW, screenH, true );
           };
         break;
         case "ratio":
           _fullScreenMethod = function( screenW, screenH )
           {
-            this.resizeRatio(screenW, screenH, false);
+            this.resizeRatio( screenW, screenH, false );
           };
         break;
         // default = nothing
@@ -302,95 +322,82 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         break;
       }
     }
-    
+
     /****
      * fullScreenMethod@void
      */
     this.fullScreenMethod = function()
     {
-      var offsetH = window.DEremoveUsableHeight || 0;
-      
       var screenW = ( window.innerWidth || document.documentElement.clientWidth );
-      var screenH = ( window.innerHeight || document.documentElement.clientHeight ) - offsetH;
-      
+      var screenH = ( window.innerHeight || document.documentElement.clientHeight );
+
       var divParentH = window.getComputedStyle( this.div.parentElement, null ).getPropertyValue( 'height' );
       if ( this.div.parentElement != null
           && divParentH && screenH < document.body.clientHeight )
       {
         var divW = this.div.parentElement.innerWidth || this.div.parentElement.clientWidth;
         var divH = this.div.parentElement.innerHeight || this.div.parentElement.clientHeight;
-        
+
         if ( divH < screenH )
           screenH = divH;
         if ( divW < screenW )
           screenW = divW;
       }
-      
+
       if ( !_fullScreenMethod )
       {
         throw ("Render.js : fullScreenMethod need a fullScreenMode, maybe you never used changeFullScreenMode")
       }
-      
+
       _fullScreenMethod.call( this, screenW, screenH );
     }
     
-    /****
-     * fullScreen@void
-      TODO - WIP
-     */
-    this.fullScreen = function( mode, automatism )
+    this.directRender = function( container )
     {
-      if ( mode )
-      {
-        this.changeFullScreenMode( mode );
-      }
-
-      if ( automatism )
-      {
-        // add on listener Resize
-      }
-
-      this.fullScreenMethod();
-    }
-
+      this.pixiRenderer.render( container );
+    };
+    
     /****
      * render@void
       renderise all cameras binded on this Render
      */
     this.render = function()
     {
-      if ( this.freeze )
-        return;
-      
-      this.ctx.globalAlpha = this.alpha;
-      this.ctx.fillStyle = "black";
-      this.ctx.fillRect( 0, 0, this.sizes.width, this.sizes.height );
-      
-      for ( var i = 0, camera; camera = this.cameras[ i ]; ++i )
-        camera.render( this.ctx, _drawRatio, this.physicRatio );
-      
-      if ( CONFIG.DEBUG_LEVEL > 0 )
+      this.pixiContainer.removeChildren();
+      for ( var i = 0, c = this.cameras.length; i < c; ++i )
       {
-        this.ctx.globalAlpha = 1;
-        this.ctx.font = "24px Arial";
-        this.ctx.fillStyle = "white";
-        this.ctx.fillText( "DeltaTime: " + Time.deltaTime
-                          , ( this.sizes.width >> 0 ) - 220
-                          , 30 );
-        this.ctx.fillText( "MissedFrame: " + Time.missedFrame
-                          , ( this.sizes.width >> 0 ) - 220
-                          , 60 );
-        this.ctx.fillText( "FPS: " + Time.fps
-                          , ( this.sizes.width >> 0 ) - 220
-                          , 90 );
+        if ( this.cameras[ i ].enable )
+        {
+          this.pixiContainer.addChild( this.cameras[ i ].render( this.physicRatio ) );
+        }
       }
-    }
+      
+      if ( CONFIG.DEBUG_LEVEL )
+      {
+        this.pixiContainer.addChild( this.debugRender );
+        
+        if ( CONFIG.DEBUG_LEVEL == "FPS_ONLY" )
+          this.debugRender.text = "FPS: " + Time.fps;
+        else
+          this.debugRender.text = "DeltaTime: " + Time.deltaTime + "\nMissedFrame: " + Time.missedFrame + "\nFPS: " + Time.fps;
+      }
+      
+      this.pixiRenderer.render( this.pixiContainer );
+      
+      for ( var i = 0, c = this.cameras.length; i < c; ++i )
+      {
+        if ( this.cameras[ i ].enable )
+        {
+          this.cameras[ i ].restoreAfterRender();
+        }
+      }
+    };
     
     this.update = function()
     {
       if ( this.freeze )
         return;
-      
+
       for ( var i in this.events )
       {
         this.camerasMouseCollide.apply( this, this.events[ i ] );
@@ -400,33 +407,34 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
     
     this.updateGuis = function()
     {
-      if ( this.sleep || this.freeze )
+      if ( !this.enable )
         return;
-      
+
       for ( var i = 0, camera; camera = this.cameras[ i ]; ++i )
-        if ( camera.gui && !camera.gui.sleep )
+        if ( camera.enable && camera.gui && camera.gui.enable )
           camera.gui.update();
     };
-    
+
     /****
-     * add@void( camera@Camera )
-      add a camera on this render
-     */
+    * add@void( camera@Camera )
+    add a camera on this render
+    */
     this.add = function( camera )
     {
       this.cameras.push( camera );
       camera.on( "changeCursor", function( cursor )
       {
-        this.canvas.style.cursor = cursor;
+        // this.canvas.style.cursor = cursor;
+        this.pixiRenderer.view.style.cursor = cursor;
       }, this );
       this.maxScenes++;
-      camera.screenChangedSizeIndex( this.physicRatio, this.savedSizes );
-    }
-    
+      // camera.screenChangedSizeIndex( this.physicRatio, this.savedSizes ); // TODO
+    };
+
     /****
-     * remove@void( camera@Camera )
-      remove a camera on this render ( not deleted ! )
-     */
+    * remove@void( camera@Camera )
+    remove a camera on this render ( not deleted ! )
+    */
     this.remove = function( camera )
     {
       var pos = this.cameras.indexOf( camera );
@@ -435,11 +443,12 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
         CONFIG.debug.log( "Remove camera not found ", 1, camera );
         return;
       }
-      
+
       this.cameras.splice( pos, 1 );
       this.maxScenes--;
     }
-    
+
+    // TODO PIXI had a touch/mouse event side
     /****
      * camerasMousCollide@void( eventName@string, x@Int, y@Int, index@Int )
       trigger mouses/touches events in cameras
@@ -454,19 +463,19 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
       for ( var i = 0, cam, camPos; i < this.cameras.length; i++ )
       {
         cam = this.cameras[ i ];
-        if ( cam.sleep )
+        if ( !cam.enable )
           continue;
         
+        // camPos = cam.getBounds();
         camPos = {
-          'x'      : cam.renderPosition.x - ( cam.renderSizes.width * 0.5 * cam.renderSizes.scaleX )
-          ,'y'     : cam.renderPosition.y - ( cam.renderSizes.height * 0.5 * cam.renderSizes.scaleY )
-          ,'width' : cam.renderSizes.width * cam.renderSizes.scaleX
-          ,'height': cam.renderSizes.height * cam.renderSizes.scaleY
+          'x'      : cam.x
+          ,'y'     : cam.y
+          ,'width' : cam.renderSizes.x * cam.renderScale.x
+          ,'height': cam.renderSizes.y * cam.renderScale.y
           ,'enable': true
         };
         
-        // console.log( 'camPos', mouse );
-        if ( CollisionSystem.pointFixedBoxCollision( mouse, camPos ) )
+        if ( CollisionSystem.standardPointFixedBoxCollision( mouse, camPos ) )
         {
           if ( !cam.indexMouseOver[ index ] && cam.oOnMouseEnter( mouse, this.physicRatio ) )
             break;
@@ -478,24 +487,24 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
           break;
         }
       }
-      
+
       if ( !mouse.stopPropagation )
         this[ 'lastOn' + eventName ]( mouse );
       return mouse;
     }
-    
-    /* Custom Events
-      return true to stop current event */
+
+    // /* Custom Events
+    //   return true to stop current event */
     this.onMouseMove = function(){};
     this.onMouseDown = function(){};
     this.onMouseUp = function(){};
-    
-    /* last event, called after all 
-      if no stopPropagation */
+
+    // /* last event, called after all 
+    //   if no stopPropagation */
     this.lastOnMouseMove = function(){};
     this.lastOnMouseDown = function(){};
     this.lastOnMouseUp = function(){};
-    
+
     this.oOnMouseDown = function( mouse )
     {
       this.events[ Date.now() + "down" ] = [ "MouseDown", mouse.x, mouse.y, mouse.index ];
@@ -511,48 +520,48 @@ function( CONFIG, Sizes, Time, MainLoop, CollisionSystem, Inputs, CanvasBuffer, 
       this.events[ Date.now() + "move" ] = [ "MouseMove", mouse.x, mouse.y, mouse.index ];
       // this.camerasMouseCollide( "MouseMove", mouse.x, mouse.y, mouse.index );
     }
-    
+
     /****
-     * @private
-     */
-      /****
-       * _scrollPosition@Vector2
-        return the scollPostion of the window
-       **/
-      function _scrollPosition()
+    * @private
+    */
+    /****
+    * _scrollPosition@Vector2
+    return the scollPostion of the window
+    **/
+    function _scrollPosition()
+    {
+      return {
+        x: document.scrollLeft || window.pageXOffset,
+        y: document.scrollTop || window.pageYOffset
+      };
+    }
+
+    /****
+    * _getMouseCoords@Mouse
+    */
+    function _getMouseCoords( x, y, index )
+    {
+      var pos = { "x": x, "y": y };
+      var elem = this.pixiRenderer.view;
+      var offsetLeft = 0, offsetTop = 0;
+      while( elem )
       {
-        return {
-          x: document.scrollLeft || window.pageXOffset,
-          y: document.scrollTop || window.pageYOffset
-        };
+        offsetLeft += elem.offsetLeft;
+        offsetTop += elem.offsetTop;
+        elem = elem.parentElement;
       }
-      
-      /****
-       * _getMouseCoords@Mouse
-       */
-      function _getMouseCoords( x, y, index )
-      {
-        var pos = { "x": x, "y": y };
-        var elem = this.canvas;
-        var offsetLeft = 0, offsetTop = 0;
-        while( elem )
-        {
-          offsetLeft += elem.offsetLeft;
-          offsetTop += elem.offsetTop;
-          elem = elem.parentElement;
-        }
-        pos.x -= offsetLeft;
-        pos.y -= offsetTop;
-        return {
-            'x': pos.x / _drawRatio + _scrollPosition().x >> 0
-          , 'y': pos.y / _drawRatio + _scrollPosition().y >> 0
-          , 'index': index
-        };
-      }
+      pos.x -= offsetLeft;
+      pos.y -= offsetTop;
+      return {
+        'x': pos.x / _drawRatio + _scrollPosition().x >> 0
+        , 'y': pos.y / _drawRatio + _scrollPosition().y >> 0
+        , 'index': index
+      };
+    }
     /*** -private- ***/
   }
   Render.prototype.DEName = "Render";
-  
+
   CONFIG.debug.log( "Render loaded", 3 );
   return Render;
 } );

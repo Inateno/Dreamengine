@@ -23,20 +23,21 @@ function( CONFIG )
   var datas = {
     // avalaible images sizes (engine will load optimisest images depends on user resolution)
     screenSizes: [
-      { "w": 1280, "h": 720, "path": "" }
-      ,{ "w": 720, "h": 480, "path": "", "notRatio": true }
+      { "w": 1920, "h": 1080, "path": "" }
     ]
     
     // index of the used screen size during game conception
     , conceptionSizeIndex: 0
     
     // images folder name 
-    , folderName: "img"
+    , baseUrl: "img"
     
     // usage name, real name (can contain subpath), extension, parameters
-    , imagesList: [
-      [ "bg", "bg", "jpg", { "load": true, "totalFrame": 80, "totalLine": 40, "isAnimated": false } ]
-    ]
+    , pools: {
+      main: [
+        [ "bg", "bg.jpg", { "load": true, "totalFrame": 80, "totalLine": 40, "isAnimated": false } ]
+      ]
+    }
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );
   return datas;

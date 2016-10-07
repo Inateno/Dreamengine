@@ -1,24 +1,36 @@
-----0.3----
-* add support for DE.PIXI version (no need to do all the reverse-migration process)
-This is useful when you want to come back to Canvas2D version (still more powerful on mobile than PIXI)
-----0.26 ----
-* fix fade in Renderer
-* add missing npm in package
-* GameObject.moveTo now work as global position by default and can keep running with local with "keepLocal" argument
-* in AudioManager add a forceLoop arguments, allowing to get a better control on musics loop (not waiting for the "ended" DOM event)
-- use forceLoop= true, startAt=float and loopPrecision=float helpers in your audio data.
+---- 0.26.3 ----
+  * add Timer plugin
+  * add version in CONFIG and ImageManager to force cache reload
+  * fix loader
+  
+---- 0.26.2 ----
+ Fix during Ludum Dare #35
+  * add keyboard Inputs keyCodes
+  * add pingPongMode on SpriteRenderer
+  * add inverseAutomatism
+  * add active/unactive trigger event on GameObject when change enable flag
+  
+---- 0.26.1 ----
+ - others
+  * add tests in the main stress_test.html file
+  * minor comments/changes
+  * clean folders
+  
+---- 0.26.0 ----
+ - features
+  * add a CircleRenderer
+  * add a RectRenderer
 
-----0.25.1 ----
-* Input.stopListening 
-* add scaleTo on Renderer
-* add a BufferRenderer
+ - fix
+  * camera.on("onLastMouseEvent") become camera.on("lastMouseEvent")
+  * add missing npm in package
+  * LangSystem not failing if nothing in dictionary
+  * load event if no images is set in the main pool
 
---Fix
-* Mouse wheel use classic declaration way, trigger a axeMoved
-* fix askToKill if object is children
-* fix event propagation order in GUI
-* renderer alpha fadeTo (was prevent if to value = current value)
-* camera.on("onLastMouseEvent") become camera.on("lastMouseEvent")
+ - others
+  * create a migration process file
+  * add samples (missing plate-former)
+  * create more test scenes (better to tests all features quickly)
 
 ---- 0.25.0 ----
 * add rightClick / middleClick inside mouse events

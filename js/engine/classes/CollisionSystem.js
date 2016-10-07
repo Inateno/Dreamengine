@@ -14,12 +14,29 @@
  *  - collision detection with orientedBox (have to finish this one)
  * @namespace CollisionSystem
  */
-define( [ 'DE.CONFIG' ],
-function( CONFIG )
+define( [ 'PIXI', 'DE.CONFIG' ],
+function( PIXI, CONFIG )
 {
   var CollisionSystem = new function()
   {
     this.DEName = "CollisionSystem";
+    
+    this._tempPoint = new PIXI.Point( 0, 0 );
+    this._tempPoint2= new PIXI.Point( 0, 0 );
+    
+    // TRY A NEW WAY WITH PIXI - should work with all primitive -> circle / rectangle / rounded / shape
+    this.pointColliderCollision = function( point, collider )
+    {
+      if ( !collider.enable || ( collider.gameObject && !collider.gameObject.enable ) )
+        return false;
+      
+      this._tempPoint2.copy( point );
+      if ( point.getGlobalPosition )
+        point.getGlobalPosition( this._tempPoint2 );
+      
+      collider.gameObject.worldTransform.applyInverse( this._tempPoint2, this._tempPoint );
+      return collider.contains( this._tempPoint.x, this._tempPoint.y );
+    };
     
     /**
      * detect if the point is inside a box
@@ -30,33 +47,34 @@ function( CONFIG )
      * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
      * @returns {Boolean} is colliding ?
      */
-    this.pointFixedBoxCollision = function( point, box, params )
+    this.pointFixedBoxCollision = function( point, collider, params )
     {
-      if ( !box.enable )
+      if ( !collider.enable || ( collider.gameObject && !collider.gameObject.enable ) )
         return false;
-      var boxpoints = ( box.getRealPosition ) ? box.getRealPosition() : { x: box.x, y: box.y, z: 0 };
-      var ratioz = 1;
       
-      // when mouse click in the camera field, we have to convert the 3D position from the object to 2D
-      if ( point.scenePosition !== undefined && ( !params || !params.prevent3D ) && point.scenePosition.z != boxpoints.z )
-      {
-        // convert 3D pos to 2D, z on point should be a z from a camera, or you can simply decide
-        ratioz = ( 10 / ( boxpoints.z - point.scenePosition.z ) );
-        if ( ratioz != 1 )
-        {
-          boxpoints.x = ( boxpoints.x - ( point.scenePosition.x + point.fieldSizes.width * 0.5 ) ) * ratioz + ( point.scenePosition.x + point.fieldSizes.width * 0.5 );
-          boxpoints.y = ( boxpoints.y - ( point.scenePosition.y + point.fieldSizes.height * 0.5 ) ) * ratioz + ( point.scenePosition.y + point.fieldSizes.height * 0.5 );
-        }
-      }
-      
-      if ( point.x >= boxpoints.x
-        && point.x < boxpoints.x + box.width * ratioz
-        && point.y >= boxpoints.y
-        && point.y < boxpoints.y + box.height * ratioz )
-        return true;
-      else
-        return false;
+      var rot = collider.gameObject.rotation;
+      collider.gameObject.position.rotation = 0;
+      collider.gameObject.updateTransform();
+      var r = this.pointColliderCollision( point, collider );
+      collider.gameObject.rotation = rot;
+      collider.gameObject.updateTransform();
+      return r;
     }
+    
+    /**
+     * detect if a point is inside a box, useful for standalone collision (without context)
+     */
+    this.standardPointFixedBoxCollision = function( point, box )
+    {
+      if ( point.x < box.x
+        || point.y < box.y
+        || point.y > box.y + box.height
+        || point.x > box.x + box.width
+        || ( box.gameObject && !box.gameObject.enable )
+        || !box.enable )
+        return false;
+      return true;
+    };
     
     /**
      * detect if 2 box are colliding
@@ -69,41 +87,21 @@ function( CONFIG )
      */
     this.fixedBoxCollision = function( boxA, boxB, params )
     {
-      if ( !boxA.enable || !boxB.enable )
+      if ( !boxA.enable || !boxB.enable
+        || ( boxA.gameObject && !boxA.gameObject.enable )
+        || ( boxB.gameObject && !boxB.gameObject.enable ) )
         return false;
       
-      var boxAPoints = ( boxA.getRealPosition ) ? boxA.getRealPosition() : { x: boxA.x, y: boxA.y };
-      var boxBPoints = ( boxB.getRealPosition ) ? boxB.getRealPosition() : { x: boxB.x, y: boxB.y };
+      var boxAPoints = boxA.getWorldTransform();
+      var boxBPoints = boxB.getWorldTransform();
       
-      // can convert 3D position to 2D position to test a collision with what player see
-      if ( params && params.convert3D && boxAPoints.z != boxBPoints.z )
-      {
-        if ( !params.camera )
-        {
-          console.log( "Error: you have to pass a camera to convert 3D position to 2D position - fixedBoxCollision" );
-          return false;
-        }
-        var ratioz = ( 10 / ( boxAPoints.z - params.camera.scenePosition.z ) );
-        if ( ratioz != 1 )
-        {
-          boxAPoints.x = ( boxAPoints.x - ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 ) ) * ratioz + ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 );
-          boxAPoints.y = ( boxAPoints.y - ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 ) ) * ratioz + ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 );
-        }
-        ratioz = ( 10 / ( boxBPoints.z - params.camera.scenePosition.z ) );
-        if ( ratioz != 1 )
-        {
-          boxBPoints.x = ( boxBPoints.x - ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 ) ) * ratioz + ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 );
-          boxBPoints.y = ( boxBPoints.y - ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 ) ) * ratioz + ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 );
-        }
-      }
-      // if !prevent3D and if z is different, ignore collision
-      else if ( ( !params || !params.prevent3D ) && boxAPoints.z >> 0 != boxBPoints.z >> 0 )
+      if ( boxAPoints.z != boxBPoints.z && ( !params || !params.prevent3D ) )
         return false;
       
-      if ( ( boxBPoints.x >= boxAPoints.x + boxA.width )
-        || ( boxBPoints.x + boxB.width <= boxAPoints.x )
-        || ( boxBPoints.y >= boxAPoints.y + boxA.height )
-        || ( boxBPoints.y + boxB.height <= boxAPoints.y ) )  
+      if ( ( boxBPoints.x >= boxAPoints.x + boxAPoints.width )
+        || ( boxBPoints.x + boxBPoints.width <= boxAPoints.x )
+        || ( boxBPoints.y >= boxAPoints.y + boxAPoints.height )
+        || ( boxBPoints.y + boxBPoints.height <= boxAPoints.y ) )  
         return false; 
       else
         return true; 
@@ -118,7 +116,24 @@ function( CONFIG )
      * @param {object} params optional parameters, can prevent3D (will use positions x, y as it come without z conversion)
      * @returns {Boolean} is colliding ?
      */
-    this.pointCircleCollision = function( point, C, params )
+    // this.pointCircleCollision = this.pointColliderCollision; // not working mmh ?
+    this.pointCircleCollision = function( p, c, params )
+    {
+      if ( !c.enable  || ( c.gameObject && !c.gameObject.enable ) )
+        return false;
+      var cpos = c.getWorldTransform();
+      
+      if ( p.z && cpos.z != p.z && ( !params || !params.prevent3D ) )
+        return false;
+      
+      var allowedDistance = cpos.radius * cpos.radius;
+      
+      var realDistance = ( ( p.x - cpos.x ) * ( p.x - cpos.x ) )
+                       + ( ( p.y - cpos.y ) * ( p.y - cpos.y ) );
+      
+      return ( realDistance < allowedDistance ) ? true : false;
+    };
+    /*function( point, C, params )
     {
       if ( !C.enable )
         return false;
@@ -142,10 +157,10 @@ function( CONFIG )
       if ( d2 > ( C.radius * ratioz ) * ( C.radius * ratioz ) )
         return false;
       return true;
-    }
+    }*/
     
     /**
-     * detect if a point is inside a circle
+     * detect if a two circles collide
      * @memberOf CollisionSystem
      * @protected
      * @param {CircleCollider} circleA
@@ -155,38 +170,17 @@ function( CONFIG )
      */
     this.circleCollision = function( circleA, circleB, params )
     {
-      if ( !circleA.enable || !circleB.enable )
+      if ( !circleA.enable || !circleB.enable
+        || ( circleA.gameObject && !circleA.gameObject.enable )
+        || ( circleB.gameObject && !circleB.gameObject.enable ) )
         return false;
-      var realPosA = circleA.getRealPosition()
-        , realPosB = circleB.getRealPosition();
+      var realPosA = circleA.getWorldTransform()
+        , realPosB = circleB.getWorldTransform();
       
-      // can convert 3D position to 2D position to test a collision with what player see
-      if ( params && params.convert3D && realPosA.z != realPosB.z )
-      {
-        if ( !params.camera )
-        {
-          console.log( "Error: you have to pass a camera to convert 3D position to 2D position - fixedBoxCollision" );
-          return false;
-        }
-        var ratioz = ( 10 / ( realPosA.z - params.camera.scenePosition.z ) );
-        if ( ratioz != 1 )
-        {
-          realPosA.x = ( realPosA.x - ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 ) ) * ratioz + ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 );
-          realPosA.y = ( realPosA.y - ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 ) ) * ratioz + ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 );
-        }
-        ratioz = ( 10 / ( realPosB.z - params.camera.scenePosition.z ) );
-        if ( ratioz != 1 )
-        {
-          realPosB.x = ( realPosB.x - ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 ) ) * ratioz + ( params.camera.scenePosition.x + params.camera.fieldSizes.width * 0.5 );
-          realPosB.y = ( realPosB.y - ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 ) ) * ratioz + ( params.camera.scenePosition.y + params.camera.fieldSizes.height * 0.5 );
-        }
-      }
-      // if !prevent3D and if z is different, ignore collision
-      else if ( ( !params || !params.prevent3D ) && realPosA.z >> 0 != realPosB.z >> 0 )
+      if ( realPosA.z != realPosB.z && ( !params || !params.prevent3D ) )
         return false;
       
-      var allowedDistance = ( circleB.radius + circleA.radius ) * ( circleB.radius + circleA.radius );
-      
+      var allowedDistance = ( realPosB.radius + realPosA.radius ) * ( realPosB.radius + realPosA.radius );
       
       var realDistance = ( ( realPosB.x - realPosA.x ) * ( realPosB.x - realPosA.x ) )
                        + ( ( realPosB.y - realPosA.y ) * ( realPosB.y - realPosA.y ) );
@@ -200,7 +194,9 @@ function( CONFIG )
      */
     this.orientedBoxCollision = function( boxA, boxB, params )
     {
-      if ( !boxA.enable || !boxB.enable )
+      if ( !boxA.enable || !boxB.enable 
+         || ( boxA.gameObject && !boxA.gameObject.enable )
+         || ( boxB.gameObject && !boxB.gameObject.enable ) )
         return false;
       var realPosBoxA  = boxA.getRealPosition()
         , realPosBoxB  = boxB.getRealPosition();

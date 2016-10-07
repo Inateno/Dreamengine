@@ -5,7 +5,7 @@
 /**
  * @constructor FixedBoxCollider
  * @class Create a box collider (can't rotate)
- * @augments Collider
+ * @augments PIXI.Rectangle
  * @param {int} width - box width
  * @param {int} height - box height
  * @param {object} params - Optional parameters (offets)
@@ -17,90 +17,76 @@
  * @example // adding a collider later
  * myObject.collider = new DE.FixedBoxCollider( 150, 100 );
  */
-define( [ 'DE.Collider', 'DE.COLORS', 'DE.CONFIG', 'DE.CanvasBuffer' ],
-function( Collider, COLORS, CONFIG, CanvasBuffer )
+define( [ 'PIXI', 'DE.COLORS', 'DE.CONFIG' ],
+function( PIXI, COLORS, CONFIG )
 {
   function FixedBoxCollider( width, height, params )
   {
     params = params || {};
-    params.type = CONFIG.COLLISION_TYPE.FIXED_BOX;
     
-    Collider.call( this, params );
+    PIXI.Rectangle.call( 0, 0, width, height );
     
-    var _points    = new Array();
-    var _inCircles = new Array();
-    var _extCircle = new Array();
+    this.type = CONFIG.COLLISION_TYPE.FIXED_BOX;
+    this.enable = true;
+    this.gameObject = params.gameObject || undefined;
     
     this.width  = width || 1;
     this.height = height || 1;
-    this.preventRotation = true;
     
-    this.localPosition.x -= this.width * 0.5;
-    this.localPosition.y -= this.height * 0.5;
+    this.x = ( -this.width * 0.5 >> 0 ) + ( params.x || params.offsetX || params.offsetLeft || 0 );
+    this.y = ( -this.height * 0.5 >> 0 ) + ( params.y || params.offsetY || params.offsetTop || 0 );
     
-    this.createDebugRenderer = function()
+    this._createDebugRender = function()
     {
-      this.debugBuffer = new CanvasBuffer( this.width, this.height );
-      this.debugBuffer.ctx.lineWidth = 2;
-      this.debugBuffer.ctx.strokeStyle = COLORS.DEBUG.COLLIDER;
-      this.debugBuffer.ctx.strokeRect( 0, 0, this.width, this.height );
-    }
-    
-    // only for fixed box collider because we prevent rotate
-    this.debugRender = function( ctx, physicRatio, ratioz )
-    {
-      if ( !this.debugBuffer )
+      if ( CONFIG.DEBUG_LEVEL <= 1 )
         return;
-      ctx.rotate( -this.gameObject.position.rotation );
-      ctx.drawImage( this.debugBuffer.canvas
-                      , this.localPosition.x * physicRatio * ratioz >> 0
-                      , this.localPosition.y * physicRatio * ratioz >> 0
-                      , this.debugBuffer.canvas.width * physicRatio * ratioz >> 0
-                      , this.debugBuffer.canvas.height * physicRatio * ratioz >> 0 );
-      ctx.rotate( this.gameObject.position.rotation );
+      
+      if ( !this.debugRender )
+        this.debugRender = new PIXI.Graphics();
+      else
+        this.debugRender.clear();
+      
+      this.debugRender.lineStyle( 2, COLORS.DEBUG.COLLIDER, 0.6 );
+      this.debugRender.drawRect( this.x, this.y, this.width, this.height );
+      this.debugRender.zindex = 99999991;
     }
     
-    // overrides for box collider because we have to subtract width and height
-    this.getRealPosition = function()
+    // get worldTransform from PIXI for global scale
+    // a = complete scale x and d = complete scale y
+    this.getWorldTransform = function()
     {
       var pos = this.gameObject.getPos();
-      var harmonics = this.gameObject.getHarmonics();
-      var offsetX = this.localPosition.x + this.width * 0.5;
-      var offsetY = this.localPosition.y + this.height * 0.5;
-      return { x: -(-offsetX * harmonics.cos + offsetY * harmonics.sin) + pos.x - this.width * 0.5
-        , y: -(-offsetX * harmonics.sin + offsetY * -harmonics.cos) + pos.y - this.height * 0.5
-        , z: pos.z
+      var offsetX = this.x + this.width * 0.5;
+      var offsetY = this.y + this.height * 0.5;
+      return {
+        x        : offsetX + pos.x - this.width * ( 0.5 * this.gameObject.worldScale.x )
+        , y      : offsetY + pos.y - this.height * ( 0.5 * this.gameObject.worldScale.y )
+        , z      : pos.z
+        , width  : this.width * this.gameObject.worldScale.x
+        , height : this.height * this.gameObject.worldScale.y
+        , centerX: pos.x
+        , centerY: pos.y
       };
     }
     
-    this.resize = function( width, height, keepLocalPosition )
+    this.resize = function( width, height, keepPosition )
     {
-      this.width = width != undefined ? width : this.width;
+      this.width = width  != undefined ? width  : this.width;
       this.height= height != undefined ? height : this.height;
       
-      if ( !keepLocalPosition )
+      if ( !keepPosition )
       {
-        this.localPosition.x = - this.width * 0.5;
-        this.localPosition.y = - this.height * 0.5;
+        this.x = - this.width * 0.5;
+        this.y = - this.height * 0.5;
       }
       
       if ( CONFIG.DEBUG_LEVEL > 1 )
-      {
-        this.debugBuffer.clear();
-        this.debugBuffer.resize( this.width, this.height );
-        this.debugBuffer.ctx.lineWidth = 2;
-        this.debugBuffer.ctx.strokeStyle = COLORS.DEBUG.COLLIDER;
-        this.debugBuffer.ctx.strokeRect( 0, 0, this.width, this.height );
-      }
+        this._createDebugRender();
     };
-    
-    if ( CONFIG.DEBUG_LEVEL > 1 )
-      this.createDebugRenderer();
   }
-
-  FixedBoxCollider.prototype = new Collider();
+  
+  FixedBoxCollider.prototype = Object.create( PIXI.Rectangle.prototype );
   FixedBoxCollider.prototype.constructor = FixedBoxCollider;
-  FixedBoxCollider.prototype.supr        = Collider.prototype;
   FixedBoxCollider.prototype.DEName      = "FixedBoxCollider";
   
   CONFIG.debug.log( "FixedBoxCollider loaded", 3 );

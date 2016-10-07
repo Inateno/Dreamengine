@@ -33,24 +33,36 @@ function( CONFIG )
     , conceptionSizeIndex: 0
     
     // images folder name 
-    , folderName: "img"
+    , baseUrl: "img/"
     
     // usage name, real name (can contain subpath), extension, parameters
-    , imagesList: [
-      // [ "example", "example", "png", { "load": true, "totalFrame": 4, "totalLine": 2, "eachAnim": 50, "isAnimated":true, "isReversed": false } ]
-      [ "ship", "ayera/ship", "png", { "load": true, "totalFrame": 10, "totalLine": 1, "eachAnim": 100, "isAnimated":false, "isReversed": false } ]
-      ,[ "reactor", "ayera/reactor", "png", { "load": true, "totalFrame": 4, "eachAnim": 40, "isAnimated":true, "isReversed": false } ]
-      ,[ "bg", "ayera/bg", "jpg", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
-      ,[ "canyon", "ayera/canyon", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
-      ,[ "grass", "ayera/grass", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
-      ,[ "grass", "ayera/grass", "png", { "load": true, "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+    , pools: {
+      main: [
+        // [ "example", "example", "png", { "totalFrame": 4, "totalLine": 2, "eachAnim": 50, "isAnimated":true, "isReversed": false } ]
+        // [ "ship", "ayera/ship.png", { "totalFrame": 10, "totalLine": 1, "eachAnim": 100, "isAnimated":true, "isReversed": false } ]
+        [ "reactor", "ayera/reactor.png", { "totalFrame": 4, "eachAnim": 40, "isAnimated":true, "isReversed": false } ]
+        ,[ "bg", "platform.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+        
+        ,[ "canyon", "ayera/canyon.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+        ,[ "grass", "ayera/grass.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+        ,[ "touchControlBackground", "touchControlBackground.png", { "totalFrame": 1, "isAnimated": false } ]
+        ,[ "touchControlStick", "touchControlStick.png", { "totalFrame": 1, "isAnimated": false } ]
+        
+        ,[ "platform", "platform.png", { "totalFrame": 1, "eachAnim": 1, "totalLine": 1, "isAnimated":false } ]
+        
+        ,"pck/ship.json"
+      ]
       
-      ,[ "touchControlBackground", "touchControlBackground", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
-      ,[ "touchControlStick", "touchControlStick", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      ,afterMain: [
+        // resources
+      ]
       
-      ,[ "platform", "platform", "png", { "load": true, "totalFrame": 1, "eachAnim": 1, "totalLine": 1, "isAnimated":false } ]
-    ]
+      ,hallOfFame: [
+        // resources
+      ]
+    }
   };
+  
   CONFIG.debug.log( "imagesDatas loaded", 3 );
   return datas;
 } );

@@ -8,25 +8,99 @@
 ***
 * engine constructor
 **/
-define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.ImageManager'
-       , 'DE.CollisionSystem', 'DE.Collider', 'DE.Renderer', 'DE.Scene', 'DE.Rigidbody'
-       , 'DE.CanvasBuffer', 'DE.GameObject', 'DE.FixedBoxCollider', 'DE.OrientedBoxCollider'
-       , 'DE.CircleCollider', 'DE.BoxRenderer', 'DE.CircleRenderer', 'DE.SpriteRenderer'
-       , 'DE.BufferRenderer', 'DE.TextRenderer', 'DE.TileRenderer'
+define( [ 'PIXI', 'DE.COLORS', 'DE.CONFIG', 'DE.Time', 'DE.Vector2', 'DE.ImageManager'
+       , 'DE.CollisionSystem', 'DE.BaseRenderer', 'DE.Scene', 'DE.Rigidbody'
+       , 'DE.GameObject', 'DE.FixedBoxCollider', 'DE.CircleCollider'
+       , 'DE.TextRenderer', 'DE.SpriteRenderer', 'DE.SheetRenderer'
+       , 'DE.CircleRenderer', 'DE.RectRenderer'
+       /*, 'DE.BoxRenderer', 'DE.Sizes'
+       , 'DE.BufferRenderer', 'DE.TileRenderer'
+       , 'DE.BaseGui', 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage'*/
        , 'DE.Render', 'DE.MainLoop', 'DE.Event', 'DE.States', 'DE.Inputs'
        , 'DE.Camera', 'DE.AudioManager', 'DE.Gui'
-       // , 'DE.BaseGui', 'DE.GuiButton', 'DE.GuiLabel', 'DE.GuiImage'
        , 'DE.LangSystem', 'DE.SystemDetection'
        , 'DE.GamePad', 'DE.Screen', 'DE.about', 'DE.SaveSystem', 'DE.Notifications'
        , 'NebulaOffline', 'DE.AchievementSystem', 'DE.DemoPopups' ]
-, function()
+, function( PIXI )
 {
   var DREAM_ENGINE = {};
   var NebulaOffline = null;
+    window.PIXI = undefined;
+  /** PIXI overwrite */
+    DREAM_ENGINE.PIXI = PIXI;
+    PIXI.IS_PIXI = true;
+    PIXI.utils.sayHello = function( type )
+    {
+      if ( type == "WebGL" )
+        type = type + " ☺";
+      
+      if ( navigator.userAgent.toLowerCase().indexOf('chrome') > -1 )
+      {
+          var args = [
+              '\n %c %c %c DreamEngine > PIXI ☃ - version ' + DREAM_ENGINE.about.version + ' - ✰ ' + type + ' ✰  %c ' +
+                ' %c ' + ' http://dreamengine.dreamirl.com/ %c ' +
+                ' %c ' + ' http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n'
+              ,'background: #FF7C0A; padding:5px 0;'
+              ,'background: #FF7C0A; padding:5px 0;'
+              ,'color: #FF7C0A; background: #030307; padding:5px 0;'
+              ,'background: #FF7C0A; padding:5px 0;'
+              ,'background: #FFC18E; padding:5px 0;'
+              ,'background: #FF7C0A; padding:5px 0;'
+              ,'background: #ffc3dc; padding:5px 0;'
+              ,'background: #FF7C0A; padding:5px 0;'
+              ,'color: #ff2424; background: #fff; padding:5px 0;'
+              ,'color: #ff2424; background: #fff; padding:5px 0;'
+              ,'color: #ff2424; background: #fff; padding:5px 0;'
+          ];
+
+          window.console.log.apply(console, args); //jshint ignore:line
+      }
+      else if (window.console)
+      {
+          window.console.log( 'DreamEngine > PIXI ☃ - version ' + DREAM_ENGINE.about.version + ' - ✰ ' + type + ' ✰ '
+            + ' | http://dreamengine.dreamirl.com | http://www.pixijs.com' ); //jshint ignore:line
+      }
+    };
+    
+    Object.defineProperties( PIXI.DisplayObject.prototype, {
+      zindex: {
+        get: function()
+        {
+          return this._zindex || 0;
+        }
+        , set: function( value )
+        {
+          this._zindex = value;
+          if ( this.parent )
+            this.parent.sortChildren();
+        }
+      }
+    } );
+    
+    PIXI.Point.prototype.setRotation = function( value )
+    {
+      this.rotation = value;
+    };
+    
+    /**
+     * sort children by zindex
+     * this is overwrite by gameObjects because it using z position
+     * @protected
+     * @memberOf GameObject
+     */
+    PIXI.DisplayObject.prototype.sortChildren = function()
+    {
+      this.children.sort( function( a, b )
+      {
+        return a.zindex - b.zindex;
+      } );
+    };
   
   var _startedAt = Date.now();
   for ( var a in arguments )
   {
+    if ( arguments[ a ].IS_PIXI )
+      continue;
     if ( arguments[ a ].isNebula )
     {
       NebulaOffline = arguments[ a ];
@@ -48,16 +122,16 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
   /***
   * @init
   ***/
+  // TODO new loader based on PIXI
   DREAM_ENGINE.init = function( params )
   {
     params = params || {};
     
     params.loader            = params.loader || {};
     params.loader.name       = "loader";
-    params.loader.url        = params.loader.url || "loader";
+    params.loader.url        = params.loader.url || "loader.png";
     params.loader.totalFrame = params.loader.totalFrame || 16;
     params.loader.eachAnim   = params.loader.eachAnim || 45;
-    params.loader.ext        = params.loader.ext || "png";
     params.loader.isAnimated = true;
     params.loader.scale      = params.loader.scale || 1;
     
@@ -75,15 +149,13 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     
     DREAM_ENGINE.AchievementSystem.init( params.achievements || [] );
     
+    // TODO update with PIXI loader
     DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
     {
       this.ImageManager.pathPrefix        = sizes.path;
       this.ImageManager.imageNotRatio     = sizes.notRatio || false;
       this.ImageManager.ratioToConception = ratioToConception;
-      this.ImageManager.folderName        = params.images.folderName || params.images.baseUrl;
-      this.ImageManager.imagesLoaded      = 0;
-      this.ImageManager.imagesRequested   = 1;
-      this.ImageManager.pushImage( params.loader.name, params.loader.url, params.loader.ext, params.loader );
+      this.ImageManager.load( params.loader );
     }, DREAM_ENGINE, false );
     
     if ( !params.ignoreNotification )
@@ -116,6 +188,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       this.MainLoop.loop();
     };
     
+    DREAM_ENGINE.ImageManager.init( params.images.baseUrl, params.images.pools );
     DREAM_ENGINE.on( 'notisLoadingImages', function()
     {
       if ( !params.ignoreNebula )
@@ -124,28 +197,29 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
         this.on( "nebula-show", this.pause, this );
         NebulaOffline.init( params.nebulaElementId, params.preventNebulaAutoStart );
       }
-      DREAM_ENGINE.MainLoop.loader = new DREAM_ENGINE.GameObject( {
-        renderers: [
-          new DREAM_ENGINE.SpriteRenderer( { "spriteName": "loader", "scale": params.loader.scale } )
-          ,new DREAM_ENGINE.TextRenderer( {
-            "fillColor"    : params.loader.fillColor || "#FFFFFF"
-            , "strokeColor": params.loader.strokeColor || "#FBC989"
-            , "fontSize"   : params.loader.fontSize || 32
-            , "lineWidth"  : params.loader.lineWidth || 2
-            , "offsetY"    : 220 + ( params.loader.offsetY || 0 )
-            , "offsetX"    : 0 + ( params.loader.offsetX || 0 )
-            , "font"       : params.loader.font || "Helvetica"
-          }, 400, 100, "100%" )
-        ]
-      } );
+      // DREAM_ENGINE.MainLoop.loader = new DREAM_ENGINE.GameObject( {
+      //   renderers: [
+      //     new DREAM_ENGINE.SpriteRenderer( { "spriteName": "loader", "scale": params.loader.scale } )
+      //     ,new DREAM_ENGINE.TextRenderer( {
+      //       "fillColor"    : params.loader.fillColor || "#FFFFFF"
+      //       , "strokeColor": params.loader.strokeColor || "#FBC989"
+      //       , "fontSize"   : params.loader.fontSize || 32
+      //       , "lineWidth"  : params.loader.lineWidth || 2
+      //       , "offsetY"    : 220 + ( params.loader.offsetY || 0 )
+      //       , "offsetX"    : 0 + ( params.loader.offsetX || 0 )
+      //       , "font"       : params.loader.font || "Helvetica"
+      //     }, 400, 100, "100%" )
+      //   ]
+      // } );
       
+      // TODO update with PIXI loader
       // for future screen update (manual call needed)
       DREAM_ENGINE.on( 'updateScreenSizes', function( ratioToConception, sizes )
       {
         this.ImageManager.pathPrefix        = sizes.path;
         this.ImageManager.imageNotRatio     = sizes.notRatio || false;
         this.ImageManager.ratioToConception = ratioToConception;
-        this.ImageManager.arrayLoader( params.images.imagesList || params.images.pools );
+        this.ImageManager.arrayLoader( params.images.imagesList );
         this.MainLoop.screenChangedSizeIndex( ratioToConception, sizes );
       }, DREAM_ENGINE );
       
@@ -176,7 +250,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
       if ( DREAM_ENGINE.isDemo )
         DREAM_ENGINE.DemoPopups.init();
       
-      DREAM_ENGINE.ImageManager.arrayLoader( params.images.imagesList || params.images.pools );
+      DREAM_ENGINE.ImageManager.loadPool( "main" );
       DREAM_ENGINE.AudioManager.loadAudios( params.audios );
       
       DREAM_ENGINE.Inputs.init( params.inputs );
@@ -193,6 +267,7 @@ define([ 'DE.CONFIG', 'DE.COLORS', 'DE.Time', 'DE.Vector2', 'DE.Sizes', 'DE.Imag
     }, DREAM_ENGINE, false );
     
     // adapt to the screen
+    // TODO update with PIXI (have hi own system ?)
     DREAM_ENGINE.Screen.init( params.images );
     DREAM_ENGINE.Screen.updateScreenSizes( ENGINE_SETTING.quality );
   };

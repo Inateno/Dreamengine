@@ -8,10 +8,10 @@
 ***
 * singleton@MainLoop
 **/
-define( [ 'DE.Time', 'DE.CONFIG', 'DE.States', 'DE.Inputs', 'DE.GamePad', 'DE.ImageManager'
-        , 'DE.SystemDetection', 'DE.Screen', 'DE.Event', 'DE.AudioManager' ],
-function( Time, CONFIG, States, Inputs, GamePad, ImageManager
-        , SystemDetection, Screen, Event, AudioManager )
+define( [ 'PIXI', 'DE.Time', 'DE.CONFIG', 'DE.States', 'DE.Inputs', 'DE.GamePad', 'DE.ImageManager'
+        , 'DE.SystemDetection', 'DE.Screen', 'DE.Event', 'DE.AudioManager', 'DE.GameObject', 'DE.SpriteRenderer' ],
+function( PIXI, Time, CONFIG, States, Inputs, GamePad, ImageManager
+        , SystemDetection, Screen, Event, AudioManager, GameObject, SpriteRenderer )
 {
   var MainLoop = new function()
   {
@@ -25,6 +25,27 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
     this.loader     = null;
     
     this.additionalModules = {};
+    
+    this.createLoader = function()
+    {
+      this.loader = new GameObject( {
+        renderers: [
+          new PIXI.Text( "Loading...", { font: "35px Snippet", fill: "white", align: "left" } )
+          ,new SpriteRenderer( { spriteName: "loader" } )
+          // loader
+        ]
+      } );
+      this.loader.renderer.y += 150;
+      PIXI.loader.on( 'progress', function()
+      {
+        MainLoop.loader.renderer.text = ( ( ImageManager.numToLoad - PIXI.loader._numToLoad ) / ImageManager.numToLoad * 100 ).toString().slice( 0, 5 ) + "%";
+      } );
+      PIXI.loader.on( 'complete', function()
+      {
+        MainLoop.loader.renderer.text = "100%";
+      } );
+    };
+    
     /****
      * loop@void
      */
@@ -34,21 +55,22 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
         return;
       requestAnimationFrame( MainLoop.loop );
       
+      if ( ! MainLoop.loader )
+        MainLoop.createLoader();
+      
       if ( !Time.update() )
         return;
       if ( States.get( "isLoading" ) )
       {
         if ( !MainLoop.loader )
           return;
-        var percent = ( ( ImageManager.imagesLoaded / ImageManager.imagesRequested * 1000 ) >> 0 ) / 10;
-        if ( percent.toString().length > 4 )
-          percent = percent.slice( 0, 4 );
+        
+        MainLoop.loader.update( Time.currentTime );
         for ( var i = 0, j; j = MainLoop.renders[ i ]; i++ )
         {
-          j.ctx.translate( j.sizes.width * 0.5, j.sizes.height * 0.5 );
-          MainLoop.loader.renderers[ 1 ].setText( percent + "%" );
-          MainLoop.loader.render( j.ctx, Screen.ratioToConception, { x: 0, y: 0, z: -10 }, { width: 0, height: 0 }, j.sizes.width / Screen.activeScreenWidth );
-          j.ctx.translate( -j.sizes.width * 0.5, -j.sizes.height * 0.5 );
+          MainLoop.loader.x = j.pixiRenderer.width * 0.5;
+          MainLoop.loader.y = j.pixiRenderer.height * 0.5;
+          j.directRender( MainLoop.loader );
         }
         return;
       }
@@ -81,14 +103,12 @@ function( Time, CONFIG, States, Inputs, GamePad, ImageManager
           
           for ( i = 0, j; j = MainLoop.scenes[ i ]; ++i )
           {
-            if ( !j.sleep )
+            if ( j.enable )
               j.update();
           }
           
           for ( i = 0, j; j = MainLoop.renders[ i ]; ++i )
-          {
             j.updateGuis();
-          }
           
           Time.deltaTime = 1;
           Time.timeSinceLastFrameScaled = 0;

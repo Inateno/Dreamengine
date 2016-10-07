@@ -24,7 +24,7 @@
  * @property {String} [name="noname"] use name to detect precise type (example player)
  * @property {String} [tag="none"] use tags for quick type recognition (example characters)
  * @property {GameObject} [parent=null] if you want to set it a parent on creation
- * @property {Array-GameObject} [childrens=[]] if you want to give childs on creation
+ * @property {Array-GameObject} [gameObjects=[]] if you want to give childs on creation
  * @property {Vector2} [position] if you give a Vector2, this have to be Vector2 class not a nested object
  * @property {Float} [x=0] x position
  * @property {Float} [y=0] y position
@@ -35,13 +35,56 @@
  * @property {Collider} [collider]
  * @property {RigidBody} [rigidbody] work in progress
  */
-define( [ 'DE.Vector2', 'DE.GameObject.render', 'DE.GameObject.update', 'DE.CONFIG', 'DE.Sizes', 'DE.Event', 'DE.Time' ],
-function( Vector2, render, update, CONFIG, Sizes, Event, Time )
+define( [ 'PIXI', 'DE.GameObject.update', 'DE.Vector2', 'DE.CONFIG', 'DE.COLORS', 'DE.Event', 'DE.Time' ],
+function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
 {
   var PI = Math.PI;
   function GameObject( params )
   {
+    PIXI.Container.call( this );
+    
     params    = params || {};
+    
+    /**
+     * @protected
+     * @memberOf GameObject
+     * @type {Vector2}
+     */
+    this.position = new Vector2( params.x || 0, params.y || 0, params.z || 0 );
+    this.position.gameObject = this;
+    this.savedPosition = new Vector2( params.x || 0, params.y || 0, params.z || 0 );
+    
+    /**
+     * @public
+     * store real scale
+     * @memberOf GameObject
+     * @type {PIXI.Point}
+     */
+    this.worldScale = new PIXI.Point( 1, 1 );
+    
+    /**
+     * @private
+     * used to prevent call on function undefined in Camera
+     * @memberOf GameObject
+     * @type {Boolean}
+     */
+    this._isGameObject = true;
+    
+    /**
+     * @private
+     * create a scale depend on z axis (to simulate object is far)
+     * @memberOf GameObject
+     * @type {Int}
+     */
+    this._zscale = 1;
+    
+    /**
+     * @public
+     * save the scale before z applies
+     * @memberOf GameObject
+     * @type {PIXI.Point}
+     */
+    this.savedScale = new PIXI.Point( 1, 1 );
     
     /**
      * @public
@@ -61,12 +104,16 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      * @type {String}
      */
     this.tag     = params.tag;
+    
     /**
      * @public
+     * if false, object will stop being updated
+     * see visible from PIXI to prevent render
      * @memberOf GameObject
      * @type {Boolean}
      */
-    this.enable = true;
+    this.updatable = true;
+    
     /**
      * @protected
      * @memberOf GameObject
@@ -80,10 +127,6 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      */
     this.killArgs= {};
     
-    // TODO - define if stay or not
-      // this.parentPosition = null;
-      this.sceneIndex = 0;
-    
     /**
      * @public
      * @memberOf GameObject
@@ -96,7 +139,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      * @memberOf GameObject
      * @type {Int}
      */
-    this.zindex = params.zindex || 0;
+    this._zindex = params.zindex || 0;
     
     /**
      * set true will automatically change cursor to pointer on over, and remove it on not over
@@ -112,17 +155,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      * @memberOf GameObject
      * @type {Array-GameObject}
      */
-    this.gameObjects = params.childrens || params.children || params.gameObjects || new Array();
-    
-    // DEPRECATED
-    this.childrens = this.gameObjects;
-    
-    /**
-     * @protected
-     * @memberOf GameObject
-     * @type {Vector2}
-     */
-    this.position = params.position || new Vector2( params.x || 0, params.y || 0, params.z || 0 );
+    this.gameObjects = params.gameObjects || new Array();
     
     /**
      * @private
@@ -155,13 +188,6 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     this.isMoved = false;
     
     /**
-     * @private
-     * @memberOf GameObject
-     * @type {Sizes}
-     */
-    this.biggerOffset = new Sizes( 1, 1, 1, 1 );
-    
-    /**
      * quick access to renderers[ 0 ] (in 90% of cases we use the one renderer)
      * @protected
      * @memberOf GameObject
@@ -190,7 +216,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
      */
     this.collider = null;
     if ( params.collider )
-      this.setCollider( params.collider )
+      this.setCollider( params.collider );
     
     /**
      * @protected
@@ -223,17 +249,295 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       "done": true
     };
     
+    /**
+     * object used to apply fade transition
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.fadeData = {
+      "from"     : 1
+      ,"to"      : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    
+    /**
+     * object used to apply scale transition
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.scaleData = {
+      "fromx"    : 1
+      ,"tox"     : 0
+      ,"fromy"   : 1
+      ,"toy"     : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    
+    this._updateZScale();
     if ( params.create )
     {
       for ( var i in params.create )
         if ( !this[ i ] )
           this[ i ] = params.create[ i ];
     }
-    Event.addEventComponents( this );
+    // Event.addEventComponents( this );
   };
   
-  GameObject.prototype = { constructor: GameObject };
+  GameObject.prototype = Object.create( PIXI.Container.prototype );
+  GameObject.prototype.constructor = GameObject;
   
+  // GameObject.prototype.position = new Vector2();
+  
+  /*
+  // z scale
+    this.zscale = { _x: 0, _y : 0 };//new PIXI.Point( 1, 1 );
+    Object.defineProperties( this.zscale,  )
+  */
+  
+  Object.defineProperties( GameObject.prototype, {
+    /**
+     * @public
+     * if false, object will stop being rendered and stop being updated
+     * @memberOf GameObject
+     * @type {Boolean}
+     */
+    enable: {
+      get: function()
+      {
+        return this.updatable && this.visible;
+      }
+      , set: function( value )
+      {
+        
+        // this is useful for dynamic pools (feature incoming)
+        if ( this.enable != value )
+          this.trigger( value ? 'active' : 'unactive' );
+        
+        this.updatable  = value;
+        this.renderable = value;
+        this.visible    = value;
+      }
+    }
+    
+    /**
+     * @public
+     * quick access to z attribute
+     * @memberOf GameObject
+     * @type {Float}
+     */
+    , z: {
+      get: function()
+      {
+        return this.position._z;
+      }
+      , set: function( value )
+      {
+        this.position._z = value;
+        this._updateZScale();
+        if ( this.parent && this.parent._isGameObject )
+          this.parent.sortChildren();
+      }
+    }
+    
+    /***
+     * @public
+     * overwrite from PIXI rotation to bind this inside the Vector2
+     * better when using .rotate using deltaTime
+     * @memberOf GameObject
+     * @type {Float}
+     */
+    , rotation: {
+      get: function()
+      {
+        return this.position.rotation;
+      }
+      , set: function( value )
+      {
+        this.position.setRotation( value );
+      }
+    }
+    
+    /***
+     * @public
+     * scale the object calling update on scale (for z deformation)
+     * use this instead .scale.x
+     * @memberOf GameObject
+     * @type {Float}
+     */
+    , scaleX: {
+      get: function()
+      {
+        return this.savedScale.x;
+      }
+      , set: function( value )
+      {
+        this.scale.x = value;
+        this._updateScale();
+      }
+    }
+    
+    /***
+     * @public
+     * scale the object calling update on scale (for z deformation)
+     * use this instead .scale.y
+     * @memberOf GameObject
+     * @type {Float}
+     */
+    , scaleY: {
+      get: function()
+      {
+        return this.savedScale.y;
+      }
+      , set: function( value )
+      {
+        this.scale.y = value;
+        this._updateScale();
+      }
+    }
+    
+    /***
+     * @public
+     * Quick access to get real z
+     * @memberOf GameObject
+     * @type {Float}
+     */
+    , realZ: {
+      get: function()
+      {
+        if ( this.parent && this.parent._isGameObject )
+          return this.position.z + this.parent.realZ;
+        return this.position.z;
+      }
+    }
+  } );
+  
+  /***
+   * when z change we restore scale, then change it again to final values
+   * @public
+   * @memberOf GameObject
+   * @param {Int} x scale x value, can be an object with x-y inside
+   * @param {Int} y scale y value
+   * @example // precise way
+   * myObject.setScale( 1, 1 );
+   * // with object
+   * myObject.setScale( otherObject.scale );
+   * // fast way
+   * myObject.setScale( 2 );
+   */
+  GameObject.prototype.setScale = function( x, y )
+  {
+    if ( x.x )
+    {
+      this.scale.x = x.x;
+      this.scale.y = x.y;
+    }
+    else
+    {
+      this.scale.x = x;
+      this.scale.y = x;
+      if ( y !== undefined )
+        this.scale.y = y;
+    }
+    this._updateScale();
+  };
+  
+  /***
+   * when rotation change if debug and fixed box collider inside, update the prevent rotation to get it on good orientation
+   * @private
+   * @memberOf GameObject
+   */
+  GameObject.prototype._updateRotation = function()
+  {
+    if ( CONFIG.DEBUG_LEVEL > 1 )
+    {
+      if ( this.collider && this.collider.debugRender
+        && this.collider.type == CONFIG.COLLISION_TYPE.FIXED_BOX )
+        this.collider.debugRender.rotation = -this.getRotation() || 0;
+      
+      for ( var i = 0; i < this.gameObjects.length; ++i )
+        this.gameObjects[ i ]._updateRotation();
+    }
+  };
+  
+  /***
+   * when z change we restore scale, then change it again to final values
+   * @private
+   * @memberOf GameObject
+   */
+  GameObject.prototype._updateZScale = function()
+  {
+    // first come back to true scale
+    this.scale.x = this.scale.x / this._zscale;
+    this.scale.y = this.scale.y / this._zscale;
+    // and store savedScale
+    this.savedScale.copy( this.scale );
+    
+    // this come from old Camera render (working fine as excepted...)
+    // camera was set to z -10 as default => 10 / ( 0 - - 10 ) = 1
+    var zscale = ( 10 / ( this.position.z - -10 ) );
+    this._zscale = zscale;
+    
+    this.scale.x = zscale * this.scale.x;
+    this.scale.y = zscale * this.scale.y;
+    
+    // update worldScale
+    this._updateWorldScale();
+    for ( var i = 0; i < this.gameObjects.length; ++i )
+      this.gameObjects[ i ]._updateWorldScale();
+  };
+  
+  /***
+   * when we change the scale manually, we need to re-apply z deformation
+   * directly save the old scale before zscale applies
+   * @private
+   * @memberOf GameObject
+   */
+  GameObject.prototype._updateScale = function()
+  {
+    this.savedScale.copy( this.scale );
+    this.scale.x = this._zscale * this.scale.x;
+    this.scale.y = this._zscale * this.scale.y;
+    
+    // PIXI update worldScale
+    this._updateWorldScale();
+    for ( var i = 0; i < this.gameObjects.length; ++i )
+      this.gameObjects[ i ]._updateWorldScale();
+  };
+  GameObject.prototype._updateWorldScale = function( parentWorldScale )
+  {
+    this.worldScale.set( this.scale.x, this.scale.y );
+    if ( !this.parent || !this.parent._isGameObject )
+      return;
+    
+    this.worldScale.x = this.worldScale.x * this.parent.worldScale.x;
+    this.worldScale.y = this.worldScale.y * this.parent.worldScale.y;
+  };
+  
+  /**
+   * create a gizmo useful for debug renderer and see all gameObjects
+   * this method is called when object is added in a scene or into an other GameObject
+   * @private
+   * @memberOf GameObject
+   */
+  GameObject.prototype._createDebugRender = function()
+  {
+    this.debugRender = new PIXI.Graphics();
+    this.debugRender.position.x = -1;
+    this.debugRender.position.y = -1;
+    this.debugRender.zindex = 9999999;
+    
+    this.debugRender.lineStyle( 0 );
+    this.debugRender.beginFill( COLORS.DEBUG.X_AXIS, 1 );
+    this.debugRender.drawRect( 0, 0, CONFIG.DEFAULT_SIZES.GIZMO.SIZE || 30, CONFIG.DEFAULT_SIZES.GIZMO.WIDTH || 2 );
+    this.debugRender.beginFill( COLORS.DEBUG.Y_AXIS, 1 );
+    this.debugRender.drawRect( 0, 0, CONFIG.DEFAULT_SIZES.GIZMO.WIDTH || 2, CONFIG.DEFAULT_SIZES.GIZMO.SIZE || 30 );
+    
+    this.addChild( this.debugRender );
+  };
   
   /**
    * create a shake with given range
@@ -300,7 +604,6 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @public
    * @memberOf GameObject
    * @param {Object} pos give x, y, and z destination
-   you can also give keepLocal as Boolean to prevent global position system
    * @param {Int} [duration=500] time duration
    * @param {Function} callback will be called in the current object context
    * @example // move to 100,100 in 1 second
@@ -311,15 +614,6 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   GameObject.prototype.moveTo = function( pos, duration, callback, curveName )
   {
     var myPos = this.position;
-    // convert pos to locale myPos
-    if ( this.parent && !pos.keepLocal )
-    {
-      var rPos = this.getPos();
-      if ( pos.x != undefined )
-        pos.x = myPos.x + ( pos.x - rPos.x );
-      if ( pos.y != undefined )
-        pos.y = myPos.y + ( pos.y - rPos.y );
-    }
     
     this.moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
@@ -443,7 +737,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       pos = this.target.getPos();
     // focus a camera ?
     if ( !pos )
-      pos = this.target.scenePosition;
+      pos = this.target.sceneContainer;
     
     if ( !this.focusLock.x )
       this.position.x = pos.x + ( this.focusOffset.x || 0 );
@@ -460,11 +754,10 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * if absolute, object will move on world axis instead this own axis
    * @example myObject.translate( { "x": 10, "y": 5 }, false );
    */
-  GameObject.prototype.translate = function( vector2, absolute )
+  GameObject.prototype.translate = function( vector2, absolute, ignoreDelta )
   {
-    this.moved();
     absolute = absolute || false;
-    this.position.translate( vector2, absolute );
+    this.position.translate( vector2, absolute, ignoreDelta );
   };
   
   /**
@@ -475,10 +768,10 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @param {Boolean} absolute
    * if absolute, object will move on world axis instead this own axis
    */
-  GameObject.prototype.translateX = function( distance, absolute )
+  GameObject.prototype.translateX = function( distance, absolute, ignoreDelta )
   {
     absolute = absolute || false;
-    this.translate( { x: distance, y: 0 }, absolute );
+    this.translate( { x: distance, y: 0 }, absolute, ignoreDelta );
   };
 
   /**
@@ -489,20 +782,23 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @param {Boolean} absolute
    * if absolute, object will move on world axis instead this own axis
    */
-  GameObject.prototype.translateY = function( distance, absolute )
+  GameObject.prototype.translateY = function( distance, absolute, ignoreDelta )
   {
     absolute = absolute || false;
-    this.translate( { x: 0, y: distance }, absolute );
+    this.translate( { x: 0, y: distance }, absolute, ignoreDelta );
   };
   
   /**
-   * return absolute position
+   * return absolute position - copy from PIXI prototype, is the same but using matrix
    * @public
    * @memberOf GameObject
    */
   GameObject.prototype.getPos = function()
   {
-    if ( this.parent )
+    // var pos = this.getGlobalPosition(); // PIXI fail and give screen position
+    // pos.z = this.realZ;
+    // return pos;
+    if ( this.parent && this.parent.getPos )
     {
       var pos = this.parent.getPos();
       var harmonics = this.parent.getHarmonics();
@@ -510,12 +806,37 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       //   return { x: this.position.x + pos.x, y: this.position.y + pos.y, z: this.position.z + pos.z };
       return { x: -(-this.position.x * harmonics.cos + this.position.y * harmonics.sin) + pos.x
         , y: -(-this.position.x * harmonics.sin + this.position.y * -harmonics.cos) + pos.y
-        , z: this.position.z + pos.z
+        , z: this.realZ
       };
     }
     return { x: this.position.x, y: this.position.y, z: this.position.z };
   };
+  // {
+  //     var pos = this.parent.getPos();
+  //     var harmonics = this.parent.getHarmonics();
+  //     // if ( harmonics.sin == 0 && harmonics.cos == 1 )
+  //     //   return { x: this.position.x + pos.x, y: this.position.y + pos.y, z: this.position.z + pos.z };
+  //     return { x: -(-this.position.x * harmonics.cos + this.position.y * harmonics.sin) + pos.x
+  //       , y: -(-this.position.x * harmonics.sin + this.position.y * -harmonics.cos) + pos.y
+  //       , z: this.position.z + pos.z
+  //     };
+  //   }
+  //   return { x: this.position.x, y: this.position.y, z: this.position.z };
+  // };
+  
+  GameObject.prototype.setPositionFromAbsolute = function( x, y )
+  {
+    var pos = this.getGlobalPosition();
+    if ( x.x )
+    {
+      this.position.set( ( x.x + this.x ) - pos.x, ( x.y + this.y ) - pos.y );
+      return this;
+    }
+    this.position.set( ( x + this.x ) - pos.x, ( y + this.y ) - pos.y );
     
+    return this;
+  };
+  
   /**
    * return absolute harmonics (sin, cos)
    * @public
@@ -523,12 +844,12 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.getHarmonics = function()
   {
-    if ( this.parent )
+    if ( this.parent && this.parent._isGameObject )
       return this.position.getHarmonics( this.parent.getRotation() );
     
     return this.position.getHarmonics();
   }
-    
+  
   /**
    * return the absolute rotation
    * @public
@@ -536,22 +857,21 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.getRotation = function()
   {
-    if ( this.parent )
+    if ( this.parent && this.parent._isGameObject )
       return ( this.position.rotation + this.parent.getRotation() ) % ( PI * 2 );
     
     return this.position.rotation % ( PI * 2 );
   };
-    
+  
   /**
    * quick access to position.rotate
    * @public
    * @memberOf GameObject
    * @param {Float} angle
    */
-  GameObject.prototype.rotate = function( angle )
+  GameObject.prototype.rotate = function( angle, ignoreDelta )
   {
-    this.moved();
-    this.position.rotate( angle );
+    this.position.rotate( angle, ignoreDelta );
   };
   
   /**
@@ -563,15 +883,18 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.lookAt = function( vector2 )
   {
-    this.moved();
-    if ( this.parent )
+    if ( this.parent && this.parent._isGameObject )
     {
       var pos = this.getPos();
       this.position.setRotation( -Math.atan2( vector2.x - ( pos.x )
-                                , vector2.y - ( pos.y ) ) - ( this.parent.getRotation() - Math.PI ) );
+                                , vector2.y - ( pos.y ) ) - ( this.parent.getRotation() ) );
       return;
     }
-    this.position.setRotation( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) + PI );
+    // this line give a rotation from 0 to 6.28 (PI*2)
+    //this.position.setRotation( PI * 2 + ( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) ) );
+    
+    // this line give a rotation from -PI to +PI
+    this.position.setRotation( -Math.atan2( ( vector2.x - this.position.x ), ( vector2.y - this.position.y ) ) );
   };
   
   /**
@@ -601,7 +924,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       else
         this.addOne( args[ i ] );
     }
-    this.sortChildrens();
+    this.sortChildren();
   };
   
   /**
@@ -620,47 +943,21 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     }
     
     if ( object.parent !== undefined )
-      object.parent.remove( object );
+      object.parent.remove( object ); // remove it from gameObjects, PIXI will auto remove from children
     
-    object.parent = this;
-    // object.parentPosition = this.position;
+    // object.parent = this; // PIXI is already doing it on addChild
     this.gameObjects.push( object );
     
-    if ( object.renderers.length > 0 )
-    {
-      var x = object.position.x, y = object.position.y;
-      for ( var i = 0, ren; ren = object.renderers[ i ]; ++i )
-      {
-        if ( ren.sizes )
-        {
-          if ( x + ren.sizes.width > this.biggerOffset.width )
-            this.biggerOffset.width = x + ren.sizes.width;
-          else if ( x - ren.sizes.width > this.biggerOffset.width )
-            this.biggerOffset.width = x - ren.sizes.width;
-          
-          if ( y + ren.sizes.height > this.biggerOffset.height )
-            this.biggerOffset.height = y + ren.sizes.height;
-          else if ( y - ren.sizes.height > this.biggerOffset.height )
-            this.biggerOffset.height = y - ren.sizes.height;
-        }
-        else if ( ren.radius )
-        {
-          if ( x + ren.radius > this.biggerOffset.width )
-            this.biggerOffset.width = x + ren.radius;
-          else if ( x - ren.radius > this.biggerOffset.width )
-            this.biggerOffset.width = x - ren.radius;
-          
-          if ( y + ren.radius > this.biggerOffset.height )
-            this.biggerOffset.height = y + ren.radius;
-          else if ( y - ren.radius > this.biggerOffset.height )
-            this.biggerOffset.height = y - ren.radius;
-        }
-      }
-    }
+    // TODO - detect if there is renderer or gameObjects inside, push the object inside PIXI.children
+    // if ( object.children.length > 0 || CONFIG.DEBUG )
+      this.addChild( object );
+    
+    if ( CONFIG.DEBUG )
+        object._createDebugRender();
   };
-  
+    
   /**
-   * remove a the given child in this GameObject childrens
+   * remove a the given child in this GameObject gameObjects
    * @public
    * @memberOf GameObject
    * @param {GameObject} object
@@ -687,27 +984,26 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   };
   
   /**
-   * return the children by name
+   * return the object by name
    * @public
    * @memberOf GameObject
    * @param {String} name
    * name of the GameObject
    * @param {Boolean} recursive
-   * if you want to look in childrens childs
+   * if you want to look in gameObjects childs
    */
-  GameObject.prototype.getChildByName = function( name, recursive )
+  GameObject.prototype.getObjectByName = function( name, recursive )
   {
-    var c, child;
-    for ( c = 0; child = this.gameObjects[ c ]; c ++ )
+    for ( var c = 0, g; g = this.gameObjects[ c ]; c ++ )
     {
-      if ( child.name === name )
-        return child;
+      if ( g.name === name )
+        return g;
       
       if ( recursive )
       {
-        child = child.getChildByName( name, recursive );
-        if ( child !== undefined )
-          return child;
+        g = g.getObjectByName( name, recursive );
+        if ( g !== undefined )
+          return g;
       }
     }
     return undefined;
@@ -734,12 +1030,12 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   };
   
   /**
-   * sort childrens by zindex and z<br>
-   * engine use this, but you can call it to if you need a to force sort when adding objects for example
+   * sort children by zindex and z<br>
+   * engine call this automatically
    * @protected
    * @memberOf GameObject
    */
-  GameObject.prototype.sortChildrens = function()
+  GameObject.prototype.sortChildren = function()
   {
     this.gameObjects.sort( function( a, b )
     {
@@ -747,6 +1043,19 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
         return a.zindex - b.zindex;
       return b.position.z - a.position.z;
     } );
+    this.renderers.sort( function( a, b )
+    {
+      return a.zindex - b.zindex;
+    } );
+    this.children = this.renderers.concat( this.gameObjects );
+    
+    if ( CONFIG.DEBUG )
+    {
+      if ( this.debugRender )
+        this.addChild( this.debugRender );
+      if ( this.collider && this.collider.debugRender )
+        this.addChild( this.collider.debugRender );
+    }
   };
   
   /**
@@ -756,31 +1065,39 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @param {Renderer} renderer
    * @example myObject.addRenderer( new DE.SpriteRenderer( { "spriteName": "ship" } ) );
    */
-  GameObject.prototype.addRenderer = function( renderer )
+  GameObject.prototype.addRenderer = function( renderer, pos )
   {
+    if ( !renderer.gameObject && !renderer._isCentered && !renderer.preventCenter ) // if this renderer come from an other GameObject ignore center
+    {
+      var b = renderer.getBounds();
+      if ( b.width )
+        renderer.x -= b.width * renderer.scale.x * 0.5;
+      if ( b.height )
+        renderer.y -= b.height * renderer.scale.y * 0.5;
+    }
     renderer.gameObject = this;
-    this.renderers.push( renderer );
+    
+    if ( pos !== undefined )
+    {
+      this.renderers.splice( pos, 0, renderer );
+      this.addChildAt( renderer, pos );
+    }
+    else
+    {
+      this.renderers.push( renderer );
+      this.addChild( renderer );
+    }
     
     if ( this.renderers.length == 1 )
       this.renderer = renderer;
-    if ( renderer.sizes )
-    {
-      if ( renderer.sizes.width * renderer.sizes.scaleX + renderer.localPosition.x > this.biggerOffset.width )
-        this.biggerOffset.width = renderer.sizes.width * renderer.sizes.scaleX + renderer.localPosition.x;
-      
-      if ( renderer.sizes.height * renderer.sizes.scaleY + renderer.localPosition.y > this.biggerOffset.height )
-        this.biggerOffset.height = renderer.sizes.height * renderer.sizes.scaleY + renderer.localPosition.y;
-    }
-    else if ( renderer.radius )
-    {
-      if ( renderer.radius + renderer.localPosition.x > this.biggerOffset.width )
-        this.biggerOffset.width = renderer.radius + renderer.localPosition.x;
-      if ( renderer.radius + renderer.localPosition.y > this.biggerOffset.height )
-        this.biggerOffset.height = renderer.radius + renderer.localPosition.y;
-    }
+    
+    this.sortChildren();
     return this;
   };
   
+  // todo removeRenderer( destroy:bool )
+  
+  // TODO use primitives from PIXI and CollisionDetection from PIXI ?
   /**
    * set given Collider to this GameObject and return current GameObject instance
    * @public
@@ -790,43 +1107,19 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.setCollider = function( collider )
   {
+    if ( this.collider && this.collider.debugRender )
+      this.removeChild( this.collider.debugRender );
+    
     collider.gameObject = this;
     this.collider = collider;
+    this.hitArea = collider;
     
-    if ( collider.radius )
+    if ( CONFIG.DEBUG_LEVEL > 1 )
     {
-      if ( collider.radius > this.biggerOffset.width )
-        this.biggerOffset.width = collider.radius + collider.localPosition.x;
-      
-      if ( collider.radius > this.biggerOffset.height )
-        this.biggerOffset.height = collider.radius + collider.localPosition.y;
+      collider._createDebugRender();
+      collider.debugRender.rotation = -this.getRotation() || 0;
+      this.addChild( collider.debugRender );
     }
-    else if ( collider.width && collider.height )
-    {
-      if ( collider.width + collider.localPosition.x > this.biggerOffset.width )
-        this.biggerOffset.width = collider.width + collider.localPosition.x;
-      if ( collider.height + collider.localPosition.y > this.biggerOffset.height )
-        this.biggerOffset.height = collider.height + collider.localPosition.y;
-    }
-    return this;
-  };
-  
-  /**
-   * helper to know if an object has moved since last frame
-   * (usefull for collisions or custom buffer optimisation)<br/>
-   * it's used by the engine but you can use it to, to improve renderings or collisions
-   * @protected
-   * @memberOf GameObject
-   * @returns {GameObject}
-   * current instance
-   */
-  GameObject.prototype.moved = function()
-  {
-    var parent = this;
-    while ( parent.parent !== undefined )
-      parent = parent.parent;
-    
-    parent.isMoved = true;
     return this;
   };
   
@@ -835,13 +1128,14 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    * @protected
    * @memberOf GameObject
    * @param {GameObject} object
-   * object reference or object index in the childrens array
+   * object reference or object index in the gameObjects array
    */
   GameObject.prototype.delete = function( object )
   {
     // if its an index
     if ( this.gameObjects[ object ] )
     {
+      this.removeChild( this.gameObjects[ object ] ); // remove from PIXI
       this.gameObjects[ object ].killMePlease();
       delete this.gameObjects[ object ];
       this.gameObjects.splice( object, 1 );
@@ -851,6 +1145,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
     
     if ( index !== - 1 )
     {
+      this.removeChild( this.gameObjects[ object ] ); // remove from PIXI
       object.killMePlease();
       this.gameObjects[ index ] = null;
       this.gameObjects.splice( index, 1 );
@@ -925,6 +1220,7 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.askToKill = function( params )
   {
+    this.target = null;
     if ( this.scene )
       this.scene.cleanObjectBinding( this );
     
@@ -935,13 +1231,18 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
         this.onKill();
       this.trigger( "kill", this );
     }
-    if ( this.parent )
+    if ( this.parent && this.parent._isGameObject )
     {
       this.parent.delete( this );
       return;
     }
     this.enable   = false;
     this.flag     = "delete";
+    
+    this.removeAllListeners();
+    
+    if ( ( this.scene && ( this.scene.enable == false || this.scene.gameObjects.indexOf( this ) == -1 ) ) || !this.scene )
+      this.killMePlease();
   };
   
   /**
@@ -973,6 +1274,21 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
    */
   GameObject.prototype.killMePlease = function()
   {
+    // delete object and all children in PIXI
+    // check if object isn't already destroyed and there is children inside 'cause PIXI don't do it
+    // and prevent crash (if user ask multiple destroy)
+    this.target = null;
+    if ( !this.children )
+      this.children = [];
+    
+    // remove children with texture (DE renderers or direct PIXI renderers)
+    // all container must be inside "gameObjects"
+    for ( var i = 0; i < this.children.length; ++i )
+    {
+      if ( this.children[ i ].texture )
+        this.children[ i ].destroy();
+    }
+    
     this.enable = false;
     if ( !this.killArgs.preventEvents && !this.killArgs.preventKilledEvent )
     {
@@ -995,15 +1311,9 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       delete this.gameObjects[ i ];
       this.gameObjects.splice( i, 1 );
     }
+    this.destroy();
   };
   
-  /****
-   * default render method, you can override it if you want but it's not recommended at all<br>
-   * prefer use custom Renderers for specific rendering
-   * @private
-   * @memberOf GameObject
-   */
-  GameObject.prototype.render = render;
   /****
    * default update method, you can override it if you want but it's not recommended<br>
    * prefer use custom addAutomatism who give you a better control/dry
@@ -1047,6 +1357,8 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   GameObject.prototype.addAutomatism = function( id, methodName, params )
   {
     params = params || {};
+    methodName = methodName || id;
+    
     // if using the old way - TODO - remove it on version 0.2.0
     if ( methodName.type )
     {
@@ -1073,12 +1385,11 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
   };
   
   /**
-   * remove the automatism by id you provided on creation
+   * remove the automatism by id (the one you provided on creation)
    * @public
    * @memberOf GameObject
    * @param {String} id automatism id to remove
    * @example
-   * // remove the gameLogic previously added
    * myObject.removeAutomatism( "logic" );
    */
   GameObject.prototype.removeAutomatism = function( id )
@@ -1102,86 +1413,229 @@ function( Vector2, render, update, CONFIG, Sizes, Event, Time )
       delete this.automatism[ i ];
   };
   
+  /**
+   * inverse values of an automatism
+   * useful for "ping-pong" moves, fades, snaking, and patrols logics
+   * @public
+   * @memberOf GameObject
+   * @example
+   * myObject.inverseAutomatism( "translateY" ); // this will inverse the value applied on the automatized translateY action
+   */
+  GameObject.prototype.inverseAutomatism = function( autoName )
+  {
+    var at = this.automatism[ autoName ];
+    at.value1 = -at.value1;
+    at.value2 = -at.value2;
+  };
+  
+  // todo check if we need custom event or not
   /****
    * provide Events handler
    * @memberOf GameObject
    * @public
    */
-  Event.addEventCapabilities( GameObject );
+  // Event.addEventCapabilities( GameObject );
+  GameObject.prototype.trigger = GameObject.prototype.emit;
   
-  // propagation methods to renderers
-    /**
-     * create a fade from alpha to alpha on all renderers, with given duration time
-     * @public
-     * @memberOf GameObject
-     * @param {Float} from start value
-     * @param {Float} [to=0] end value
-     * @param {Int} [duration=500] fade duration in ms
-     * @example myObject.fade( 0.5, 1, 850 );
-     */
-    GameObject.prototype.fade = function( from, to, duration )
-    {
-      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
-        r.fade( from, to, duration );
-      for ( i = 0; child = this.gameObjects[ i ]; ++i )
-        child.fade( from, to, duration );
+  /**
+   * create a fade from alpha to alpha, with given duration time
+   * @public
+   * @memberOf GameObject
+   * @param {Float} from start value
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @example myObject.fade( 0.5, 1, 850 );
+   */
+  GameObject.prototype.fade = function( from, to, duration, force )
+  {
+    if ( force )
+      this.enable = true;
+    var data = {
+      from      : from || 1
+      ,to       : to != undefined ? to : 0
+      ,duration : duration || 500
+      ,oDuration: duration || 500
+      ,fadeScale: Math.abs( from - to )
+      ,done     : false
     };
+    data.dir = data.from > to ? -1 : 1;
+    this.alpha = from;
+    this.fadeData = data;
     
-    /**
-     * create a fade to val on all renderers, from current alpha value with given duration time
-     * @public
-     * @memberOf GameObject
-     * @param {Float} [to=0] end value
-     * @param {Int} [duration=500] fade duration in ms
-     * @example myObject.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
-     */
-    GameObject.prototype.fadeTo = function( to, duration )
+    if ( !this.visible && to > 0 )
+      this.visible = true;
+  };
+  
+  /**
+   * create a fade from current alpha to given value with given duration time
+   * @public
+   * @memberOf GameObject
+   * @param {Float} [to=0] end value
+   * @param {Int} [duration=500] fade duration in ms
+   * @example myObject.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
+   */
+  GameObject.prototype.fadeTo = function( to, duration, force )
+  {
+    this.fade( this.alpha, to, duration, force );
+  };
+  
+  /**
+   * fade to alpha 0 with given duration time
+   * fade start to the current alpha or 1 if force is true
+   * @public
+   * @memberOf GameObject
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [force=false] if true will set alpha at 1 before fade
+   * @example // alpha = 0 in 850ms
+   * myObject.fadeOut( 850 );
+   */
+  GameObject.prototype.fadeOut = function( duration, force )
+  {
+    if ( force )
     {
-      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
-        r.fadeTo( to, duration );
-      for ( i = 0; child = this.gameObjects[ i ]; ++i )
-        child.fadeTo( to, duration );
-    };
-    
-    /**
-     * fade all renderers to alpha 0 with given duration time
-     * fade start to the current alpha or 1 if force is true
-     * @public
-     * @memberOf GameObject
-     * @param {Int} [duration=500] fade duration in ms
-     * @param {Boolean} [force=false] if true will set alpha at 1 before fade
-     * @example // alpha = 0 in 850ms
-     * myObject.fadeOut( 850 );
-     */
-    GameObject.prototype.fadeOut = function( duration, force )
+      this.enable = true;
+      this.alpha = 1;
+    }
+    this.fade( this.alpha, 0, duration, force );
+  };
+  
+  /**
+   * fade to alpha 1 with given duration time
+   * fade start to the current alpha, or 0 if force is true
+   * @public
+   * @memberOf GameObject
+   * @param {Int} [duration=500] fade duration in ms
+   * @param {Boolean} [force=false] if true will set alpha at 0
+   * @example // alpha = 1 in 850ms
+   * myObject.fadeIn( 850 );
+   */
+  GameObject.prototype.fadeIn = function( duration, force )
+  {
+    if ( force )
     {
-      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
-        r.fadeOut( duration, force );
-      for ( i = 0; child = this.gameObjects[ i ]; ++i )
-        child.fadeOut( duration, force );
-    };
+      this.enable = true;
+      this.alpha = 0;
+    }
+    this.fade( this.alpha, 1, duration, force );
     
-    /**
-     * fade all renderers to alpha 1 with given duration time
-     * fade start to the current alpha, or 0 if force is true
-     * @public
-     * @memberOf GameObject
-     * @param {Int} [duration=500] fade duration in ms
-     * @param {Boolean} [force=false] if true will set alpha at 0
-     * @example // alpha = 1 in 850ms
-     * myObject.fadeIn( 850 );
-     */
-    GameObject.prototype.fadeIn = function( duration, force )
+  };
+  
+  /**
+   * apply the current fade
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.applyFade = function()
+  {
+    if ( !this.fadeData.done )
     {
-      if ( force && this.enable == false )
-        this.enable = true;
-      
-      for ( var i = 0, r, child; r = this.renderers[ i ]; ++i )
-        r.fadeIn( duration, force );
-      for ( i = 0; child = this.gameObjects[ i ]; ++i )
-        child.fadeIn( duration, force );
+      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration
+                              * this.fadeData.dir * this.fadeData.fadeScale;
+      this.alpha += this.fadeData.stepVal * Time.scaleDelta;
+      this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+      if ( ( this.fadeData.dir < 0 && this.alpha <= this.fadeData.to )
+          || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
+          || this.alpha < 0 || this.alpha > 1 )
+      {
+        this.alpha = this.fadeData.to;
+      }
+      if ( this.fadeData.duration <= 0 )
+      {
+        this.fadeData.done = true;
+        if ( this.alpha == 1 || this.alpha == 0 )
+        {
+          if ( this.alpha == 0 )
+            this.visible = false;
+        }
+        this.trigger( "fadeEnd", this );
+      }
+    }
+  };
+  
+  /**
+   * create a fluid scale
+   * you can only have one at a time
+   * @public
+   * @memberOf GameObject
+   * @param {Object} scale give final x, and final y
+   * @param {Int} [duration=500] time duration
+   * @example // scale to 2,3 in 1 second
+   * myGameObject.scaleTo( { x: 2, y: 3 }, 1000 );
+   */
+  GameObject.prototype.scaleTo = function( scale, duration )
+  {
+    var dscale = {
+      "x"     : !isNaN( scale ) ? scale : scale.x
+      ,"y"    : !isNaN( scale ) ? scale : scale.y
     };
+    this.scaleData = {
+      "valX"     : - ( this.savedScale.x - ( dscale.x !== undefined ? dscale.x : this.savedScale.x ) )
+      ,"valY"    : - ( this.savedScale.y - ( dscale.y !== undefined ? dscale.y : this.savedScale.y ) )
+      ,"dirX"     : this.savedScale.x > dscale.x ? 1 : -1
+      ,"dirY"     : this.savedScale.y > dscale.y ? 1 : -1
+      ,"duration" : duration || 500
+      ,"oDuration": duration || 500
+      ,"done"     : false
+      ,"stepValX" : 0
+      ,"stepValY" : 0
+      ,"destX"    : dscale.x
+      ,"destY"    : dscale.y
+      ,"scaleX"   : this.savedScale.x
+      ,"scaleY"   : this.savedScale.y
+    };
+    this.scaleData.leftX = this.scaleData.valX;
+    this.scaleData.leftY = this.scaleData.valY;
+  };
+  
+  /**
+   * apply the current scale
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.applyScale = function()
+  {
+    if ( this.scaleData.done )
+      return;
     
+    var scaleD = this.scaleData;
+    
+    if ( scaleD.valX != 0 )
+    {
+      scaleD.stepValX = Time.timeSinceLastFrame / scaleD.oDuration * scaleD.valX * Time.scaleDelta;
+      scaleD.leftX    -= scaleD.stepValX;
+      scaleD.scaleX   += scaleD.stepValX;
+    }
+    
+    if ( scaleD.valY != 0 )
+    {
+      scaleD.stepValY = Time.timeSinceLastFrame / scaleD.oDuration * scaleD.valY * Time.scaleDelta;
+      scaleD.leftY    -= scaleD.stepValY;
+      scaleD.scaleY   += scaleD.stepValY;
+    }
+    scaleD.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    
+    // check scale
+    if ( scaleD.dirX < 0 && scaleD.leftX < 0 )
+      scaleD.scaleX += scaleD.leftX;
+    else if ( scaleD.dirX > 0 && scaleD.leftX > 0 )
+      scaleD.scaleX -= scaleD.leftX;
+    
+    if ( scaleD.dirY < 0 && scaleD.leftY < 0 )
+      scaleD.scaleY += scaleD.leftY;
+    else if ( scaleD.dirY > 0 && scaleD.leftY > 0 )
+      scaleD.scaleY -= scaleD.leftY;
+    
+    this.scale.set( scaleD.scaleX, scaleD.scaleY );
+    
+    if ( scaleD.duration <= 0 )
+    {
+      this.scaleData.done = true;
+      this.scale.set( scaleD.destX, scaleD.destY );
+      this.trigger( "scaleEnd", this );
+    }
+    this._updateScale();
+  };
+  
   GameObject.prototype.DEName = "GameObject";
   CONFIG.debug.log( "GameObject loaded", 3 );
   return GameObject;

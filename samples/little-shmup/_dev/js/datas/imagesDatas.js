@@ -24,32 +24,34 @@ function( CONFIG )
     // avalaible images sizes (engine will load optimisest images depends on user resolution)
     screenSizes: [
       { "w": 1000, "h": 1080, "path": "" }
-      ,{ "w": 666, "h": 720, "path": "", "notRatio": true }
-      ,{ "w": 333, "h": 360, "path": "", "notRatio": true }
+      // ,{ "w": 666, "h": 720, "path": "", "notRatio": true }
+      // ,{ "w": 333, "h": 360, "path": "", "notRatio": true }
     ]
     
     // index of the used screen size during game conception
     , conceptionSizeIndex: 0
     
     // images folder name 
-    , folderName: "img"
+    , baseUrl: "img/"
     
     // usage name, real name (can contain subpath), extension, parameters
-    , imagesList: [
-      [ "ship", "ship", "png", { "load": true, "totalFrame": 10, "eachAnim": 40
-        , "isAnimated": false, "isLoop": false } ]
-      ,[ "p-fire", "p-fire", "png", { "load": true, "totalFrame": 10, "eachAnim": 40
-          , "isAnimated": true, "isLoop": false } ]
-      ,[ "enemies", "enemies", "png", { "load": true, "totalFrame": 4, "isAnimated": false, "isLoop": false } ]
-      ,[ "reactor", "reactor", "png", { "load": true, "totalFrame": 4, "eachAnim": 40
-          , "isAnimated": true, "isLoop": true } ]
-      ,[ "e-fire", "e-fire", "png", { "load": true, "totalFrame": 4, "eachAnim": 80
-          , "isAnimated": true, "isLoop": true } ]
-      ,[ "heart", "heart", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
-      ,[ "btn", "btn", "png", { "load": true, "totalFrame": 3, "isAnimated": false } ]
-      ,[ "touchControlBackground", "touchControlBackground", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
-      ,[ "touchControlStick", "touchControlStick", "png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
-    ]
+    , pools: {
+      main: [
+        [ "ship", "ship.png", { "load": true, "totalFrame": 10, "eachAnim": 40
+          , "isAnimated": false, "isLoop": false } ]
+        ,[ "p-fire", "p-fire.png", { "load": true, "totalFrame": 10, "eachAnim": 40
+            , "isAnimated": true, "isLoop": false } ]
+        ,[ "enemies", "enemies.png", { "load": true, "totalFrame": 4, "isAnimated": false, "isLoop": false } ]
+        ,[ "reactor", "reactor.png", { "load": true, "totalFrame": 4, "eachAnim": 40
+            , "isAnimated": true, "isLoop": true } ]
+        ,[ "e-fire", "e-fire.png", { "load": true, "totalFrame": 4, "eachAnim": 80
+            , "isAnimated": true, "isLoop": true } ]
+        ,[ "heart", "heart.png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+        ,[ "btn", "btn.png", { "load": true, "totalFrame": 3, "isAnimated": false } ]
+        ,[ "touchControlBackground", "touchControlBackground.png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+        ,[ "touchControlStick", "touchControlStick.png", { "load": true, "totalFrame": 1, "isAnimated": false } ]
+      ]
+    }
   };
   CONFIG.debug.log( "imagesDatas loaded", 3 );
   return datas;

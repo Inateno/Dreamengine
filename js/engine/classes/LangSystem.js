@@ -81,6 +81,9 @@ function( CONFIG )
           break;
         }
       }
+      
+      if ( !this.dictionary[ this.currentLang ] )
+        this.dictionary[ this.currentLang ] = {};
     };
   };
   

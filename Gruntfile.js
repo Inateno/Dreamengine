@@ -35,21 +35,22 @@ module.exports = function(grunt)
     }
     
     , requirejs: { // requirejs compil
-      standalone: {
-        options: {
-          findNestedDependencies : true
-          , mainConfigFile       : 'js/files-engine.js'
-          , baseUrl              : 'js/'
-          , name                 : 'standalonev'
-          , out                  : 'js/dist/DreamEngine-min.js'
-          , optimize             : 'uglify'
-          , uglify               : requireUglify
-          , closure              : requireClosure
-          , inlineText           : true
-          , useStrict            : false
-        }
-      }
-      , requireVersion: {
+      // standalone: {
+      //   options: {
+      //     findNestedDependencies : true
+      //     , mainConfigFile       : 'js/files-engine.js'
+      //     , baseUrl              : 'js/'
+      //     , name                 : 'standalonev'
+      //     , out                  : 'js/dist/DreamEngine-min.js'
+      //     , optimize             : 'uglify'
+      //     , uglify               : requireUglify
+      //     , closure              : requireClosure
+      //     , inlineText           : true
+      //     , useStrict            : false
+      //   }
+      // }
+      // ,
+      requireVersion: {
         options: {
           findNestedDependencies : true
           , mainConfigFile       : 'js/files-engine.js'
@@ -58,7 +59,7 @@ module.exports = function(grunt)
           , out                  : 'js/dist/DreamEngine-min-require.js'
           , optimize             : 'uglify'
           , uglify               : requireUglify
-          , closure              : requireClosure
+          , closure              : null
           , inlineText           : true
           , useStrict            : false
         }
@@ -109,14 +110,20 @@ module.exports = function(grunt)
             pattern: 'define("main",[],function(',
             replacement: ""
           }, {
-            pattern: '){}),',
-            replacement: ""
-          }, {
             pattern: ',define("requirev",function(){});',
             replacement: ";"
           }, {
             pattern: ',define("standalonev",[],function(){});',
             replacement: ";"
+          // this can appear depending the grunt process (previously this happened a lot but it seems to be fixed)
+          // if the build fail, uncomment these 2 last replacement
+          // }, {
+          //   pattern: '){}),',
+          //   replacement: ""
+          // }, {
+          //   // this one is needed too
+          //   pattern: 'function(r()',
+          //   replacement: 'function(){}),r()'
           }]
         }
       }
