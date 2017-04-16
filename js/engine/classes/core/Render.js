@@ -8,15 +8,15 @@
 * @example Game.render = new DE.Render( "render", { fullScreen: "ratioStretch" } );
 * Game.render.init();
 */
-define( [ 'PIXI', 'DE.CONFIG', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs' ],
-function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs )
+define( [ 'PIXI', 'DE.CONFIG', 'DE.Time', 'DE.MainLoop', 'DE.CollisionSystem', 'DE.Inputs', 'DE.Event' ],
+function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs, Event )
 {
   // TODO use PIXI renderer
   function Render( divId, params )
   {
     params      = params || {};
     
-    var _drawRatio = 1;
+    this._drawRatio = 1;
     
     // create a renderer instance
     this.pixiRenderer = new PIXI.autoDetectRenderer(
@@ -282,7 +282,8 @@ function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs )
         this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
       }
       
-      _drawRatio = newW / this.savedSizes.x;
+      this._drawRatio = newW / this.savedSizes.x;
+      this.trigger( "resize", this._drawRatio );
     }
 
     var _fullScreenMethod;
@@ -520,48 +521,68 @@ function( PIXI, CONFIG, Time, MainLoop, CollisionSystem, Inputs )
       this.events[ Date.now() + "move" ] = [ "MouseMove", mouse.x, mouse.y, mouse.index ];
       // this.camerasMouseCollide( "MouseMove", mouse.x, mouse.y, mouse.index );
     }
-
-    /****
-    * @private
-    */
-    /****
-    * _scrollPosition@Vector2
-    return the scollPostion of the window
-    **/
-    function _scrollPosition()
-    {
-      return {
-        x: document.scrollLeft || window.pageXOffset,
-        y: document.scrollTop || window.pageYOffset
-      };
-    }
-
-    /****
-    * _getMouseCoords@Mouse
-    */
-    function _getMouseCoords( x, y, index )
-    {
-      var pos = { "x": x, "y": y };
-      var elem = this.pixiRenderer.view;
-      var offsetLeft = 0, offsetTop = 0;
-      while( elem )
-      {
-        offsetLeft += elem.offsetLeft;
-        offsetTop += elem.offsetTop;
-        elem = elem.parentElement;
-      }
-      pos.x -= offsetLeft;
-      pos.y -= offsetTop;
-      return {
-        'x': pos.x / _drawRatio + _scrollPosition().x >> 0
-        , 'y': pos.y / _drawRatio + _scrollPosition().y >> 0
-        , 'index': index
-      };
-    }
-    /*** -private- ***/
+    
+    Event.addEventComponents( this );
   }
-  Render.prototype.DEName = "Render";
+  
+  /****
+   * @private
+   */
+  /****
+   * _scrollPosition@Vector2
+    return the scollPostion of the window
+   **/
+  function _scrollPosition()
+  {
+    return {
+      x: document.scrollLeft || window.pageXOffset,
+      y: document.scrollTop || window.pageYOffset
+    };
+  }
 
+  /****
+   * _getMouseCoords@Mouse
+   */
+  function _getMouseCoords( x, y, index )
+  {
+    var pos = { "x": x, "y": y };
+    var elem = this.pixiRenderer.view;
+    var offsetLeft = 0, offsetTop = 0;
+    while( elem )
+    {
+      offsetLeft += elem.offsetLeft;
+      offsetTop += elem.offsetTop;
+      elem = elem.parentElement;
+    }
+    pos.x -= offsetLeft;
+    pos.y -= offsetTop;
+    return {
+      'x': pos.x / this._drawRatio + _scrollPosition().x >> 0
+      , 'y': pos.y / this._drawRatio + _scrollPosition().y >> 0
+      , 'index': index
+    };
+  }
+  /*** -private- ***/
+  
+  Render.prototype.DEName = "Render";
+  
+  Object.defineProperties( Render.prototype, {
+    /**
+     * @public
+     * getter to know the _drawRatio (real canvas size to configured size)
+     * @memberOf Render
+     * @type {Float}
+     */
+    drawRatio: {
+      get: function()
+      {
+        return this._drawRatio;
+      }
+    }
+  } );
+  
+  Event.addEventCapabilities( Render );
+  
   CONFIG.debug.log( "Render loaded", 3 );
   return Render;
 } );

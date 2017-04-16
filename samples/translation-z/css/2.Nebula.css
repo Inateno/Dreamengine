@@ -141,7 +141,6 @@
     box-sizing             : border-box;
     border-top-left-radius : 5px;
     border-top-right-radius: 5px;
-    z-index                : 9999999999;
     -webkit-transition: all 0.1s linear;
        -moz-transition: all 0.1s linear;
          -o-transition: all 0.1s linear;

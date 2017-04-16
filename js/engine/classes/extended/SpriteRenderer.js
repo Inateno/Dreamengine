@@ -388,12 +388,14 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
       throw new Error( "SpriteRenderer :: No spriteName defined -- declaration canceled" );
     
     var d = ImageManager.spritesData[ this.spriteName ];
-    if ( !this.preventCenter )
+    
+    // uncenter (reset the flag _isCentered)
+    if ( !this.preventCenter && !params.keepPosition )
       this.uncenter();
     if ( !params.keepPosition )
     {
-      this.position.x = params.offsetX || params.x || 0;
-      this.position.y = params.offsetY || params.y || 0;
+      this.position.x = 0;
+      this.position.y = 0;
     }
     
     this.scale.x = params.scaleX || params.scale || 1;
@@ -503,9 +505,16 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     }
     
     this.preventCenter = params.preventCenter;
-    if ( !this.preventCenter )
+    if ( !this.preventCenter && !params.keepPosition )
     {
       this.center();
+    }
+    
+    // apply offsets
+    if ( !params.keepPosition )
+    {
+      this.position.x += params.offsetX || params.x || 0;
+      this.position.y += params.offsetY || params.y || 0;
     }
   };
   

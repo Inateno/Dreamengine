@@ -1,3 +1,12 @@
+---- 0.26.4 ----
+ Sample for z-projection test (todo fix it) + minor features
+  * add Vector2.getAnglesDifference
+  * add Render Events methods
+  * add Render._drawRatio attribute and trigger an event when it change
+  * fix GameObject.moveTo in case of undefined values
+  * fix SpriteRenderer.changeSprite offsets x-y wasn't correctly set
+  * other minor clean
+  
 ---- 0.26.3 ----
   * add Timer plugin
   * add version in CONFIG and ImageManager to force cache reload

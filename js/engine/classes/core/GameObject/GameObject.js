@@ -694,9 +694,11 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
     if ( move.duration <= 0 )
     {
       this.moveData.done = true;
-      this.position.setPosition( move.destX || this.position.x
-        , move.destY || this.position.y
-        , move.destZ || this.position.z );
+      this.position.setPosition(
+        move.destX !== undefined ? move.destX : this.position.x
+        , move.destY !== undefined ? move.destY : this.position.y
+        , move.destZ !== undefined ? move.destZ : this.position.z
+      );
       if ( move.callback )
         move.callback.call( this, move.callback );
       
@@ -811,6 +813,7 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
     }
     return { x: this.position.x, y: this.position.y, z: this.position.z };
   };
+  
   // {
   //     var pos = this.parent.getPos();
   //     var harmonics = this.parent.getHarmonics();
@@ -1451,15 +1454,15 @@ function( PIXI, update, Vector2, CONFIG, COLORS, Event, Time )
     if ( force )
       this.enable = true;
     var data = {
-      from      : from || 1
+      from      : from != undefined ? from : 1
       ,to       : to != undefined ? to : 0
       ,duration : duration || 500
       ,oDuration: duration || 500
       ,fadeScale: Math.abs( from - to )
       ,done     : false
     };
-    data.dir = data.from > to ? -1 : 1;
-    this.alpha = from;
+    data.dir      = data.from > to ? -1 : 1;
+    this.alpha    = from;
     this.fadeData = data;
     
     if ( !this.visible && to > 0 )

@@ -254,7 +254,7 @@ function( CONFIG, buzz, Event )
       this.stopAllAndPlay = function( name, ignore )
       {
         this.stopAll( ignore );
-        if ( name != ignore)
+        if ( name != ignore )
           this.play( name );
         
         return this;

@@ -1,9 +1,9 @@
 ![DreamEngine Logo](http://dreamengine.dreamirl.com/assets/imgs/logo.png)
 
-Dream-Engine - a powerful 2D games engine - PIXI Version
+Dream-Engine - a simple and powerful 2D game engine - PIXI Version
 ===========
-The Dream-Engine is a free open source engine to create HTML5 games, it's based on PIXIJS.
-PIXIJS is a fast light rendering engine, using WebGL for rendering 2D.
+The Dream-Engine is a free open source engine to create HTML5 games.
+The renderer is based on PIXIJS, it's a fast light rendering engine, using WebGL for rendering 2D.
 
 You may ask, why should I use the Dream-Engine if PIXI is the rendering engine ?
 Well, the DE (Dream-Engine) is mainly focused on architecture, game logic and gaming features to enhance your productivity.
@@ -19,15 +19,17 @@ PS: If you already made a game with the engine in Canvas2D version the migration
 
 Nb: because PIXI is using WebGL you have to run a local web-server on your computer to try your game, it was possible to do it without on the Canvas2D version, this is a security issue.
 
-Update 0.26.3
+Last Update: 0.26.4 (checkout the changelog)
 -------
-This update is the last one I did on the DreamEngine, here is lot of new stuff and bug changes !
-- now the repository contain only 3 branches, the master contain the last pixi version, one for the (old) canvas2d and an other for the website.
+Sample for z-projection test (todo fix it) + minor features
+  * add Vector2.getAnglesDifference
+  * add Render Events methods
+  * add Render._drawRatio attribute and trigger an event when it change
 
-Check out samples
+Samples are here to help a lot
 -------
 
-Please feel free to check out samples, it took me around 10 to 30 minutes to wrote it.
+Please check out samples, it take me around 10 to 30 minutes to wrote one like these ones.
 I can't give you a better way to start with the engine.
 The "Empty" one for starting a new project, kill-bubbles, defender, or waves are the most simple. Check plateformer and little-shmup for "class" and "inheritance" examples.
 
@@ -39,7 +41,8 @@ Companies, indie, pro, students. No matters. I made this engine for those who wa
 It's not a "clicking" software, starting with the engine may be hard, but the learning curve is fast.
 
 I made a lot of professional and experimental games with it.
-You can even do a game in "one big file" this will work (![like this one}(http://pongarena.dreamirl.com/)) or a huge online game with hundreds of files and images ![like this one](http://nebula.dreamirl.com/#Games/Description/ola).
+You can even do a game in "one big file" this will work ([like this one](http://pongarena.dreamirl.com/)).
+Check [all the games made with](http://dreamengine.dreamirl.com/)
 
 Now let's look at the "cool" features!
 
@@ -49,13 +52,13 @@ Cool features
 * gamepad's API for Chrome, Firefox, Edge and a compatible one with Windows8 (if you bring the XInput component on you project and use the SystemDetection)
 * multi-quality (you need no more stuff than write your qualities settings in the imagesDatas file)
 * Inputs triggering are very simple (keyboard and mouse/touch, compatible with multi-touch, and possible to work with interval) just write a settings file
-* nice Game Objects, with a hierarchy system and with components (renderers, collider, events triggering), the addAutomatism is your new friend (very powerful for AI, timers, delay, it's like a setTimeout but with or without repeat and under control of the engine and the delta-time)
+* nice GameObject class, with a hierarchy system and with components (renderers, collider, events triggering), the addAutomatism is your new friend (very powerful for AI, timers, delay, it's like a setTimeout but with or without repeat and under control of the engine and the delta-time)
 * it's think to inherit from base class as you want (so it's very easy to make plugins for everyone), but it's only an option you can also make your whole game in one file ;)
 * a simple image loader with configuration through a basic list (handle simple and complex sheet loading)
 * it work with an intern dictionary (LangSystem) to provide an easy way for the localisation
 * Achievement API inside
 * Audio file loading and API inside, split FX and musics
-* powerfull mouse/touch events tree, from the render to the collider, you can handle event on each objects and shut it down
+* powerfull mouse/touch events tree, from the render to the collider, you can handle event on each objects and shut it down at any time
 * easy to bring on new platforms with the SystemDetection (you have to override what you want in the system file, and bind stuff on init)
 
 
@@ -88,7 +91,7 @@ Open an issue or send a pull request !
 Credits
 ===========
 
-The website [HTML5-Dreamengine](http://dreamengine.dreamirl.com) if you wanna help me on this I say hell yes.
+The website [HTML5-Dreamengine](http://dreamengine.dreamirl.com)
 You can also follow me on [Twitter](http://twitter.com/inateno)
 
 License

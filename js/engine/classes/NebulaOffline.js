@@ -24,6 +24,10 @@ function( about, Event, SaveSystem, LangSystem
       ,"nebula-firewall"     : "Chargement impossible, il semble que votre pare-feu bloque la connexion, ou le serveur est down"
     }
   };
+  
+  var _apiUrl = "http://nebula.dreamirl.com:8080";
+  var _nebulaUrl = "http://nebula.dreamirl.com/Nebula.js?r=" + Date.now();
+  
   var NebulaOffline = new function()
   {
     var _self = this;
@@ -78,7 +82,10 @@ function( about, Event, SaveSystem, LangSystem
       this.vignet = vi;
       vi.addEventListener( "click", function()
       {
-        _self.show();
+        if ( _self.visible )
+          _self.hide();
+        else
+          _self.show();
       }, true );
       Event.trigger( "nebula-show" );
       Event.on( "force-nebula-load", this.loadClient, this );
@@ -98,7 +105,7 @@ function( about, Event, SaveSystem, LangSystem
         // hackInit on server
         var initScript = document.createElement( "script" );
           initScript.type = "text/javascript";
-          initScript.src = "http://dreamirl.com:8080/hackInit";
+          initScript.src = _apiUrl + "/hackInit";
         _self.tempLoader.style.display = "block";
         initScript.onload = function()
         {
@@ -107,7 +114,7 @@ function( about, Event, SaveSystem, LangSystem
           // then check if logged
           var islogged = document.createElement( "script" );
             islogged.type = "text/javascript";
-            islogged.src = "http://dreamirl.com:8080/isLogged";
+            islogged.src = _apiUrl + "/isLogged";
           islogged.onload = function()
           {
             // if it is, and if there is no arguments to prevent it, force load Nebula (hided)
@@ -170,12 +177,13 @@ function( about, Event, SaveSystem, LangSystem
       {
         delete _self.tempLoader;
         window.Nebula.init( about, Event, SaveSystem, Notifications, AchievementSystem );
+        delete window.Nebula;
         return;
       }
       var script = document.createElement( "script" );
         script.type = "text/javascript";
         // script.src = "http://localhost/dreamirl/src/nebula/main.js?r=" + Date.now();
-        script.src = "http://dreamirl.com/Nebula.js?r=" + Date.now();
+        script.src = _nebulaUrl;
       document.body.appendChild( script );
       script.onload = this.onLoadClient;
       script.onerror = function()
@@ -196,8 +204,8 @@ function( about, Event, SaveSystem, LangSystem
         delete _self.tempLoader;
       };
       // only for Nebula dev - not compiled
-      if ( e )
-        eval( 'require( [ "Nebula" ] )' );
+      // if ( e )
+      //   eval( 'require( [ "Nebula" ] )' );
     };
   };
   

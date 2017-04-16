@@ -367,6 +367,24 @@ function( PIXI, Time, CONFIG )
       return new Vector2( this.x, this.y, this._z );
   };
   
+  /**
+   * return a positive angle difference between 2 angles.
+    Example, if A = 0 and B = Math.PI*2, then difference is 0.
+    (or A = 0.1 B = 6, difference is 0.383185307179586)
+   */
+  Vector2.prototype.getAnglesDifference = function( angleA, angleB )
+  {
+    if ( angleB === undefined )
+      angleB = this.rotation;
+    
+    var difference = angleA - angleB;
+    if ( difference < -Math.PI )
+      difference += Math.PI*2;
+    else if ( difference > Math.PI )
+      difference -= Math.PI*2;
+    return Math.abs( difference );
+  };
+  
   Vector2.prototype.DEName = "Vector2";
   
   CONFIG.debug.log( "Vector2 loaded", 3 );
