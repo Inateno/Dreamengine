@@ -26,7 +26,7 @@ function( DE, TouchControl )
     DE.CONFIG.DEBUG_LEVEL = 2;
     // DE.CONFIG.DEBUG_LEVEL = 2;
     // render
-    Game.render = new DE.Render( "render", { backgroundColor: "0x880044", fullScreen: "ratioStretch", width: 1920, height: 1080 } );
+    Game.render = new DE.Render( "render", { backgroundColor: "0x1100A4", fullScreen: "ratioStretch", width: 1920, height: 1080 } );
     Game.render.init();
     
     DE.start();
@@ -38,7 +38,7 @@ function( DE, TouchControl )
     console.log( "game starto!!" );
     Game.scene = new DE.Scene( "Test" );
     
-    Game.camera = new DE.Camera( 1920, 1080, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "rgb(50,50,80)" } );
+    Game.camera = new DE.Camera( 1920, 1080, 0, 0, { 'name': "Test zoom 100%", 'backgroundColor': "0x889944" } );
     Game.camera.scene = Game.scene;
     Game.render.add( Game.camera );
     
@@ -73,7 +73,7 @@ function( DE, TouchControl )
     
     Game.bg = new DE.GameObject( {
       x: 960
-      ,y: 540
+      ,y: 1400
       ,zindex: -1
       ,renderer: new DE.SpriteRenderer( { spriteName: "bg" } )
     } );
@@ -212,10 +212,27 @@ function( DE, TouchControl )
     Game.scene.add( so, inout );
     
     Game.scene.add( new DE.GameObject( {
-      x: 960, y: 100
-      ,zindex: 1000
-      ,renderer: new DE.TextRenderer( "Open the console to see debug message" )
-    } ) );
+        x: 960, y: 100
+        ,zindex: 1000
+        ,renderer: new DE.TextRenderer( "Open the console to see debug message" )
+      } )
+      , new DE.GameObject( {
+        x: 960, y: 200
+        ,renderer: new DE.TextRenderer( "This is camera background color" )
+      } )
+      , new DE.GameObject( {
+        x: 960, y: 1000
+        ,renderer: new DE.TextRenderer( "This is a gameobject with a superlarge sprite" )
+      } )
+      , new DE.GameObject( {
+        x: 200, y: 850
+        ,renderer: new DE.TextRenderer( "A RectRenderer with x at 25" )
+      } )
+      , new DE.GameObject( {
+        x: 200, y: 900, 
+        renderer: new DE.RectRenderer( { x: 25, "fillColor": "0x0000FF", "width": 50, "height": 50 } )
+      } )
+    );
     
     var lookCursor = new DE.GameObject( {
       x: 150, y: 150,

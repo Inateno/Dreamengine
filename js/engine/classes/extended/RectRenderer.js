@@ -28,6 +28,9 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
     this.scale.x = params.scaleX || params.scale || 1;
     this.scale.y = params.scaleY || params.scale || 1;
     
+    this.x = params.x || 0;
+    this.y = params.y || 0;
+    
     this._rectData = {};
     
     this.rectData = {
@@ -78,7 +81,7 @@ function( PIXI, ImageManager, CONFIG, Time, Event, BaseRenderer )
   {
     this.clear();
     this.beginFill( this.fillColor, 1 );
-    this.drawRect( this.x, this.y, this.rectData.width, this.rectData.height );
+    this.drawRect( 0, 0, this.rectData.width, this.rectData.height );
     this.endFill();
   }
   

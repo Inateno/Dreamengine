@@ -26,9 +26,9 @@
  * @property {Scene} [scene=null] you can give a scene on creation, or later
 **/
 define( [ 'PIXI', 'DE.CONFIG', 'DE.Vector2', 'DE.Mid.gameObjectMouseEvent'
-        , 'DE.ImageManager', 'DE.Event', 'DE.Time' ],
+        , 'DE.ImageManager', 'DE.Event', 'DE.Time', 'DE.RectRenderer' ],
 function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
-        , ImageManager, Event, Time )
+        , ImageManager, Event, Time, RectRenderer )
 {
   // Camera is a PIXI container append in the render, it had an other container for scene
   function Camera( width, height, x, y, params )
@@ -53,6 +53,11 @@ function( PIXI, CONFIG, Vector2, gameObjectMouseEvent
     if ( params.backgroundImage )
     {
       this.background = new PIXI.extras.TilingSprite( PIXI.utils.TextureCache[ PIXI.loader.resources[ params.backgroundImage ].url ], width, height );
+      this.addChild( this.background );
+    }
+    else if ( params.backgroundColor )
+    {
+      this.background = new RectRenderer( { "width": width, "height": height, "fillColor": params.backgroundColor } )
       this.addChild( this.background );
     }
     
