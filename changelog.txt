@@ -1,3 +1,8 @@
+---- 0.27 ----
+  * WIP, more incoming
+  * add some plugins
+  * add < condition in achievements
+
 ---- 0.26.4 ----
  Sample for z-projection test (todo fix it) + minor features
   * add Vector2.getAnglesDifference

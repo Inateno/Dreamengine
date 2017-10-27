@@ -131,7 +131,11 @@ function( stash, CONFIG, about, Event, AudioManager
             break;
           case "increment":
           case ">=":
-            if ( ob.target > ua[ i ].value )
+            if ( ob.target >= ua[ i ].value )
+              obComplete = false;
+            break;
+          case "<":
+            if ( ob.target < ua[ i ].value )
               obComplete = false;
             break;
         }
