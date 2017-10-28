@@ -1,0 +1,29 @@
+{
+  "name": "dreamengine",
+  "version": "1.0.0",
+  "description": "A simple and fast 2D engine based on PIXI",
+  "main": "js/main.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Inateno/Dreamengine.git"
+  },
+  "keywords": [
+    "webgl",
+    "2D",
+    "PIXI",
+    "canvas",
+    "js",
+    "games"
+  ],
+  "author": "Inateno",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Inateno/Dreamengine/issues"
+  },
+  "homepage": "https://github.com/Inateno/Dreamengine#readme"
+}
