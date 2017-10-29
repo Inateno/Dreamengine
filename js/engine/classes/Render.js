@@ -1,3 +1,13 @@
+/**
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
+
+/**
+ * @constructor Render
+ * @class a Render is globally the canvas in your DOM
+ * A Render will render every scene you add to it and is rendered by the MainLoop
+ * @example Game.render = new DE.Render( "Test", { size, options } );
+ */
 define( [
   'PIXI'
   , 'DE.config'
@@ -15,6 +25,12 @@ function(
   {
     var _params = params || {};
     
+    /**
+     * the PIXI Renderer
+     * @public
+     * @memberOf Render
+     * @type {PIXI.Renderer}
+     */
     this.pixiRenderer = new PIXI.autoDetectRenderer(
       _params.width, _params.height
       , {
@@ -31,6 +47,14 @@ function(
       }
     );
     
+    // this.pixiRenderer.plugins.interaction.mousedown
+    
+    /**
+     * For convenience we use a PIXI.Container to add each scenes to, this way we just need to render this container
+     * @public
+     * @memberOf Render
+     * @type {PIXI.Container}
+     */
     this.mainContainer = new PIXI.Container();
     
     // TODO NEED camera distinction ? this.cameras = [];
@@ -52,10 +76,11 @@ function(
     this.freeze = false; // set to true to prevent update but keep render
   }
 
-  /****
-   * init@void
-    create canvas render, buffer, init ctx, and append in the dom
-    bind Inputs, then call updateSizes
+  /**
+   * create the parent div, add it to the dom, add this render to the MainLoop
+   * bind Inputs, then call updateSizes
+   * @public
+   * @memberOf Render
    */
   Render.prototype.init = function()
   {
@@ -108,9 +133,10 @@ function(
     */
   };
 
-  /****
-   * render@void
-    render all cameras binded on this Render
+  /**
+   * render all cameras binded on this Render (called by MainLoop)
+   * @private
+   * @memberOf Render
    */
   Render.prototype.render = function()
   {
@@ -130,10 +156,11 @@ function(
     this.pixiRenderer.render( this.mainContainer );
   };
 
-  /****
-  * add@this( scene@Scene )
-  add a scene on this render
-  */
+  /**
+   * add a scene on this render
+   * @public
+   * @memberOf Render
+   */
   Render.prototype.add = function( scene )
   {
     this.mainContainer.addChild( scene );

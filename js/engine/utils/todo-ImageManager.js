@@ -6,7 +6,7 @@
  @Inateno
 
 ***
-* singleton@ImageManager
+* @namespace ImageManagser
 **/
 define( [ 'PIXI', 'DE.CONFIG', 'DE.States', 'DE.Event' ],
 function( PIXI, CONFIG, States, Event )

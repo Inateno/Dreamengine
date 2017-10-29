@@ -9,8 +9,8 @@ define( [
   
   // utils
   , 'DE.Save'
-  // , 'DE.Inputs'
-  // , 'DE.gamepad'
+  , 'DE.Inputs'
+  , 'DE.gamepad'
   , 'DE.Audio'
   , 'DE.Localization'
   , 'DE.Notifications'
@@ -63,37 +63,61 @@ function(
    */
   DE.init = function( params )
   {
+    if ( !params ) {
+      throw "Cannot init DreamEngine without the options, take a sample for easy start";
+    }
     // configuration trough a global script tag is possible
     window.ENGINE_SETTING = window.ENGINE_SETTING || {};
-      
+    
     // set the about informations
     DE.about.set( params.about );
     
     // init the Save with your custom scheme
     DE.Save.init( params.saveModel, params.saveIgnoreVersion );
     
-    // init localization
+    // init localization with dictionary
     DE.Localization.init( params.dictionary || {} );
     
+    // make all audios instance and launch preload if required
+    DE.Audio.loadAudios( params.audios || [] );
+    
     // init SystemDetection (if you develop special features for a special OS release)
-    DE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
+    // TODO DE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
     
     // set achievements with your custom list
     DE.Achievements.init( params.achievements || [] );
     
-    if ( !params.ignoreNotification ) {
-      DE.Notifications.init( params );
+    if ( !params.ignoreNotifications
+      && params.useNotifications !== false
+      && !params.ignoreNotification ) {
+      DE.Notifications.init( params.notifications || {} );
     }
+    else {
+      DE.config.notifications.enable = false;
+    }
+    
+    // init input listener with your custom list 
+    DE.Inputs.init( params.inputs || {} );
     
     if ( !params.preventGamepad ) {
       DE.gamepad.init();
     }
+    
+    if ( !params.onLoad ) {
+      console.error( "No onLoad given on init, nothing will happen after images load" );
+    }
+    this.onLoad = params.onLoad || function(){ console.log( "You have to give a onLoad callback to the DE.init options" ); };
+    
+    params.onReady();
   };
   
   DE.start = function()
   {
     DE.MainLoop.launched = true;
     DE.MainLoop.loop();
+    
+    // TODO move this when the first file loader ends
+    this.onLoad();
   };
   
   // pause / unpause the game

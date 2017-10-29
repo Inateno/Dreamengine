@@ -16,7 +16,7 @@ function( config )
     this.DEName        = "Localization";
     this.currentLang   = "en";
     
-    this.dictionary   = {};
+    this.dictionary   = { "en": {} };
     this.avalaibleLang = new Array();
     
     /**

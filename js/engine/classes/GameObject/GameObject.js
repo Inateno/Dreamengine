@@ -1,3 +1,33 @@
+/**
+ * @author Inateno / http://inateno.com / http://dreamirl.com
+ */
+
+/**
+ * @constructor GameObject
+ * @class The core of the engine, all is based on GameObjects
+ * They can get renderers, collider (can add more than one but not in an array)
+ * You can make groups by adding a GameObject to an other (no recursive limit but be prudent with that,
+ * I tried a 5 levels hierarchy and this work perfectly, but you shouldn't have to make a lot)
+ * @param {object} params - All parameters are optional
+ * @author Inateno
+ * @example // the most simple example
+ * var ship = new DE.GameObject();
+ * @example // with positions
+ * var ship = new DE.GameObject( { "x": 100, "y": 200, "zindex": 1, "name": "ship", "tag": "player" } );
+ * @example // a complete GameObject with a sprite and a CircleCollider
+ * var ship = new DE.GameObject( {
+ *   "x": 100, "y": 200, "zindex": 1, "name": "ship", "tag": "player"
+ *   ,"renderers": [ new DE.SpriteRenderer( { "spriteName": "ship", "offsetY": 100 } ) ]
+ *   ,"collider": new DE.CircleCollider( 60, { "offsetY": 50 } )
+ * } );
+ * @property {String} [id="0-999999999"] the gameObject id
+ * @property {String} [name="noname"] use name to detect precise type (example player)
+ * @property {String} [tag="none"] use tags for quick type recognition (example characters)
+ * @property {Array-GameObject} [gameObjects=[]] if you want to give childs on creation
+ * @property {Vector2} [vector2] useful rotation/translate tool
+ * @property {Renderer} [renderer] give a renderer
+ * @property {Array-Renderer} [renderers] give some renderers
+ */
 define( [
   'PIXI'
   , 'DE.Vector2'
@@ -27,14 +57,32 @@ function(
      * If false, the object wont be updated anymore (but still renderer).
      *
      * @public
-     * @member {DE.GameObject}
+     * @memberOf GameObject
      * @type {Boolean}
      */
     this.updatable = true;
     
     /**
+     * Target to focus (position, Vector2, Points or GameObject, whatever with x/y)
+     *
+     * @public
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.target = undefined;
+    
+    /**
+     * Flag used in intern logic (for delete) but can be used outside when it's not conflicting with the engine's logic
+     *
+     * @public
+     * @memberOf GameObject
+     * @type {String}
+     */
+    this.flag   = undefined;
+    
+    /**
      * @readOnly
-     * @member {DE.GameObject}
+     * @memberOf GameObject
      * @type {Array-GameObject}
      */
     this.gameObjects = params.gameObjects || [];
@@ -98,7 +146,7 @@ function(
       {
         // TODO ? this is useful for dynamic pools (feature incoming)
         // if ( this.enable != value )
-        //   this.trigger( value ? 'active' : 'unactive' );
+        //   this.emit( value ? 'active' : 'unactive' );
         
         this.updatable  = value;
         this.visible    = value;
@@ -310,11 +358,126 @@ function(
         this.gameObjects.splice( index, 1 );
         this.removeChild( object );
       }
+      return object;
     }
     else {
+      var target = this.gameObjects[ object ];
+      
       this.gameObjects.splice( object, 1 );
-      this.removeChildAt( object );
+      // remove from PIXI Container
+      this.removeChild( target );
+      
+      return target;
     }
+  };
+  
+  /**
+   * delete the object
+   * @protected
+   * @memberOf GameObject
+   * @param {GameObject} object
+   * object reference or object index in the gameObjects array
+   */
+  GameObject.prototype.delete = function( object )
+  {
+    var target = this.remove( this.gameObjects[ object ] );
+    
+    target.killMePlease();
+    delete target;
+    return this;
+  };
+  
+  /**
+   * delete the object<br>
+   * this is the good way to destroy an object in the scene<br>
+   * the object is disable and the mainloop will destroy it at the next frame<br>
+   * emit a kill event with current instance, and call onKill method if provided
+   * @public
+   * @memberOf GameObject
+   * @param {Object} [params]
+   * @property {Boolean} [preventEvents] will prevent all kill events
+   * @property {Boolean} [preventKillEvent] will prevent the kill event
+   * @property {Boolean} [preventKilledEvent] will prevent the killed event
+   * if you provide preventEvents, all kill events will be prevented
+   * @example myObject.askToKill();
+   * @example myObject.askToKill( { preventEvents: true } );
+   */
+  GameObject.prototype.askToKill = function( params )
+  {
+    this.target = null;
+    this.killArgs = params || {};
+    
+    if ( !this.killArgs.preventEvents && !this.killArgs.preventKillEvent ) {
+      if ( this.onKill ) {
+        this.onKill();
+      }
+      this.emit( "kill", this );
+    }
+    
+    this.enable = false;
+    this.flag   = "delete";
+    
+    if ( !this.parent || !this.parent.enable ) {
+      this.killMePlease();
+    }
+  };
+  
+  /**
+   * If you want to get an intern method when your object is killed<br>
+   * usefull when you make your own GameObjects classes, and don't want to inherit all the "on("kill")" events registered<br>
+   * here the list of killed events:<br>
+   * - onKill: when you called askToKill<br>
+   * - onKilled: when your object is deleted (just before we remove collider and childs, so you can still do actions on)
+   * @public
+   * @override
+   * @memberOf GameObject
+   * @function
+   * @example myObject.onKill = function(){ console.log( "I'm dead in 16 milliseconds !" ); };
+   * @example myObject.onKilled = function(){ console.log( "Ok, now I'm dead" ); };
+   * @example myObject.on( "kill", function( currentObject ){ console.log( "I'm dead in 16 milliseconds !" ); } );
+   * @example myObject.on( "killed", function( currentObject ){ console.log( "Ok, now I'm dead" ); } );
+   */
+  GameObject.prototype.onKill   = undefined;
+  GameObject.prototype.onKilled = undefined;
+  
+  /**
+   * this function is called when the update loop remove this GameObject (after an askToKill call)<br>
+   * you shouldn't call it directly, if you do it, maybe other GameObjects in the current 
+   * frame are dealing with this one and should produce errors<br>
+   * <b>if you provided to askToKill a preventEvents or a preventKilledEvent this will 
+   * not emit killed event and will not call onKilled method if provided</b>
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.killMePlease = function()
+  {
+    if ( !this.killArgs.preventEvents && !this.killArgs.preventKilledEvent ) {
+      if ( this.onKilled )
+        this.onKilled();
+      this.emit( "killed", this );
+    }
+    
+    this.target = undefined;
+    this.enable = false;
+    this.flag   = undefined;
+    
+    // check if object isn't already destroyed and there is children inside 'cause PIXI don't do it
+    // and prevent crash (if user ask multiple destroy)
+    if ( !this.children ) {
+      this.children = [];
+    }
+    
+    for ( var i = 0, obj; i < this.gameObjects.length; ++i )
+    {
+      obj = this.remove( i );
+      obj.killMePlease();
+    }
+    
+    this.destroy( {
+      children     : true
+      , baseTexture: this.destroyTextureOnKill
+      , texture    : this.destroyTextureOnKill
+    } );
   };
   
   GameObject.prototype.DEName = "GameObject";

@@ -18,43 +18,42 @@ require.config( {
   , paths: {
     'engine'    : 'engine/index'
     
-    // DATAS
-    // ,'DE.imagesDatas' : 'datas/imagesDatas'
-    // ,'DE.inputsList'  : 'datas/inputsList'
-    // ,'DE.audiosList'  : 'datas/audiosList'
-    // ,'DE.dictionary'  : 'datas/dictionary'
-    // ,'DE.achievements': 'datas/achievements'
-    
     // ,'gameLoop'       : 'custom/gameLoop'
     ,'Game'           : 'game1/Game'
     
     // ,'DE.TouchControl' : 'plugins/TouchControl'
+    
+    // custom data
+    ,'inputs'      : 'game1/data/inputs'
+    ,'audios'      : 'game1/data/audios'
+    ,'dictionary'  : 'game1/data/dictionary'
+    ,'achievements': 'game1/data/achievements'
+    ,'images'      : 'game1/data/images'
   }
   , urlArgs: 'bust=' + Date.now()
 } );
 
 // init here your game with your code by using the Engine (as DE)
-require( [ 'engine', 'Game' ],
-function( DE, Game )
+require( [ 'engine', 'Game', 'inputs', 'audios', 'dictionary', 'images', 'achievements' ],
+function( DE, Game, inputs, audios, dictionary, images, achievements )
 {
   console.log( "game main file loaded DREAM_ENGINE:" , DE );
-  window.DE = DE;
   
   DE.config.DEBUG = true;
   DE.config.DEBUG_LEVEL = 5;
   
-  console.log( "make game" );
-  Game.make();
-  // DE.CONFIG.version = "1.0.0";
-  // DE.init(
-  // {
-  //   'onReady': Game.init
-  //   , 'onStart': Game.start
-  //   // , 'images': images, 'audios': audios
-  //   // , 'inputs': inputs, 'dictionary': dictionary
-  //   // , 'about': { 'gameName': "StressTest", "namespace": "ztech", 'author': "Dreamirl", 'gameVersion': "0.1" }
-  //   // , 'saveModel': {}, 'saveIgnoreVersion': true
-  //   // , 'achievements': achievements
-  //   // , 'ignoreNebula': true
-  // } );
+  DE.init(
+  {
+    'onReady'              : Game.init
+    , 'onLoad'             : Game.onload
+    , 'ignoreNotifications': true
+    , 'inputs'             : inputs
+    , 'audios'             : audios
+    , 'dictionary'         : dictionary
+    , 'images'             : images
+    , 'achievements'       : achievements
+    , 'about': { 'gameName': "Engine Dev Game 1", "namespace": "noting", 'author': "Inateno", 'gameVersion': "0.1" }
+    , 'saveModel': { "nShoots": 0 }, 'saveIgnoreVersion': true
+    , 'ignoreNebula': true
+  } );
 } );

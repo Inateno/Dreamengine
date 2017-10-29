@@ -1,8 +1,10 @@
 define( [
   'DE.Time'
+  , 'DE.gamepad'
 ],
 function(
   Time
+  , gamepad
 )
 {
   var MainLoop = new function()
@@ -30,19 +32,17 @@ function(
       for ( var i = 0, r; r = MainLoop.renders[ i ]; ++i )
       {
         r.render();
-        // r.update(); // call waiting input here
+        // r.update(); // was used for touch things, needed ? (call waiting input here)
       }
       
-      // TODO apply audio fades (if there is some)
+      gamepad.update( Time.currentTime );
       
       while( Time.missedFrame >= 0 )
       {
-      /* TODO
-        => update Gamepad
-        => update MainLoop.customLoop (keep it ?)
-        => update DE.additionalModules[ x ].update( time ) ?
-        => update scenes
-        */
+        /* TODO
+          => update MainLoop.customLoop (keep it ?)
+          => update DE.additionalModules[ x ].update( time ) ?
+          */
         for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
         {
           if ( s.enable ) {
@@ -51,8 +51,9 @@ function(
         }
         
         /*
-        => update Renders GUIs ?
+          => update Renders GUIs ?
         */
+        
         Time.deltaTime = 1;
         Time.timeSinceLastFrameScaled = 0;
         Time.timeSinceLastFrame = 0;

@@ -20,9 +20,6 @@ function( config, howler, Events )
     
     this.loadAudios = function( audioList )
     {
-      this.music.volume = this.volume;
-      this.fx.volume = this.volume * 0.75;
-      
       for ( var m = 0, audioData, audio, urls, params; audioData = audioList[ m ]; ++m )
       {
         params = audioData[ 3 ] || {};
@@ -36,7 +33,6 @@ function( config, howler, Events )
           src          : urls
           , autoplay   : params.autoplay || false
           , loop       : params.loop || false
-          , volume     : params.volume || 1
           , sprite     : params.sprite || {}
           , html5      : params.html5 !== undefined ? params.html5 : false
           , preload    : params.preload !== undefined ? params.preload : true
@@ -44,6 +40,7 @@ function( config, howler, Events )
           , rate       : params.rate || 1
           , pool       : params.pool || 1
         } );
+        audio.volume( params.volume || params.isMusic ? this.music.volume : this.fx.volume );
         /**/
         
         audio.name = audioData[ 0 ] || 'noname';
@@ -108,6 +105,7 @@ function( config, howler, Events )
     this.music = new function()
     {
       this._musics = {};
+      this.volume = 0.75;
       
       /**
        * get all musics, an other way to access (instead of Audio.music._musics )
@@ -128,7 +126,7 @@ function( config, howler, Events )
        */
       this.get = function( name )
       {
-        return this._musics[ name ].sound;
+        return this._musics[ name ];
       }
       
       /**
@@ -152,9 +150,46 @@ function( config, howler, Events )
        */
       this.play = function( name, sprite )
       {
-        if ( !this._musics[ name ] ){ return; }
+        if ( !this._musics[ name ] ){
+          console.error( "Audio.music: not declared: " + name + " - " + sprite );
+          return;
+        }
         
         this._musics[ name ].play( sprite );
+        return this;
+      }
+      
+      /**
+       * pause all instance of the given music
+       * @memberOf Audio.music
+       * @public
+       * @param {String} name - name of the music to pause
+       */
+      this.pause = function( name )
+      {
+        if ( !this._musics[ name ] ){
+          console.error( "Audios.music: not declared: " + name );
+          return;
+        }
+        
+        this._musics[ name ].pause();
+        return this;
+      }
+      
+      /**
+       * stop all instance of the given music
+       * @memberOf Audio.music
+       * @public
+       * @param {String} name - name of the music to stop
+       */
+      this.stop = function( name )
+      {
+        if ( !this._musics[ name ] ){
+          console.error( "Audios.music: not declared: " + name );
+          return;
+        }
+        
+        this._musics[ name ].stop();
         return this;
       }
       
@@ -249,6 +284,13 @@ function( config, howler, Events )
        */
       this.setVolume = function( val, usePercent )
       {
+        if ( usePercent ) {
+          this.volume = this.volume * val;
+        }
+        else {
+          this.volume = val;
+        }
+        
         for ( var i in this._musics )
         {
           if ( usePercent ) {
@@ -269,6 +311,7 @@ function( config, howler, Events )
     this.fx = new function()
     {
       this._fxs = {};
+      this.volume = 0.4;
       
       /**
        * get a specific fx
@@ -365,6 +408,14 @@ function( config, howler, Events )
        */
       this.setVolume = function( val, usePercent )
       {
+        if ( usePercent ) {
+          this.volume = ( this.volume * val * 100 >> 0 ) / 100;
+        }
+        else {
+          this.volume = val;
+        }
+        
+        
         for ( var i in this._fxs )
         {
           if ( usePercent ) {

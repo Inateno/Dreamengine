@@ -7,8 +7,8 @@
  * (and set padding on the parent to simulate a margin)</b>
  * @namespace Notifications
  */
-define( [],
-function()
+define( [ 'DE.config' ],
+function( config )
 {
   var Notifications = new function()
   {
@@ -45,15 +45,17 @@ function()
       var templateContainer = document.getElementById( this.templateName )
       this.template  = params.template || templateContainer ? templateContainer.innerHTML : null;
       
-      if ( !this.container || !this.template )
+      if ( !this.container || !this.template ) {
         throw new Error( "Can't init Notifications without a container element AND a template -- "
             + "container selector:: " + this.selector + " -- templateName:: " + this.templateName );
+      }
       
       this.inited = true;
       this.notifsHeight = this.container.offsetHeight || 0;
       
-      if ( templateContainer )
+      if ( templateContainer ) {
         document.body.removeChild( templateContainer );
+      }
     }
     
     /**
@@ -66,11 +68,15 @@ function()
      */
     this.create = function( text, expirationTime ) // use this one
     {
-      if ( !this.inited )
-      {
-        console.log( "You don't init Notifications, init it before call it" );
+      if ( !config.notifications.enable ) {
         return;
       }
+      
+      if ( !this.inited ) {
+        console.log( "Notifications: You didn't called Notifications.init" );
+        return;
+      }
+      
       this.notifsHeight = this.notifsHeight < 0 ? 0 : this.notifsHeight;
       
       var time = expirationTime || this.defaultExpirationTime;
@@ -86,9 +92,9 @@ function()
       this.notifs[ id ] = notif;
       this.notifs[ id ].getElementsByClassName( 'notifClose' )[ 0 ]
         .addEventListener( 'click', function()
-      {
-        _self.remove( id );
-      } );
+        {
+          _self.remove( id );
+        } );
       
       var height = this.notifs[ id ].offsetHeight;
       this.notifsHeight += height;
@@ -121,8 +127,9 @@ function()
      */
     this.triggerRemove = function( id )
     {
-      if ( !this.notifs[ id ] )
+      if ( !this.notifs[ id ] ) {
         return;
+      }
       
       this.notifs[ id ].className = this.notifs[ id ].className + ' disapear';
       
@@ -148,5 +155,6 @@ function()
       return;
     }
   };
+  
   return Notifications;
 } );

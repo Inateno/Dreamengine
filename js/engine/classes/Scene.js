@@ -150,5 +150,53 @@ function(
   };
   
   Scene.prototype.DEName = "Scene";
+  
+  /**
+   * Delete and remove an object in the scene.
+   * You should prefer askToKill GameObject's method because it's safer (if you know what you do go crazy).
+   * @public
+   * @memberOf Scene
+   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
+   */
+  Scene.prototype.delete = function( object )
+  {
+    var target = this.remove( object );
+    target.killMePlease();
+    
+    delete target;
+    return this;
+  };
+  
+  /**
+   * Remove an object on this scene (it is not deleted !).
+   * @public
+   * @memberOf Scene
+   * @param {GameObject} object can be the index of the GameObject in the gameObjects array
+   */
+  Scene.prototype.remove = function( object )
+  {
+    var target;
+    
+    // if it's an index, it's dangerous D: (excepted when it came from update, which is faster than idnexindexOf)
+    if ( isNaN( object ) ) {
+      var index = this.children.indexOf( object );
+      
+      if ( index !== - 1 ) {
+        // remove from PIXI Container
+        this.removeChild( object );
+      }
+      target = object;
+    }
+    else {
+      target = this.children[ object ];
+      
+      // remove from PIXI Container
+      this.removeChild( target );
+    }
+    
+    this.emit( "update-children" );
+    return target;
+  };
+  
   return Scene;
 } );

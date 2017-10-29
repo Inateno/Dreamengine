@@ -22,48 +22,37 @@ function( DE )
   Game.init = function()
   {
     console.log( "game init" );
-    // DE.CONFIG.DEBUG = 1;
-    // DE.CONFIG.DEBUG_LEVEL = 2;
-    // // DE.CONFIG.DEBUG_LEVEL = 2;
-    // // render
-    // Game.render = new DE.Render( "render", { backgroundColor: "0x880044", fullScreen: "ratioStretch", width: 1920, height: 1080 } );
-    // Game.render.init();
+    // DE.config.DEBUG = 1;
+    // DE.config.DEBUG_LEVEL = 2;
     
-    // DE.start();
-  }
-  
-  Game.start = function()
-  {
-    console.log( "game start" );
-  };
-  
-  Game.make = function()
-  {
-    //Create the renderer
-    var render = new DE.Render( "render", {
+    // Create the renderer before assets start loading
+    Game.render = new DE.Render( "render", {
       fullScreen       : "ratioStretch"
       , width          : 1280
       , height         : 720
       , backgroundColor: "0x00004F" } );
-
-    // var renderer = PIXI.autoDetectRenderer(512, 512
-    //   , { antialias: false, transparent: false, resolution: 1 });
-    // document.body.appendChild(renderer.view);
+    Game.render.init();
+    
+    DE.start();
+  }
+  
+  Game.onload = function()
+  {
+    console.log( "game start" );
 
     // scene
     var scene = new DE.Scene();
 
-    // ne pas faire ça car le bounds se limite a la taille et position des objets dans la scene...
+    // don't do this because DisplayObject bounds is not set to the render size but to the objects inside the scene
     // scene.interactive = true;
     // scene.click = function()
     // {
     //   console.log( "clicked", arguments );
     // }
 
-    // caméra ??
-    //Tell the `renderer` to `render` the `stage`
-    render.add( scene );
-
+    // if no Camera, we add the Scene to the render (this can change if I make Camera)
+    Game.render.add( scene );
+    
     // ImageManager ? Loader ??
     DE.PIXI.loader
       .add( { name: "ayeraShip", url: "imgs/ayera-ship.png" } )
@@ -82,8 +71,30 @@ function( DE )
           console.log( "click" );
         }
       } );
-      Game.ship.addAutomatism( "translateY", "translateY", { value1: -2 } );
-      Game.ship.addAutomatism( "rotate", "rotate", { value1: 0.01 } );
+      Game.ship.axes = { x: 0, y: 0 };
+      Game.ship.checkInputs = function()
+      {
+        this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } );
+      };
+      Game.ship.addAutomatism( "checkInputs", "checkInputs" );
+      Game.ship.fire = function()
+      {
+        DE.Audio.fx.play( "piew" );
+        var bullet = new DE.GameObject( {
+          x        : this.x
+          ,y       : this.y
+          ,rotation: this.rotation
+          //,renderer
+        } );
+        bullet.addAutomatism( "translateY", "translateY", { value1: -6  } );
+        bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
+        bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
+        // bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );
+        
+        scene.add( bullet );
+      }
+      // Game.ship.addAutomatism( "translateY", "translateY", { value1: -2 } );
+      // Game.ship.addAutomatism( "rotate", "rotate", { value1: 0.01 } );
       
       Game.ship2 = new DE.GameObject( {
         x: 700, y: 640
@@ -95,12 +106,24 @@ function( DE )
       // scene.add
       scene.add( Game.ship, Game.ship2 );
     }
+    
+    DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -1; } );
+    DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 1; } );
+    DE.Inputs.on( "keyUp", "right", function() { Game.ship.axes.x = 0; } );
+    DE.Inputs.on( "keyUp", "left", function() { Game.ship.axes.x = 0; } );
+    
+    DE.Inputs.on( "keyDown", "up", function() { Game.ship.axes.y = -1; } );
+    DE.Inputs.on( "keyDown", "down", function() { Game.ship.axes.y = 1; } );
+    DE.Inputs.on( "keyUp", "down", function() { Game.ship.axes.y = 0; } );
+    DE.Inputs.on( "keyUp", "up", function() { Game.ship.axes.y = 0; } );
+    
+    DE.Inputs.on( "keyDown", "fire", function() { Game.ship.addAutomatism( "fire", "fire", { interval: 150 } ); } );
+    DE.Inputs.on( "keyUp", "fire", function() { Game.ship.removeAutomatism( "fire" ); } );
 
-    DE.start();
-    render.init();
   }
   
   window.Game = Game;
+  window.DE = DE;
 
   return Game;
 } );
