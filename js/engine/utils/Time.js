@@ -13,6 +13,9 @@ function()
     this.frameDelay  = 16;
     this.stopped     = false;
     
+    this.timeSinceLastFrame       = 0;
+    this.timeSinceLastFrameScaled = 0;
+    
     /****
      * update@Bool
       update frames

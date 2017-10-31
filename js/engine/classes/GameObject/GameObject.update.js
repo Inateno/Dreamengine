@@ -59,26 +59,27 @@ function(
       g.update( time );
     }
     
-    // TODO
-    // if ( this.visible )
-    // {
-    //   for ( var i = 0, r; r = this.renderers[ i ]; ++i )
-    //   {
-    //     if ( r.updateAnimation )
-    //       r.updateAnimation();
-    //     if ( r.applyFade )
-    //     {
-    //       r.applyFade();
-    //       r.applyScale();
-    //     }
-    //   }
-    // }
+    // this apply update on each renderer
+    if ( this.visible ) {
+      for ( var i = 0, r; r = this.renderers[ i ]; ++i )
+      {
+        if ( r.update ) {
+          r.update();
+        }
+        
+        if ( r.applyFade ) {
+          r.applyFade();
+          r.applyScale();
+        }
+      }
+    }
     
+    // TODO
     // this.applyFocus();
     // this.applyShake();
     // this.applyMove();
-    // this.applyFade();
-    // this.applyScale();
+    this.applyFade();
+    this.applyScale();
   };
   
   return GameObject;

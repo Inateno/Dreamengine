@@ -1,10 +1,16 @@
 define( [
   'DE.Time'
   , 'DE.gamepad'
+  , 'DE.GameObject'
+  , 'PIXI'
+  , 'DE.Events'
 ],
 function(
   Time
   , gamepad
+  , GameObject
+  , PIXI
+  , Events
 )
 {
   var MainLoop = new function()
@@ -12,6 +18,32 @@ function(
     this.DEName = "MainLoop";
     this.scenes = [];
     this.renders = [];
+    
+    this.createLoader = function()
+    {
+      this.loader = new GameObject( {
+        renderers: [
+          new PIXI.Text( "Loading...", new PIXI.TextStyle( {
+            fill           : 'white',
+            fontSize       : 35,
+            fontFamily     : 'Snippet, Monaco, monospace',
+            strokeThickness: 1,
+            align          : "center"
+          } ) )
+          // ,new SpriteRenderer( { spriteName: "loader" } )
+          // loader
+        ]
+      } );
+      this.loader.renderer.y += 150;
+      Events.on( 'ImageManager-pool-progress', function( poolName, progression )
+      {
+        MainLoop.loader.renderer.text = poolName + ": " + progression + "%";
+      } );
+      Events.on( 'ImageManager-pool-complete', function( poolName )
+      {
+        MainLoop.loader.renderer.text = "100%";
+      } );
+    }
     
     this.loop = function()
     {
@@ -24,6 +56,18 @@ function(
       
       // regulate fps OR if the Time machine is stopped
       if ( !Time.update() ) {
+        return;
+      }
+      
+      if ( MainLoop.displayLoader ) {
+        
+        for ( var i = 0, j; j = MainLoop.renders[ i ]; i++ )
+        {
+          MainLoop.loader.x = j.pixiRenderer.width * 0.5;
+          MainLoop.loader.y = j.pixiRenderer.height * 0.5;
+          j.directRender( MainLoop.loader );
+        }
+        
         return;
       }
       

@@ -16,6 +16,7 @@ require.config( {
     , 'DE.Notifications': 'utils/Notifications'
     , 'DE.Inputs'       : 'utils/Inputs'
     , 'DE.gamepad'      : 'utils/gamepad'
+    , 'DE.ImageManager' : 'utils/ImageManager'
     // TODO , 'DE.NebulaOffline': 'utils/NebulaOffline'
     // TODO , 'DE.Screen': 'utils/Screen'
     // TODO , 'DE.SystemDetection': 'utils/SystemDetection'
@@ -26,11 +27,17 @@ require.config( {
     , 'DE.Vector2': 'classes/Vector2'
     // TODO -- needed ? , 'DE.Camera': 'classes/Camera'
     
-    , 'DE.SpriteRenderer': 'classes/renderer/SpriteRenderer'
-    , 'DE.RectRenderer'  : 'classes/renderer/RectRenderer'
+    , 'DE.BaseRenderer'   : 'classes/renderer/BaseRenderer'
+    , 'DE.TextureRenderer': 'classes/renderer/TextureRenderer'
+    , 'DE.SpriteRenderer' : 'classes/renderer/SpriteRenderer'
+    , 'DE.TextRenderer'   : 'classes/renderer/TextRenderer'
+    , 'DE.GraphicRenderer': 'classes/renderer/GraphicRenderer'
+    , 'DE.RectRenderer'   : 'classes/renderer/RectRenderer'
     
     , 'DE.GameObject'            : 'classes/GameObject/GameObject'
     , 'DE.GameObject.update'     : 'classes/GameObject/GameObject.update'
+    , 'DE.GameObject.fade'       : 'classes/GameObject/GameObject.fade'
+    , 'DE.GameObject.scale'      : 'classes/GameObject/GameObject.scale'
     , 'DE.GameObject.automatisms': 'classes/GameObject/GameObject.automatisms'
     
     

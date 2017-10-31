@@ -15,15 +15,24 @@ define( [
   , 'DE.Localization'
   , 'DE.Notifications'
   , 'DE.Achievements'
+  , 'DE.ImageManager'
   
   // core classes
   , 'DE.Render'
   , 'DE.Scene'
   , 'DE.Vector2'
+  
+  , 'DE.BaseRenderer'
+  , 'DE.TextureRenderer'
   , 'DE.SpriteRenderer'
+  , 'DE.TextRenderer'
   , 'DE.RectRenderer'
+  , 'DE.GraphicRenderer'
+  
   , 'DE.GameObject'
   , 'DE.GameObject.update'
+  , 'DE.GameObject.fade'
+  , 'DE.GameObject.scale'
   , 'DE.GameObject.automatisms'
 ],
 function(
@@ -106,18 +115,33 @@ function(
     if ( !params.onLoad ) {
       console.error( "No onLoad given on init, nothing will happen after images load" );
     }
-    this.onLoad = params.onLoad || function(){ console.log( "You have to give a onLoad callback to the DE.init options" ); };
+    this.customOnLoad = params.onLoad || function(){ console.log( "You have to give a onLoad callback to the DE.init options" ); };
+    
+    DE.ImageManager.init( params.images.baseUrl, params.images.pools );
     
     params.onReady();
   };
   
+  // this is called when the pool "default" is loaded (the MainLoop will display a loader)
+  DE.onLoad = function()
+  {
+    setTimeout( function()
+    {
+      DE.customOnLoad();
+      DE.MainLoop.displayLoader = false;
+    }, 500 );
+  };
+  
+  var _defaultPoolName = "default";
   DE.start = function()
   {
+    DE.MainLoop.createLoader();
     DE.MainLoop.launched = true;
     DE.MainLoop.loop();
     
-    // TODO move this when the first file loader ends
-    this.onLoad();
+    DE.MainLoop.displayLoader = true;
+    DE.Events.once( "ImageManager-pool-" + _defaultPoolName + "-loaded", this.onLoad, this );
+    DE.ImageManager.loadPool( _defaultPoolName );
   };
   
   // pause / unpause the game

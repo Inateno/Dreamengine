@@ -52,60 +52,123 @@ function( DE )
 
     // if no Camera, we add the Scene to the render (this can change if I make Camera)
     Game.render.add( scene );
-    
-    // ImageManager ? Loader ??
-    DE.PIXI.loader
-      .add( { name: "ayeraShip", url: "imgs/ayera-ship.png" } )
-      .load( onLoadComplete );
-
+      
     Game.ship; Game.ship2;
-    function onLoadComplete()
-    {
-      // gameObject
-      Game.ship = new DE.GameObject( {
-        x: 240, y: 240
-        ,renderer    : new DE.SpriteRenderer( { spriteName: "ayeraShip" } )
-        , interactive: true
-        , click      :  function()
-        {
-          console.log( "click" );
-        }
-      } );
-      Game.ship.axes = { x: 0, y: 0 };
-      Game.ship.checkInputs = function()
-      {
-        this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } );
-      };
-      Game.ship.addAutomatism( "checkInputs", "checkInputs" );
-      Game.ship.fire = function()
-      {
-        DE.Audio.fx.play( "piew" );
-        var bullet = new DE.GameObject( {
-          x        : this.x
-          ,y       : this.y
-          ,rotation: this.rotation
-          //,renderer
-        } );
-        bullet.addAutomatism( "translateY", "translateY", { value1: -6  } );
-        bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
-        bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
-        // bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );
-        
-        scene.add( bullet );
-      }
-      // Game.ship.addAutomatism( "translateY", "translateY", { value1: -2 } );
-      // Game.ship.addAutomatism( "rotate", "rotate", { value1: 0.01 } );
-      
-      Game.ship2 = new DE.GameObject( {
-        x: 700, y: 640
-        ,renderer    : new DE.SpriteRenderer( { spriteName: "ayeraShip" } )
-      } );
-      Game.ship2.addAutomatism( "lookAt", "lookAt", { value1: Game.ship } );
-      
+    
+    // WIP working on a simple "AnimatedSprite" declaration
+    // var imgs = ["ship1.png","ship2.png","ship3.png","ship4.png","ship5.png","ship6.png"];
+    // var textureArray = [];
 
-      // scene.add
-      scene.add( Game.ship, Game.ship2 );
-    }
+    // for (var i=0; i < imgs.length; i++)
+    // {
+    //   var texture = PIXI.utils.TextureCache[imgs[i]];
+    //   textureArray.push(texture);
+    // };
+
+    // var mc = new PIXI.extras.AnimatedSprite(textureArray);
+    
+    Game.ship = new DE.GameObject( {
+      x: 240, y: 240, scale: 1
+      ,renderers   : [
+        new DE.SpriteRenderer( { spriteName: "ayeraShip" } )
+        , new DE.TextRenderer( "Player 1", {
+          y: -100
+          ,textStyle: {
+            fill           : 'white',
+            fontSize       : 35,
+            fontFamily     : 'Snippet, Monaco, monospace',
+            strokeThickness: 1,
+            align          : "center"
+          }
+        } )
+        ,new DE.SpriteRenderer( { spriteName: "reactor", y: 80, scale: 0.3, rotation: Math.PI } )
+      ]
+      , axes: { x: 0, y: 0 }
+      , interactive: true
+      , click      :  function()
+      {
+        console.log( "click" );
+      }
+      
+      , checkInputs: function(){ this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } ); }
+      , automatisms: [ [ "checkInputs", "checkInputs" ] ]
+      
+      , gameObjects: [
+        new DE.GameObject( {
+          x: 0
+          , scale: 0.5
+          , automatisms: [ [ "rotate", "rotate", { value1: -0.07 } ] ]
+          , gameObjects: [
+            new DE.GameObject( {
+              x: 250
+              , scale: 2
+              , renderer: new DE.SpriteRenderer( { spriteName: "player-bullet" } )
+            } )
+            , new DE.GameObject( {
+              x: -250
+              , scale: 2
+              , rotation: Math.PI
+              , renderer: new DE.SpriteRenderer( { spriteName: "player-bullet", loop: true } )
+            } )
+          ]
+        } ) ]
+    } );
+    
+    Game.ship.fire = function()
+    {
+      DE.Audio.fx.play( "piew" );
+      var bullet = new DE.GameObject( {
+        x        : this.x
+        ,y       : this.y
+        ,rotation: this.rotation
+        ,renderer: new DE.SpriteRenderer( { spriteName: "player-bullet" } )
+      } );
+      bullet.addAutomatism( "translateY", "translateY", { value1: -6  } );
+      bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
+      bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
+      bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );
+      
+      scene.add( bullet );
+    };
+    
+    Game.ship2 = new DE.GameObject( {
+      x: 700, y: 640
+      ,renderers: [
+        new DE.TextureRenderer( { spriteName: "ship3.png" } )
+        ,new DE.SpriteRenderer( { spriteName: "reactor", y: 80, scale: 0.3, rotation: Math.PI } )
+      ]
+    } );
+    Game.ship2.addAutomatism( "lookAt", "lookAt", { value1: Game.ship } );
+    
+    Game.heart1 = new DE.GameObject( {
+      x: 700, y: 100
+      ,renderer: new DE.TextureRenderer( { spriteName: "heart" } )
+    } );
+    Game.heart2 = new DE.GameObject( {
+      x: 800, y: 100
+      ,renderer: new DE.TextureRenderer( { spriteName: "heart", width: 50, height: 20 } )
+    } );
+    
+    var rectangle = new DE.GameObject( {
+      x: 800, y: 300
+      ,renderer: new DE.RectRenderer( 40, 70, "0xDDCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: false, x: -20, y: -35 } )
+    } );
+    var rectangle2 = new DE.GameObject( {
+      x: 850, y: 300
+      ,renderer: new DE.RectRenderer( 40, 70, "0xDDF0CC", { lineStyle: [ 4, "0x00F30D", 10 ], x: -20, y: -35 } )
+    } );
+    
+    var customShape = new DE.GameObject( {
+      x: 900, y: 300
+      ,renderer: new DE.GraphicRenderer( [ { "beginFill": "0x66CCFF" }, { "drawRect": [ 0, 0, 50, 50 ] }, { "endFill": [] } ], { x: -25, y: -25 } )
+    } );
+    Game.shapes = {
+      customShape : customShape
+      , rectangle : rectangle
+      , rectangle2: rectangle2
+    };
+    
+    scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
     
     DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -1; } );
     DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 1; } );

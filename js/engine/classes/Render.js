@@ -155,6 +155,18 @@ function(
     
     this.pixiRenderer.render( this.mainContainer );
   };
+  
+  /**
+   * render the given content in this render
+   * it's called by the MainLoop when displayLoader is true
+   * it can be used in other situation ?
+   * @private
+   * @memberOf Render
+   */
+  Render.prototype.directRender = function( container )
+  {
+    this.pixiRenderer.render( container );
+  };
 
   /**
    * add a scene on this render

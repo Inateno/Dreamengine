@@ -32,13 +32,13 @@ define( [
   'PIXI'
   , 'DE.Vector2'
   , 'DE.config'
-  , 'DE.RectRenderer'
+  , 'DE.GraphicRenderer'
 ],
 function(
   PIXI
   , Vector2
   , config
-  , RectRenderer
+  , GraphicRenderer
 )
 {
   function GameObject( params )
@@ -55,12 +55,31 @@ function(
     
     /**
      * If false, the object wont be updated anymore (but still renderer).
-     *
+     * check visible attribute (from PIXI) to prevent rendering without killing update
      * @public
      * @memberOf GameObject
      * @type {Boolean}
      */
     this.updatable = true;
+    
+    /**
+     * @public
+     * @memberOf GameObject
+     * @type {String}
+     */
+    this.id      = _params.id !== undefined ? _params.id : Math.random() * 999999999 >> 0;
+    /**
+     * @public
+     * @memberOf GameObject
+     * @type {String}
+     */
+    this.name    = _params.name;
+    /**
+     * @public
+     * @memberOf GameObject
+     * @type {String}
+     */
+    this.tag     = _params.tag;
     
     /**
      * Target to focus (position, Vector2, Points or GameObject, whatever with x/y)
@@ -85,7 +104,7 @@ function(
      * @memberOf GameObject
      * @type {Array-GameObject}
      */
-    this.gameObjects = params.gameObjects || [];
+    this.gameObjects = [];
     
     /**
      * @readOnly
@@ -95,18 +114,78 @@ function(
     this._automatisms = {};
     
     /**
-     * @private
      * used to make distinction between gameObject and pure PIXI DisplayObject
+     * @private
      * @memberOf GameObject
      * @type {Boolean}
      */
     this._isGameObject = true;
     
+    /**
+     * create a scale to simulate a z axis (to create perspective) change z attribute
+     * @private
+     * @memberOf GameObject
+     * @type {Int}
+     */
+    this._zscale = 1;
+    
+    /**
+     * store real scale (taking all parent in consideration)
+     * worldScale is update directly when calling the constructor
+     * @public
+     * @memberOf GameObject
+     * @type {PIXI.Point}
+     */
+    this.worldScale = new PIXI.Point( 1, 1 );
+    
+    /**
+     * save the scale before z applies
+     * @public
+     * @memberOf GameObject
+     * @type {PIXI.Point}
+     */
+    this.savedScale = new PIXI.Point(
+      _params.scale && _params.scale.x ? _params.scale.x : _params.scale || _params.scaleX || 1
+      , _params.scale && _params.scale.y ? _params.scale.y : _params.scale || _params.scaleY || 1
+    );
+    delete _params.scale;
+    // call correctly the scale modifier to update zscale and worldScale
+    this.setScale( this.savedScale.x, this.savedScale.y );
+    
+    
+    /**
+     * object used to apply fade transition
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.fadeData = {
+      "from"     : 1
+      ,"to"      : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    
+    /**
+     * object used to apply scale transition
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this.scaleData = {
+      "fromx"    : 1
+      ,"tox"     : 0
+      ,"fromy"   : 1
+      ,"toy"     : 0
+      ,"duration": 1000
+      ,"done"    : true
+    };
+    
     this.renderers = [];
     
     if ( _params.renderer ) {
       this.addRenderer( _params.renderer );
-      delete params.renderer;
+      delete _params.renderer;
     }
     
     if ( _params.renderers ) {
@@ -117,13 +196,38 @@ function(
       delete _params.renderers;
     }
     
+    this.renderer = this.renderers[ 0 ];
+    
     if ( config.DEBUG ) {
       this._createDebugRenderer();
     }
     
+    if ( _params.gameObjects ) {
+      this.add( _params.gameObjects );
+      delete _params.gameObjects;
+    }
+    
+    
+    // easy way to add custom function/attributes to a GameObject in a one-block declaration
     for ( var i in _params )
     {
+      if ( i === "automatisms" ) {
+        continue;
+      }
+      
+      if ( this[ i ] ) {
+        console.log( "WARN GameObject: you are overriding " + i + " method/attribute" );
+      }
       this[ i ] = _params[ i ];
+    }
+    
+    // this have to be at the end because we can define function just before
+    if ( _params.automatisms ) {
+      for ( var i = 0; i < _params.automatisms.length; ++i )
+      {
+        this.addAutomatism.apply( this, _params.automatisms[ i ] );
+      }
+      delete _params.automatisms;
     }
   }
 
@@ -173,7 +277,7 @@ function(
       return;
     }
     
-    this._debugRenderer = new RectRenderer(
+    this._debugRenderer = new GraphicRenderer(
       [
         { beginFill: "0x00FF00" }
         , { drawRect: [ 0, 0, 20, 2 ] }
@@ -275,7 +379,7 @@ function(
 
   GameObject.prototype.addRenderer = function( rd )
   {
-    if ( rd.anchor ) {
+    if ( rd.anchor && !rd.preventCenter ) {
       rd.anchor.set( 0.5, 0.5 );
     }
     
@@ -329,15 +433,17 @@ function(
       return;
     }
     
-    if ( object.parent !== undefined ) {
+    if ( object.parent ) {
       object.parent.remove( object );
     }
     
     this.gameObjects.push( object );
+    object._updateWorldScale();
+    
     this.addChild( object );
     
-    if ( config.DEBUG ) {
-      object._createDebugRender();
+    if ( config.DEBUG && !object._debugRenderer ) {
+      object._createDebugRenderer();
     }
   };
 
@@ -479,6 +585,10 @@ function(
       , texture    : this.destroyTextureOnKill
     } );
   };
+  
+  // support for old version using trigger and not emit (I personally prefer emit when it's a client/server communication, and trigger when it's not services communication related )
+  // but the engine will always support trigger AND emit
+  GameObject.prototype.trigger = GameObject.prototype.emit;
   
   GameObject.prototype.DEName = "GameObject";
   return GameObject;

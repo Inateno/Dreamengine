@@ -9,7 +9,7 @@
  *
  * Otherwise you can load/add images when you want, load images by calling the DREAM_ENGINE.ImageManager.pushImage function
  *
- * - [ name, url, { load:Bool, totalFrame:Int, totalLine:Int, eachAnim:Int (ms), isAnimated:Bool, isReversed:Bool } ]
+ * - [ name, url, { load:Bool, totalFrame:Int, totalLine:Int, interval:Int (ms), animated:Bool, isReversed:Bool } ]
  *
  * name, and url are required
  */
@@ -29,25 +29,28 @@ function()
     , conceptionSizeIndex: 0
     
     // images folder name 
-    , baseUrl: "img/"
+    , baseUrl: "imgs/"
     
     // usage name, real name (can contain subpath), extension, parameters
     , pools: {
       // loaded when engine is inited
       default: [
-        // [ "example", "example", "png", { "totalFrame": 4, "totalLine": 2, "eachAnim": 50, "isAnimated":true, "isReversed": false } ]
-        // [ "ship", "ayera/ship.png", { "totalFrame": 10, "totalLine": 1, "eachAnim": 100, "isAnimated":true, "isReversed": false } ]
-        [ "reactor", "ayera/reactor.png", { "totalFrame": 4, "eachAnim": 40, "isAnimated":true, "isReversed": false } ]
-        ,[ "bg", "platform.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
+        // [ "example", "example", "png", { "totalFrame": 4, "totalLine": 2, "interval": 50, "animated":true, "isReversed": false } ]
+        // [ "ship", "ayera/ship.png", { "totalFrame": 10, "totalLine": 1, "interval": 100, "animated":true, "isReversed": false } ]
+        [ "ayeraShip", "shmup/ayera-ship.png" ]
+        ,[ "player-bullet", "shmup/p-bullet.png", { "totalFrame": 10, "interval": 50, "animated": true, "loop": false } ]
+        ,[ "heart", "shmup/heart.png" ]
+        ,[ "reactor", "shmup/reactor.png", { "totalFrame": 4, "interval": 40, "animated": true } ]
+        ,"shmup/ship.json"
         
-        ,[ "canyon", "ayera/canyon.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
-        ,[ "grass", "ayera/grass.png", { "totalFrame": 1, "isAnimated":false, "isReversed": false } ]
-        ,[ "touchControlBackground", "touchControlBackground.png", { "totalFrame": 1, "isAnimated": false } ]
-        ,[ "touchControlStick", "touchControlStick.png", { "totalFrame": 1, "isAnimated": false } ]
+        ,[ "bg", "env/bg.jpg", { "totalFrame": 1, "animated":false, "isReversed": false } ]
+        ,[ "canyon", "env/canyon.png", { "totalFrame": 1, "animated":false, "isReversed": false } ]
+        ,[ "grass", "env/grass.png", { "totalFrame": 1, "animated":false, "isReversed": false } ]
+        ,[ "touchControlBackground", "touch-control/background.png", { "totalFrame": 1, "animated": false } ]
+        ,[ "touchControlStick", "touch-control/stick.png", { "totalFrame": 1, "animated": false } ]
         
-        ,[ "platform", "platform.png", { "totalFrame": 1, "eachAnim": 1, "totalLine": 1, "isAnimated":false } ]
+        ,[ "platform", "platform.png", { "totalFrame": 1, "interval": 1, "totalLine": 1, "animated":false } ]
         
-        ,"pck/ship.json"
       ]
       
       // a custom pool not loaded by default, you have to load it whenever you want (you can display a custom loader or just the default loader)
