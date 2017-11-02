@@ -95,7 +95,7 @@ function( DE )
       
       , gameObjects: [
         new DE.GameObject( {
-          x: 0
+          x: 150
           , scale: 0.5
           , automatisms: [ [ "rotate", "rotate", { value1: -0.07 } ] ]
           , gameObjects: [
@@ -170,13 +170,13 @@ function( DE )
     
     scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
     
-    DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -1; } );
-    DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 1; } );
+    DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -2; } );
+    DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 2; } );
     DE.Inputs.on( "keyUp", "right", function() { Game.ship.axes.x = 0; } );
     DE.Inputs.on( "keyUp", "left", function() { Game.ship.axes.x = 0; } );
     
-    DE.Inputs.on( "keyDown", "up", function() { Game.ship.axes.y = -1; } );
-    DE.Inputs.on( "keyDown", "down", function() { Game.ship.axes.y = 1; } );
+    DE.Inputs.on( "keyDown", "up", function() { Game.ship.axes.y = -2; } );
+    DE.Inputs.on( "keyDown", "down", function() { Game.ship.axes.y = 2; } );
     DE.Inputs.on( "keyUp", "down", function() { Game.ship.axes.y = 0; } );
     DE.Inputs.on( "keyUp", "up", function() { Game.ship.axes.y = 0; } );
     

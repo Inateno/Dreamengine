@@ -17,6 +17,8 @@ function(
   {
     this.scale.set( x, y );
     this._updateScale();
+    
+    return this;
   };
   
   /**
@@ -58,6 +60,8 @@ function(
     
     this.worldScale.x = this.worldScale.x * this.parent.worldScale.x;
     this.worldScale.y = this.worldScale.y * this.parent.worldScale.y;
+    
+    return this;
   };
   
   /**
@@ -76,9 +80,9 @@ function(
       "x"     : !isNaN( scale ) ? scale : scale.x
       ,"y"    : !isNaN( scale ) ? scale : scale.y
     };
-    this.scaleData = {
-      "valX"     : - ( this.savedScale.x - ( dscale.x !== undefined ? dscale.x : this.savedScale.x ) )
-      ,"valY"    : - ( this.savedScale.y - ( dscale.y !== undefined ? dscale.y : this.savedScale.y ) )
+    this._scaleData = {
+      "valX"      : - ( this.savedScale.x - ( dscale.x !== undefined ? dscale.x : this.savedScale.x ) )
+      ,"valY"     : - ( this.savedScale.y - ( dscale.y !== undefined ? dscale.y : this.savedScale.y ) )
       ,"dirX"     : this.savedScale.x > dscale.x ? 1 : -1
       ,"dirY"     : this.savedScale.y > dscale.y ? 1 : -1
       ,"duration" : duration || 500
@@ -91,8 +95,10 @@ function(
       ,"scaleX"   : this.savedScale.x
       ,"scaleY"   : this.savedScale.y
     };
-    this.scaleData.leftX = this.scaleData.valX;
-    this.scaleData.leftY = this.scaleData.valY;
+    this._scaleData.leftX = this._scaleData.valX;
+    this._scaleData.leftY = this._scaleData.valY;
+    
+    return this;
   };
   
   /**
@@ -102,11 +108,11 @@ function(
    */
   GameObject.prototype.applyScale = function()
   {
-    if ( this.scaleData.done ) {
+    if ( this._scaleData.done ) {
       return;
     }
     
-    var scaleD = this.scaleData;
+    var scaleD = this._scaleData;
     
     if ( scaleD.valX != 0 ) {
       scaleD.stepValX = Time.timeSinceLastFrame / scaleD.oDuration * scaleD.valX * Time.scaleDelta;
@@ -139,7 +145,7 @@ function(
     this.scale.set( scaleD.scaleX, scaleD.scaleY );
     
     if ( scaleD.duration <= 0 ) {
-      this.scaleData.done = true;
+      this._scaleData.done = true;
       this.scale.set( scaleD.destX, scaleD.destY );
       this.trigger( "scaleEnd", this );
     }

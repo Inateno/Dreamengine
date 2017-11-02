@@ -30,13 +30,15 @@ function(
       ,fadeScale: Math.abs( from - to )
       ,done     : false
     };
-    data.dir      = data.from > to ? -1 : 1;
-    this.alpha    = from;
-    this.fadeData = data;
+    data.dir       = data.from > to ? -1 : 1;
+    this.alpha     = from;
+    this._fadeData = data;
     
     if ( !this.visible && to > 0 ) {
       this.visible = true;
     }
+    
+    return this;
   };
   
   /**
@@ -50,6 +52,8 @@ function(
   GameObject.prototype.fadeTo = function( to, duration, force )
   {
     this.fade( this.alpha, to, duration, force );
+    
+    return this;
   };
   
   /**
@@ -101,20 +105,20 @@ function(
    */
   GameObject.prototype.applyFade = function()
   {
-    if ( !this.fadeData.done ) {
-      this.fadeData.stepVal = Time.timeSinceLastFrame / this.fadeData.oDuration
-                              * this.fadeData.dir * this.fadeData.fadeScale;
-      this.alpha += this.fadeData.stepVal * Time.scaleDelta;
-      this.fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
+    if ( !this._fadeData.done ) {
+      this._fadeData.stepVal = Time.timeSinceLastFrame / this._fadeData.oDuration
+                              * this._fadeData.dir * this._fadeData.fadeScale;
+      this.alpha += this._fadeData.stepVal * Time.scaleDelta;
+      this._fadeData.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
       
-      if ( ( this.fadeData.dir < 0 && this.alpha <= this.fadeData.to )
-          || ( this.fadeData.dir > 0 && this.alpha >= this.fadeData.to )
+      if ( ( this._fadeData.dir < 0 && this.alpha <= this._fadeData.to )
+          || ( this._fadeData.dir > 0 && this.alpha >= this._fadeData.to )
           || this.alpha < 0 || this.alpha > 1 ) {
-        this.alpha = this.fadeData.to;
+        this.alpha = this._fadeData.to;
       }
       
-      if ( this.fadeData.duration <= 0 ) {
-        this.fadeData.done = true;
+      if ( this._fadeData.duration <= 0 ) {
+        this._fadeData.done = true;
         
         if ( this.alpha == 0 ) {
           this.visible = false;

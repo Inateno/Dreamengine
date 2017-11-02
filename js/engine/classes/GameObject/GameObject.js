@@ -159,7 +159,7 @@ function(
      * @memberOf GameObject
      * @type {Object}
      */
-    this.fadeData = {
+    this._fadeData = {
       "from"     : 1
       ,"to"      : 0
       ,"duration": 1000
@@ -172,13 +172,35 @@ function(
      * @memberOf GameObject
      * @type {Object}
      */
-    this.scaleData = {
+    this._scaleData = {
       "fromx"    : 1
       ,"tox"     : 0
       ,"fromy"   : 1
       ,"toy"     : 0
       ,"duration": 1000
       ,"done"    : true
+    };
+    
+    /**
+     * object used to apply shake
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this._shakeData = {
+      "done": true
+      ,"prevX": 0
+      ,"prevY": 0
+    };
+    
+    /**
+     * object used to apply move translation
+     * @protected
+     * @memberOf GameObject
+     * @type {Object}
+     */
+    this._moveData = {
+      "done": true
     };
     
     this.renderers = [];
@@ -350,6 +372,7 @@ function(
   GameObject.prototype.rotate = function( angle, ignoreDelta )
   {
     this.vector2.rotate( angle, ignoreDelta );
+    return this;
   };
 
   /**
@@ -365,18 +388,17 @@ function(
     var origin = { x: 0, y: 0 };
     var otherPos = vector2.toGlobal ? vector2.toGlobal( origin ) : vector2;
     this.rotation = this.vector2.getAngle( otherPos ) + ( angleOffset || 0 );
+    
     return this;
   };
-
-  GameObject.prototype.moveTo = function()
-  {
-    
-  }
-  GameObject.prototype.applyMoveTo = function()
-  {
-    
-  }
-
+  
+  /**
+   * add a renderer to the gameObject
+   * this push the renderer in a distinct array AND set anchor to 50% (if available) + push the render in PIXI child.
+   * @public
+   * memberOf GameObject
+   * param {PIXI.DisplayObject} rd - the renderer to add
+   */
   GameObject.prototype.addRenderer = function( rd )
   {
     if ( rd.anchor && !rd.preventCenter ) {
@@ -385,6 +407,8 @@ function(
     
     this.renderers.push( rd );
     this.addChild( rd );
+    
+    return this;
   };
 
   /**
@@ -416,7 +440,11 @@ function(
         this.addOne( args[ i ] );
       }
     }
+    
+    // TODO used to sort z-index
     // this.sortChildren();
+    
+    return this;
   };
 
   /**
@@ -445,6 +473,8 @@ function(
     if ( config.DEBUG && !object._debugRenderer ) {
       object._createDebugRenderer();
     }
+    
+    return this;
   };
 
   /**
@@ -526,6 +556,8 @@ function(
     if ( !this.parent || !this.parent.enable ) {
       this.killMePlease();
     }
+    
+    return this;
   };
   
   /**
@@ -589,6 +621,15 @@ function(
   // support for old version using trigger and not emit (I personally prefer emit when it's a client/server communication, and trigger when it's not services communication related )
   // but the engine will always support trigger AND emit
   GameObject.prototype.trigger = GameObject.prototype.emit;
+  
+  /**
+   * DEPRECATED you should use getGlobalPosition (from PIXI)
+   * @public
+   * @memberOf GameObject
+   */
+  // support for old version of the engine, return world Position
+  GameObject.prototype.getPos  = GameObject.prototype.getGlobalPosition;
+  
   
   GameObject.prototype.DEName = "GameObject";
   return GameObject;

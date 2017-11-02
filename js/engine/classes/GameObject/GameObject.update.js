@@ -75,9 +75,9 @@ function(
     }
     
     // TODO
-    // this.applyFocus();
-    // this.applyShake();
-    // this.applyMove();
+    this.applyFocus();
+    this.applyShake();
+    this.applyMove();
     this.applyFade();
     this.applyScale();
   };

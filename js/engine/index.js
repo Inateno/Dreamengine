@@ -35,11 +35,13 @@ require.config( {
     , 'DE.RectRenderer'   : 'classes/renderer/RectRenderer'
     
     , 'DE.GameObject'            : 'classes/GameObject/GameObject'
-    , 'DE.GameObject.update'     : 'classes/GameObject/GameObject.update'
-    , 'DE.GameObject.fade'       : 'classes/GameObject/GameObject.fade'
-    , 'DE.GameObject.scale'      : 'classes/GameObject/GameObject.scale'
     , 'DE.GameObject.automatisms': 'classes/GameObject/GameObject.automatisms'
-    
+    , 'DE.GameObject.fade'       : 'classes/GameObject/GameObject.fade'
+    , 'DE.GameObject.focus'      : 'classes/GameObject/GameObject.focus'
+    , 'DE.GameObject.moveTo'     : 'classes/GameObject/GameObject.moveTo'
+    , 'DE.GameObject.scale'      : 'classes/GameObject/GameObject.scale'
+    , 'DE.GameObject.shake'      : 'classes/GameObject/GameObject.shake'
+    , 'DE.GameObject.update'     : 'classes/GameObject/GameObject.update'
     
     // dependencies
     , 'PIXI'          : '../../node_modules/pixi.js/dist/pixi'

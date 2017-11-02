@@ -30,10 +30,13 @@ define( [
   , 'DE.GraphicRenderer'
   
   , 'DE.GameObject'
-  , 'DE.GameObject.update'
-  , 'DE.GameObject.fade'
-  , 'DE.GameObject.scale'
   , 'DE.GameObject.automatisms'
+  , 'DE.GameObject.fade'
+  , 'DE.GameObject.focus'
+  , 'DE.GameObject.moveTo'
+  , 'DE.GameObject.scale'
+  , 'DE.GameObject.shake'
+  , 'DE.GameObject.update'
 ],
 function(
   PIXI
