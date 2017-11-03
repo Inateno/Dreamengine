@@ -26,15 +26,31 @@ function(
     var _params = params || {};
     
     /**
+     * save the previous real size (not the canvas size but the visible size without any resize)
+     * this is used to calculate correctly the resize
+     * @protected
+     * @memberOf Render
+     */
+    this._savedSizes  = new PIXI.Point( _params.width || 100, _params.height || 100 );
+    
+    /**
+     * can be used to convert every draw to initial size when the Render has a resizeMode (compared to the first declaration)
+     * @protected
+     * @memberOf Render
+     */
+    this._drawRatio = 1;
+    
+    /**
      * the PIXI Renderer
      * @public
      * @memberOf Render
      * @type {PIXI.Renderer}
      */
     this.pixiRenderer = new PIXI.autoDetectRenderer(
-      _params.width, _params.height
-      , {
-        antialias              : _params[ "antialias" ] || false
+      {
+        width                  : _params.width
+        , height               : _params.height
+        , antialias            : _params[ "antialias" ] || false
         , transparent          : _params[ "transparent" ] || false
         , resolution           : _params[ "resolution" ] || 1
         , preserveDrawingBuffer: _params[ "preserveDrawingBuffer" ] || false
@@ -44,6 +60,7 @@ function(
         , forceFXAA            : _params[ "forceFXAA" ] || false
         , legacy               : _params[ "legacy" ] || false
         , powerPreference      : _params[ "powerPreference" ] || "" //"high-performance" only for "gamers setup"
+        , autoResize           : true
       }
     );
     
@@ -73,7 +90,21 @@ function(
     this.divId = id || undefined;
     
     this.enable = true; // set to false to prevent render and update
-    this.freeze = false; // set to true to prevent update but keep render
+    this.frozen = false; // set to true to prevent update but keep render
+    
+    this._resizeMode      = null;
+    this._resizeMethod    = function(){}
+    this._listeningResize = false;
+    
+    this._resizeMode = params.resizeMode || null;
+    
+    /**
+     * flag if you use HTML5 Fullscreen API
+     * @protected
+     * @memberOf Render
+     * @type {Boolean}
+     */
+    this.isFullscreen = false;
   }
 
   /**
@@ -109,10 +140,20 @@ function(
     MainLoop.addRender( this );
     
     this.pixiRenderer.view.setAttribute( "id", this.id );
-    // TODO Inputs.addRender( this );
-    /* TODO
-    this.updateSizes();
-
+    
+    // update resize if needed
+    if ( this._resizeMode ) {
+      this.changeResizeMode( this._resizeMode );
+      this._onResize();
+      this._bindResizeEvent();      
+    }
+    
+    // TODO - this was used only to bind touch/mouse events, if we use the PIXI interactions, it's not required anymore
+    // Inputs.addRender( this );
+    
+    // update the resize of the render depending on the mode chosen by the dev
+    // this.updateSizes();
+  
     var self = this;
     this.div.addEventListener( "fullscreenchange", function( e )
     {
@@ -130,9 +171,170 @@ function(
     {
       self.isFullscreen = document.webkitIsFullScreen;
     }, false );
-    */
   };
+  
+  /**
+   * change real size when change quality (all images are also reloaded in an other resolution to keep the drawRatio ok)
+   * this will update the "physical ratio" which you should use when you are doing calculation based on objects positions (if using qualities)
+   * @protected
+   * @memberOf Render
+   */
+  /*Render.prototype.updateQualitySizes function()
+  {
+  };*/
+  
+  /**
+   * resize with ratio, stretched or not
+   * @public
+   * @memberOf Render
+   */
+  Render.prototype.resizeRatio = function( w, h , stretch )
+  {
+    var baseW = this._savedSizes.x;
+    var baseH = this._savedSizes.y;
+    var calcRatio = w / baseW;
 
+    if ( calcRatio * baseH > h ) {
+      calcRatio = h / baseH;
+    }
+
+    var newW = calcRatio * baseW >> 0;
+    var newH = calcRatio * baseH >> 0;
+    
+    if ( this.div != window.document.body )
+    {
+      this.div.style.width  = newW + "px";
+      this.div.style.height = newH + "px";
+    }
+    
+    // resize the PIXI Renderer keeping the good aspect ratio
+    this.pixiRenderer.autoResize = true;
+    this.pixiRenderer.resize( newW, newH );
+    
+    // if we want to stretch the canvas to keep the same viewport size
+    if ( stretch ) {
+      this.pixiRenderer.autoResize = false;
+      this.pixiRenderer.resize( baseW, baseH );
+    }
+    
+    this.div.style.marginLeft = ( ( w - newW ) / 2 ) + "px";
+    this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
+    
+    this._drawRatio = newW / this._savedSizes.x;
+    // TODO // this.trigger( "resize", this._drawRatio );
+  };
+  
+  /**
+   * change current resize mode
+   * @public
+   * @memberOf Render
+   */
+  Render.prototype.changeResizeMode = function( mode )
+  {
+    this._resizeMode = mode;
+    switch( mode )
+    {
+      case "stretch-ratio":
+      case "ratio-stretch":
+        this._resizeMethod = function( screenW, screenH )
+        {
+          this.resizeRatio( screenW, screenH, true );
+        };
+      break;
+      case "stretch":
+        // resize stretch = take immediately all the space available with a stretch
+        this._resizeMethod = function( screenW, screenH )
+        {
+          this.pixiRenderer.autoResize = true;
+          this.pixiRenderer.resize( screenW, screenH );
+          this.pixiRenderer.autoResize = false;
+          this.pixiRenderer.resize( this._savedSizes.x, this._savedSizes.y );
+        };
+      break;
+      case "full":
+        // resize full = take immediately all the space available in pure pixel
+        this._resizeMethod = function( screenW, screenH )
+        {
+          this.pixiRenderer.autoResize = true;
+          this.pixiRenderer.resize( screenW, screenH );
+        };
+        break;
+      // resize and respect the original ratio, but not stretching
+      case "ratio":
+        this._resizeMethod = function( screenW, screenH )
+        {
+          this.resizeRatio( screenW, screenH, false );
+        };
+      break;
+      default:
+        this._resizeMethod = function(){};
+      break;
+    }
+  };
+  
+  /****
+   * method called when event resize occurs
+   * @private
+   * @memberOf Render
+   */
+  Render.prototype._onResize = function()
+  {
+    var screenW = ( window.innerWidth || document.documentElement.clientWidth );
+    var screenH = ( window.innerHeight || document.documentElement.clientHeight );
+
+    var divParentH = window.getComputedStyle( this.div.parentElement, null ).getPropertyValue( 'height' );
+    if ( this.div.parentElement != null
+        && divParentH && screenH < document.body.clientHeight ) {
+      var divW = this.div.parentElement.innerWidth || this.div.parentElement.clientWidth;
+      var divH = this.div.parentElement.innerHeight || this.div.parentElement.clientHeight;
+
+      if ( divH < screenH ) {
+        screenH = divH;
+      }
+      if ( divW < screenW ) {
+        screenW = divW;
+      }
+    }
+
+    if ( !this._resizeMethod ) {
+      throw ( "Render.js : _onResize need a _resizeMethod, maybe changeResizeMode has never been called" );
+    }
+
+    this._resizeMethod( screenW, screenH );
+  };
+  
+  /**
+   * bind window resize event if wanted
+   * @private
+   * @memberOf Render
+   */
+  Render.prototype._bindResizeEvent = function()
+  {
+    if ( !this._resizeMode || this._listeningResize ) {
+      return;
+    }
+      
+    this._listeningResize = true;
+    var self       = this;
+    var lastResize = undefined;
+    var callback   = function() { self._onResize(); };
+    
+    if ( window.addEventListener ) {
+      window.addEventListener( "resize", function()
+      {
+        lastResize && window.clearTimeout( lastResize );
+        lastResize = window.setTimeout( callback, 50 );
+      }, false ); 
+    }
+    else if ( window.attachEvent ) {
+      window.attachEvent( "onresize", function()
+      {
+        lastResize && window.clearTimeout( lastResize );
+        lastResize = window.setTimeout( callback, 50 ); 
+      } );
+    }
+  };
+  
   /**
    * render all cameras binded on this Render (called by MainLoop)
    * @private
@@ -170,6 +372,7 @@ function(
 
   /**
    * add a scene on this render
+   * // note: if we update with Camera, it should be camera added here and not scene
    * @public
    * @memberOf Render
    */

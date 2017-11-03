@@ -25,7 +25,6 @@ function(
   {
     PIXI.Graphics.call( this );
     
-    console.log( params )
     if ( params && params.lineStyle ) {
       this.lineStyle.apply( this, params.lineStyle ); // 4, 0xFF3300, 1);
       delete params.lineStyle;

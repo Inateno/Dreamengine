@@ -27,10 +27,13 @@ function( DE )
     
     // Create the renderer before assets start loading
     Game.render = new DE.Render( "render", {
-      fullScreen       : "ratioStretch"
-      , width          : 1280
-      , height         : 720
-      , backgroundColor: "0x00004F" } );
+      resizeMode       : "stretch-ratio"
+      , width          : 1920
+      , height         : 1080
+      , backgroundColor: "0x00004F"
+      , roundPixels    : false
+      , powerPreferences: "high-performance"
+    } );
     Game.render.init();
     
     DE.start();
@@ -38,6 +41,7 @@ function( DE )
   
   Game.onload = function()
   {
+
     console.log( "game start" );
 
     // scene
