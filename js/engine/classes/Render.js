@@ -92,11 +92,28 @@ function(
     this.enable = true; // set to false to prevent render and update
     this.frozen = false; // set to true to prevent update but keep render
     
-    this._resizeMode      = null;
-    this._resizeMethod    = function(){}
-    this._listeningResize = false;
-    
+    /**
+     * Store the resize mode in a string, call changeResizeMode if you want to dynamically change this
+     * @private
+     * @memberOf Render
+     * @type {String}
+     */
     this._resizeMode = params.resizeMode || null;
+    
+    /**
+     * The resize method called on event resize
+     * @private
+     * @memberOf Render
+     * @type {Function}
+     */
+    this._resizeMethod    = function(){}
+    /**
+     * Flag to prevent potential double event binding
+     * @private
+     * @memberOf Render
+     * @type {Bool}
+     */
+    this._listeningResize = false;
     
     /**
      * flag if you use HTML5 Fullscreen API
@@ -151,7 +168,7 @@ function(
     // TODO - this was used only to bind touch/mouse events, if we use the PIXI interactions, it's not required anymore
     // Inputs.addRender( this );
     
-    // update the resize of the render depending on the mode chosen by the dev
+    // TODO - update the quality rendering mode (change resolutions and physicRatio)
     // this.updateSizes();
   
     var self = this;
@@ -188,7 +205,7 @@ function(
    * @public
    * @memberOf Render
    */
-  Render.prototype.resizeRatio = function( w, h , stretch )
+  Render.prototype.resizeRatio = function( w, h, stretch )
   {
     var baseW = this._savedSizes.x;
     var baseH = this._savedSizes.y;
