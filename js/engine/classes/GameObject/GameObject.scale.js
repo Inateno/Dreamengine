@@ -1,10 +1,12 @@
 define( [
   'DE.GameObject'
   , 'DE.Time'
+  , 'DE.config'
 ],
 function(
   GameObject
   , Time
+  , config
 )
 {
   /**
@@ -19,6 +21,29 @@ function(
     this._updateScale();
     
     return this;
+  };
+  
+  /**
+   * when z change we restore saved scale, then change it again to final values and update worldScale
+   * @private
+   * @memberOf GameObject
+   */
+  GameObject.prototype._updateZScale = function()
+  {
+    // this come from old Camera render (working fine as excepted...)
+    // zMaxDepth is 10 by default so if z is 1 scale modifier will be 0.9 (1 - 0.1)
+    var zscale = 1 - ( this.z / config.zMaxDepth );
+    this._zscale = zscale;
+    
+    this.scale.x = zscale * this.savedScale.x;
+    this.scale.y = zscale * this.savedScale.y;
+    
+    // update worldScale
+    this._updateWorldScale();
+    for ( var i = 0; i < this.gameObjects.length; ++i )
+    {
+      this.gameObjects[ i ]._updateWorldScale();
+    }
   };
   
   /**

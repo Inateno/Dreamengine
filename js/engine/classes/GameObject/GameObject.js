@@ -351,6 +351,7 @@ function(
       }
       , set: function( z ) {
         this._z = z;
+        this._updateZScale();
         
         if ( this.parent ) {
           this.parent._shouldSortChildren = true;

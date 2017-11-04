@@ -146,10 +146,12 @@ function( DE )
     
     Game.heart1 = new DE.GameObject( {
       x: 700, y: 100
+      , zindex : 10
       ,renderer: new DE.TextureRenderer( { spriteName: "heart" } )
     } );
     Game.heart2 = new DE.GameObject( {
       x: 800, y: 100
+      , zindex : 10
       ,renderer: new DE.TextureRenderer( { spriteName: "heart", width: 50, height: 20 } )
     } );
     
