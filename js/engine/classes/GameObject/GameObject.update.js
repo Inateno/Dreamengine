@@ -80,6 +80,10 @@ function(
     this.applyMove();
     this.applyFade();
     this.applyScale();
+    
+    if ( this._shouldSortChildren ) {
+      this.sortGameObjects();
+    }
   };
   
   return GameObject;

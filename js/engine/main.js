@@ -1,6 +1,6 @@
 define( [
   'PIXI'
-  , 'extendPIXI'
+  , 'DE.extendPIXI'
   , 'DE.config'
   , 'DE.about'
   , 'DE.Events'

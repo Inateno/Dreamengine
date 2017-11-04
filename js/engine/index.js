@@ -7,6 +7,11 @@ require.config( {
     , 'DE.about'   : 'about'
     , 'DE.config'  : 'config'
     
+    // middle-wares
+    , 'DE.extendPIXI'     : 'utils/extendPIXI'
+    , 'DE.sortGameObjects': 'utils/sortGameObjects'
+    
+    // tools lib
     , 'DE.Time'         : 'utils/Time'
     , 'DE.Events'       : 'utils/Events'
     , 'DE.Achievements' : 'utils/Achievements'
@@ -45,7 +50,6 @@ require.config( {
     
     // dependencies
     , 'PIXI'          : '../../node_modules/pixi.js/dist/pixi'
-    , 'extendPIXI'    : 'utils/extendPIXI'
     , 'EventEmitter'  : '../../node_modules/eventemitter3/index'
     , 'P_Charm'       : '../../node_modules/pixijs-charm/dist/pixijs-charm'
     , 'stash'         : 'ext_libs/stash'

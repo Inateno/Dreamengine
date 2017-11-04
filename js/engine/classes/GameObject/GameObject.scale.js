@@ -147,7 +147,7 @@ function(
     if ( scaleD.duration <= 0 ) {
       this._scaleData.done = true;
       this.scale.set( scaleD.destX, scaleD.destY );
-      this.trigger( "scaleEnd", this );
+      this.emit( "scale-end", this );
     }
     
     this._updateScale();

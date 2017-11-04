@@ -173,6 +173,7 @@ function( DE )
     };
     
     scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
+    Game.scene = scene;
     
     DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -2; } );
     DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 2; } );

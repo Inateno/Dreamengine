@@ -13,11 +13,13 @@ define( [
   'PIXI'
   , 'DE.MainLoop'
   , 'DE.GameObject'
+  , 'DE.sortGameObjects'
 ],
 function(
   PIXI
   , MainLoop
   , GameObject
+  , sortGameObjects
 )
 {
   function Scene( name )
@@ -31,9 +33,15 @@ function(
      */
     this.name = name || "NoName-" + ( Date.now() + Math.random() * Date.now() >> 0 );
     
-    // TODO - needed ? this.gameObjects = [];
-    // TODO this.objectsByTag = {};
-    // TODO this.objectsByName = {};
+    /**
+     * it's a copy of PIXI.children, used by sortGameObjects middle-ware
+     * @readonly
+     * @memberOf Scene
+     */
+    this.gameObjects = this.children;
+    
+    // TODO when required this.objectsByTag = {};
+    // TODO when required this.objectsByName = {};
     
     /**
      * if this world is sleeping, update will be ignored
@@ -87,8 +95,7 @@ function(
   Scene.prototype.addOne = function( gameObject )
   {
     // accept only gameObject to avoid errors
-    if ( !( gameObject instanceof GameObject ) )
-    {
+    if ( !( gameObject instanceof GameObject ) ) {
       console.error( "Tried to add something in a scene that is not a GameObject. Please inherit from GameObject" );
       return;
     }
@@ -97,8 +104,9 @@ function(
     
     // add in PIXI Container
     this.addChild( gameObject );
+    this._shouldSortChildren = true;
     
-    // TODO event trigger "updateChildren"
+    this.emit( "update-children" );
   };
 
   /**
@@ -144,11 +152,21 @@ function(
     // }
     
     // TODO ?
-    // if ( this.waitSortGameObjects ) {
-    //   this.sortGameObjects();
-    // }
+    if ( this._shouldSortChildren ) {
+      this.sortGameObjects();
+    }
   };
   
+  /**
+   * Sort gameObjects in the scene along z axis or using z-index for objects on the same same plan.
+   * The priority is the following, z, z-index, y, x
+   * You shouldn't call this method directly because engine do it for you, but in some case it can be useful to do it yourself
+   * @protected
+   * @memberOf Scene
+   */
+  Scene.prototype.sortGameObjects = sortGameObjects;
+  
+  // name registered in engine declaration
   Scene.prototype.DEName = "Scene";
   
   /**

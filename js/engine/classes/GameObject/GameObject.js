@@ -33,12 +33,14 @@ define( [
   , 'DE.Vector2'
   , 'DE.config'
   , 'DE.GraphicRenderer'
+  , 'DE.sortGameObjects'
 ],
 function(
   PIXI
   , Vector2
   , config
   , GraphicRenderer
+  , sortGameObjects
 )
 {
   function GameObject( params )
@@ -122,7 +124,29 @@ function(
     this._isGameObject = true;
     
     /**
-     * create a scale to simulate a z axis (to create perspective) change z attribute
+     * when a children change his z or zindex property this attribute change to true and the gameObject sort his children in the next update call
+     * @private
+     * @memberOf GameObject
+     */
+    this._shouldSortChildren = false;
+    
+    /**
+     * used to clearly sort gameObjects rendering priority (higher is rendered over others)
+     * @private
+     * @memberOf GameObject
+     */
+    this._zindex = 0;
+    
+    /**
+     * used to simulate a perspective when using a Camera, if not using a Camera this is an other way to sort gameObjects (with z-index)
+     * @private
+     * @memberOf GameObject
+     */
+    this._z = 0;
+    
+    /**
+     * create a scale to simulate a z axis (to create perspective) when changing z attribute
+     * this modifier is applied to this.scale (and savedScale store the old, not modified scale)
      * @private
      * @memberOf GameObject
      * @type {Int}
@@ -132,6 +156,7 @@ function(
     /**
      * store real scale (taking all parent in consideration)
      * worldScale is update directly when calling the constructor
+     * this way you can know the real rendering scale (to the screen) with all modifiers
      * @public
      * @memberOf GameObject
      * @type {PIXI.Point}
@@ -139,7 +164,7 @@ function(
     this.worldScale = new PIXI.Point( 1, 1 );
     
     /**
-     * save the scale before z applies
+     * save the scale before z applies (this way you can know the true scale of the object without any modifier)
      * @public
      * @memberOf GameObject
      * @type {PIXI.Point}
@@ -279,15 +304,57 @@ function(
       }
     }
     
+    /**
+     * override from PIXI because we want to update the _vector2 rotation on set
+     * @public
+     * @memberOf GameObject
+     */
     , rotation: {
       get: function()
       {
-          return this.transform.rotation;
+        return this.transform.rotation;
       },
       set: function set(value) // eslint-disable-line require-jsdoc
       {
         this.vector2._updateRotation( value );
         this.transform.rotation = value;
+      }
+    }
+    
+    /**
+     * allow sorting gameObjects in the parent rendering order
+     * @public
+     * @memberOf GameObject
+     */
+    , zindex: {
+      get: function() {
+        return this._zindex;
+      }
+      , set: function( zindex ) {
+        this._zindex = zindex;
+        
+        if ( this.parent ) {
+          this.parent._shouldSortChildren = true;
+        }
+      }
+    }
+    
+    /**
+     * this is used for creating perspective rendering. It is also used by the sorting algorithm
+     * note: the perspective applies only if there is a camera to render the scene content, and sub-children are not eligible to this features (only top-gameobject are)
+     * @public
+     * @memberOf GameObject
+     */
+    , z: {
+      get: function() {
+        return this._z;
+      }
+      , set: function( z ) {
+        this._z = z;
+        
+        if ( this.parent ) {
+          this.parent._shouldSortChildren = true;
+        }
       }
     }
   } );
@@ -474,9 +541,11 @@ function(
       object._createDebugRenderer();
     }
     
+    this._shouldSortChildren = true;
+    
     return this;
   };
-
+  
   /**
    * remove a the given child in this GameObject gameObjects
    * also call PIXI.removeChild
@@ -618,16 +687,32 @@ function(
     } );
   };
   
-  // support for old version using trigger and not emit (I personally prefer emit when it's a client/server communication, and trigger when it's not services communication related )
-  // but the engine will always support trigger AND emit
+  /**
+   * Sort gameObjects in the scene along z axis or using z-index for objects on the same same plan.
+   * The priority is the following, z, z-index, y, x
+   * You shouldn't call this method directly because engine do it for you, but in some case it can be useful to do it yourself
+   * @protected
+   * @memberOf GameObject
+   */
+  GameObject.prototype.sortGameObjects = sortGameObjects;
+  
+  /**
+   * DEPRECATED you should use getGlobalPosition (from PIXI)
+   * support for old version using trigger and not emit (I personally prefer emit when it's a client/server communication, and trigger when it's not services communication related )
+   * but the engine will always support trigger AND emit
+   * @deprecated
+   * @public
+   * @memberOf GameObject
+   */
   GameObject.prototype.trigger = GameObject.prototype.emit;
   
   /**
    * DEPRECATED you should use getGlobalPosition (from PIXI)
+   * support for old version of the engine, return world Position
+   * @deprecated
    * @public
    * @memberOf GameObject
    */
-  // support for old version of the engine, return world Position
   GameObject.prototype.getPos  = GameObject.prototype.getGlobalPosition;
   
   
