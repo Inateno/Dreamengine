@@ -7,10 +7,6 @@
 */
 
 /**
- * An audio tool over howler, provide some simple middleware + direct access to howler sounds
- * @namespace Audio
- */
-/**
  * An advanced resource loader. Can load pool of resources, or unload it.
  * Handle images, ready to use spritesImages, json sheets, json particles files or custom files
  * @namespace ImageManagser
@@ -46,11 +42,18 @@ function( PIXI, config, Events )
     this.baseUrl           = "img/";
     
     this.spritesData = {}; // store data for SpriteRenderer
-    this._waitingPools = []; // cannot load multiple pool in // have to queue
+    this._waitingPools = []; // cannot load multiple resources / pools // have to queue
+    this._waitingSolo = []; // cannot load multiple resources / pools // have to queue
+    
+    // when you load multiple times resources with the same loader
+    //, it goes over 100%, this "fix" this bug
+    this._nLoads = 0
     
     /**
      * main init function, create pool and set baseUrl in an object, used to load things later
      * call ImageManager.loadPool( poolName ) to start loading things
+     * @protected
+     * @memberOf ImageManager
      */
     this.init = function( baseUrl, pools )
     {
@@ -98,43 +101,54 @@ function( PIXI, config, Events )
     
     /**
      * load a complete pool in memory
+     * @public
+     * @memberOf ImageManager
      */
-    this.loadPool = function( poolName, customEventName )
+    this.loadPool = function( poolName, customEventName, resetLoader )
     {
       var self = this;
       
-      if ( this.pools[ poolName ].length == 0 )
-      {
+      if ( this.pools[ poolName ].length == 0 ) {
         setTimeout( function()
         {
-          self.onComplete( poolName, customEventName );
+          self._onComplete( poolName, customEventName );
         }, 500 );
         return;
       }
       
       if ( PIXI.loader.loading ) {
-        console.log( "WARN ImageManager: PIXI loader is already loading stuff, this call has been queued" );
+        // console.log( "WARN ImageManager: PIXI loader is already loading stuff, this call has been queued" );
         this._waitingPools.push( { name: poolName, customEventName: customEventName } );
+        return;
+      }
+      
+      if ( resetLoader ) {
+        PIXI.loader.reset();
+        this._nLoads = 0
       }
       
       PIXI.loader.add( this.pools[ poolName ] )
         .on( "progress", function( loader, resource ) {
-          self.onProgress( poolName, loader, customEventName );
+          self._onProgress( poolName, loader, customEventName );
         } )
         .load( function() {
-          
           PIXI.loader.off( "progress", function( loader, resource ) {
-            self.onProgress( poolName, loader, customEventName );
-          } )
-          self.onComplete( poolName, customEventName );
+            self._onProgress( poolName, loader, customEventName );
+          } );
+          self._onComplete( poolName, customEventName );
         } );
     };
     
-    this.onProgress = function( poolName, loader, customEventName )
+    /**
+     * onProgress event
+     * @private
+     * @memberOf ImageManager
+     */
+    this._onProgress = function( poolName, loader, customEventName )
     {
       Events.trigger( "ImageManager-pool-progress"
         , poolName
-        , loader.progress.toString().slice( 0, 5 ) );
+        , ( loader.progress - 100 * this._nLoads ).toString().slice( 0, 5 ) );
       Events.trigger( "ImageManager-pool-" + poolName + "-progress"
         , poolName
         , loader.progress.toString().slice( 0, 5 ) );
@@ -143,43 +157,84 @@ function( PIXI, config, Events )
         , loader.progress.toString().slice( 0, 5 ) );
     };
     
-    this.onComplete = function( poolName, customEventName )
+    /**
+     * when a load is completed
+     * @private
+     * @memberOf ImageManager
+     */
+    this._onComplete = function( poolName, customEventName )
     {
       console.log( "ImageManager load complete: ", poolName );
       Events.trigger( "ImageManager-pool-complete", poolName );
       Events.trigger( "ImageManager-pool-" + poolName + "-loaded" );
       Events.trigger( "ImageManager-" + customEventName + "-loaded" );
       
+      ++this._nLoads;
+      
       // dequeue waiting pools here
       if ( this._waitingPools.length ) {
         var pool = this._waitingPools.shift();
         this.loadPool( pool.name, pool.customEventName );
       }
+      else if ( this._waitingSolo.length ) {
+        var solo = this._waitingSolo.shift();
+        this.load( solo );
+      }
     };
     
     /**
-     * load a simple object
+     * load one resource
+     * @public
+     * @memberOf ImageManager
      */
     this.load = function( data )
     {
-      if ( data.totalFrame )
-      {
-        this.spritesData[ data.name ] = {
-          totalLine  : data.totalLine || 1
-          ,totalFrame: data.totalFrame || 1
-          ,startFrame: data.startFrame || 0
-          ,endFrame  : data.endFrame || data.totalFrame || 1
-          ,interval  : data.interval || 16
-          ,reversed  : data.reversed || false
-          ,loop      : data.loop !== undefined ? data.loop : true
-          ,animated  : data.animated !== undefined ? data.animated : true
+      var dataLoad = data;
+      
+      if ( typeof data === "string" ) {}
+      else if ( data.length && data.push ) {
+        
+        if ( !data[ 2 ] ) {
+          data[ 2 ] = {};
+        }
+        
+        this.spritesData[ data[ 0 ] ] = {
+          totalLine    : data[ 2 ].totalLine || 1
+          ,totalFrame  : data[ 2 ].totalFrame || 1
+          ,startFrame  : data[ 2 ].startFrame || 0
+          ,endFrame    : data[ 2 ].endFrame || data[ 2 ].totalFrame || 1
+          ,interval    : data[ 2 ].interval || 16
+          ,reversed    : data[ 2 ].reversed || false
+          ,loop        : data[ 2 ].loop !== undefined ? data[ 2 ].loop : true
+          ,animated    : data[ 2 ].animated !== undefined ? data[ 2 ].animated : true
+          ,pingPongMode: data[ 2 ].pingPongMode !== undefined ? data[ 2 ].pingPongMode : false
         };
+        
+        dataLoad = { name: data[ 0 ], url: data[ 1 ] + "?v" + config.VERSION };
       }
-      PIXI.loader.add( data ).load( this.onComplete );
+      
+      if ( PIXI.loader.loading ) {
+        // console.log( "WARN ImageManager: PIXI loader is already loading stuff, this call has been queued" );
+        this._waitingSolo.push( dataLoad );
+        return;
+      }
+      
+      var self = this;
+      PIXI.loader.add( dataLoad ).load( function()
+      {
+        // PIXI.loader.reset();
+        
+        PIXI.loader.off( "progress", function( loader, resource ) {
+          self._onProgress( poolName, loader, customEventName );
+        } );
+        self._onComplete( null, dataLoad.name ? dataLoad.name : dataLoad );
+      } );
     };
     
     /**
      * unload a complete pool (clean memory)
+     * @public
+     * @memberOf ImageManager
      */
     this.unloadPool = function( poolName )
     {

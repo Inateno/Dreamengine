@@ -188,7 +188,7 @@ function( DE )
         this.z = 10;
       }
     }
-    for ( var i = 0, a, b, c, d, e, f; i < 150; i += 5 )
+    for ( var i = 0, a, b, c, d, e, f, g; i < 150; i += 5 )
     {
       a = new DE.GameObject( { _staticPosition: true, x: 100, y: 100, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
       a.scroller = scroller;
@@ -211,6 +211,14 @@ function( DE )
       f.scroller = scroller;
       f.addAutomatism( "scroller", "scroller" );
       scene.add( a, b, c, d, e, f );
+      
+      if ( i % 10 == 0 ) {
+        g = new DE.GameObject( { _staticPosition: true, x: 960, y: 980, zindex: 10, z: i * 0.1, renderer: new DE.RectRenderer( 10, 30, "0xFFFFFF", { x: -5, y: -15 } ) } )
+        g.scroller = scroller;
+        g.addAutomatism( "scroller", "scroller" );
+        
+        scene.add( g );
+      }
     }
     
     scene.add( Game.ship );

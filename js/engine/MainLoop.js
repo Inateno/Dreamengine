@@ -4,6 +4,8 @@ define( [
   , 'DE.GameObject'
   , 'PIXI'
   , 'DE.Events'
+  , 'DE.TextRenderer'
+  , 'DE.SpriteRenderer'
 ],
 function(
   Time
@@ -11,6 +13,8 @@ function(
   , GameObject
   , PIXI
   , Events
+  , TextRenderer
+  , SpriteRenderer
 )
 {
   var MainLoop = new function()
@@ -22,17 +26,15 @@ function(
     this.createLoader = function()
     {
       this.loader = new GameObject( {
-        renderers: [
-          new PIXI.Text( "Loading...", new PIXI.TextStyle( {
+        renderer: new TextRenderer(
+          "Loading...", { textStyle: {
             fill           : 'white',
             fontSize       : 35,
             fontFamily     : 'Snippet, Monaco, monospace',
             strokeThickness: 1,
             align          : "center"
-          } ) )
-          // ,new SpriteRenderer( { spriteName: "loader" } )
-          // loader
-        ]
+          } }
+        )
       } );
       this.loader.renderer.y += 150;
       Events.on( 'ImageManager-pool-progress', function( poolName, progression )
@@ -43,7 +45,12 @@ function(
       {
         MainLoop.loader.renderer.text = "100%";
       } );
-    }
+    };
+    
+    this.updateLoaderImage = function( loader )
+    {
+      this.loader.addRenderer( new SpriteRenderer( { spriteName: loader[ 0 ], scale: loader[ 2 ].scale } ) );
+    };
     
     this.loop = function()
     {
@@ -65,6 +72,7 @@ function(
         {
           MainLoop.loader.x = j.pixiRenderer.width * 0.5;
           MainLoop.loader.y = j.pixiRenderer.height * 0.5;
+          MainLoop.loader.update( Time.currentTime );
           j.directRender( MainLoop.loader );
         }
         

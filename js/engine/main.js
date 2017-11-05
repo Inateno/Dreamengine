@@ -124,6 +124,24 @@ function(
     
     DE.ImageManager.init( params.images.baseUrl, params.images.pools );
     
+    DE.emit( "change-debug", DE.config.DEBUG, DE.config.DEBUG_LEVEL );
+    
+    // load the loader sprite image
+    params.loader = params.loader || {};
+    var loader = [
+      "loader"
+      , params.loader.url || "loader.png"
+      , {
+        totalFrame : params.loader.totalFrame || 16
+        ,interval  : params.loader.interval || 45
+        ,animated  : params.loader.animated !== undefined ? params.loader.animated : true
+        ,scale     : params.loader.scale || 1
+      }
+    ];
+    DE.Events.once( "ImageManager-loader-loaded", function() { DE.MainLoop.updateLoaderImage( loader ); } );
+    
+    DE.ImageManager.load( loader );
+    
     params.onReady();
     
     DE.emit( "change-debug", DE.config.DEBUG, DE.config.DEBUG_LEVEL );

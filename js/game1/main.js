@@ -55,5 +55,6 @@ function( DE, Game, inputs, audios, dictionary, images, achievements )
     , 'about': { 'gameName': "Engine Dev Game 1", "namespace": "noting", 'author': "Inateno", 'gameVersion': "0.1" }
     , 'saveModel': { "nShoots": 0 }, 'saveIgnoreVersion': true
     , 'ignoreNebula': true
+    // , 'loader': { interval: 10, scale: 2 }
   } );
 } );
