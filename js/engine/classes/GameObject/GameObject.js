@@ -20,13 +20,6 @@
  *   ,"renderers": [ new DE.SpriteRenderer( { "spriteName": "ship", "offsetY": 100 } ) ]
  *   ,"collider": new DE.CircleCollider( 60, { "offsetY": 50 } )
  * } );
- * @property {String} [id="0-999999999"] the gameObject id
- * @property {String} [name="noname"] use name to detect precise type (example player)
- * @property {String} [tag="none"] use tags for quick type recognition (example characters)
- * @property {Array-GameObject} [gameObjects=[]] if you want to give childs on creation
- * @property {Vector2} [vector2] useful rotation/translate tool
- * @property {Renderer} [renderer] give a renderer
- * @property {Array-Renderer} [renderers] give some renderers
  */
 define( [
   'PIXI'
@@ -34,6 +27,7 @@ define( [
   , 'DE.config'
   , 'DE.GraphicRenderer'
   , 'DE.sortGameObjects'
+  , 'DE.Events'
 ],
 function(
   PIXI
@@ -41,6 +35,7 @@ function(
   , config
   , GraphicRenderer
   , sortGameObjects
+  , Events
 )
 {
   function GameObject( params )
@@ -65,11 +60,20 @@ function(
     this.updatable = true;
     
     /**
+     * Set to true when the (PIXI) position.scope._localID change, that mean the position (x/y) has changed or if z change.
+     * If true, the camera will recalculate perspective. It can also be used by Collisions algorithms
+     * @private
+     * @memberOf GameObject
+     */
+    this._hasMoved = true;
+    
+    /**
      * @public
      * @memberOf GameObject
      * @type {String}
      */
-    this.id      = _params.id !== undefined ? _params.id : Math.random() * 999999999 >> 0;
+    this.id = _params.id !== undefined ? _params.id : Math.random() * 999999999 >> 0;
+    
     /**
      * @public
      * @memberOf GameObject
@@ -109,7 +113,7 @@ function(
     this.gameObjects = [];
     
     /**
-     * @readOnly
+     * @private
      * @memberOf GameObject
      * @type {Object}
      */
@@ -276,6 +280,16 @@ function(
       }
       delete _params.automatisms;
     }
+    
+    Events.on( "change-debug", function( debug, level )
+    {
+      if ( debug ) {
+        this._createDebugRenderer();
+      }
+      else {
+        this._destroyDebugRenderer();
+      }
+    }, this );
   }
 
   GameObject.prototype = Object.create( PIXI.Container.prototype );
@@ -283,8 +297,8 @@ function(
 
   Object.defineProperties( GameObject.prototype, {
     /**
-     * @public
      * if false, object will stop being rendered and stop being updated
+     * @public
      * @memberOf GameObject
      * @type {Boolean}
      */
@@ -351,6 +365,7 @@ function(
       }
       , set: function( z ) {
         this._z = z;
+        this._hasMoved = true;
         this._updateZScale();
         
         if ( this.parent ) {
@@ -363,7 +378,6 @@ function(
   GameObject.prototype._createDebugRenderer = function()
   {
     if ( this._debugRenderer ) {
-      console.error( "GameObject._createDebugRenderer was called but _debugRenderer already exist" );
       return;
     }
     
@@ -381,7 +395,6 @@ function(
   GameObject.prototype._destroyDebugRenderer = function()
   {
     if ( !this._debugRenderer ) {
-      console.error( "GameObject._destroyDebugRenderer was called without _debugRenderer instantiated" );
       return;
     }
     

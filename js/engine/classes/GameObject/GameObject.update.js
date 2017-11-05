@@ -84,6 +84,16 @@ function(
     if ( this._shouldSortChildren ) {
       this.sortGameObjects();
     }
+    
+    // update the hasMoved
+    if ( this._lastLocalID != this.position.scope._localID ) {
+      this._hasMoved = true;
+    }
+    else {
+      this._hasMoved = false;
+    }
+    
+    this._lastLocalID = this.position.scope._localID;
   };
   
   return GameObject;

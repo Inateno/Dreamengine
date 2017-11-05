@@ -13,12 +13,14 @@ define( [
   , 'DE.config'
   , 'DE.Time'
   , 'DE.MainLoop'
+  , 'DE.Events'
 ],
 function(
   PIXI
   , config
   , Time
   , MainLoop
+  , Events
 )
 {
   function Render( id, params )
@@ -79,12 +81,22 @@ function(
     
     this.debugRender = new PIXI.Text( 'DEBUG Enable \nDeltaTime: 1\nFPS: 60', new PIXI.TextStyle( {
       fill           : 'white',
-      fontSize       : 12,
+      fontSize       : 14,
       fontFamily     : '"Lucida Console", Monaco, monospace',
       strokeThickness: 2
     } ) );
     this.debugRender.y = 10;
     this.debugRender.x = 10;
+    
+    Events.on( "change-debug", function( debug, level )
+    {
+      if ( level > 0 ) {
+        this.mainContainer.addChild( this.debugRender );
+      }
+      else {
+        this.mainContainer.removeChild( this.debugRender );
+      }
+    }, this );
     
     this.id = "render-" + Date.now() + "-" + ( Math.random() * Date.now() >> 0 );
     this.divId = id || undefined;
@@ -164,6 +176,15 @@ function(
       this._onResize();
       this._bindResizeEvent();      
     }
+    
+    /**
+     * This is the ratio to the get initial conception sizes when the user change quality setting, if provided
+     * TODO: calculate if when quality change, must do the quality settings issue #20
+     * @todo
+     * @private
+     * @memberOf Render
+     */
+    this._qualityRatio = 1;
     
     // TODO - this was used only to bind touch/mouse events, if we use the PIXI interactions, it's not required anymore
     // Inputs.addRender( this );
@@ -359,9 +380,7 @@ function(
    */
   Render.prototype.render = function()
   {
-    if ( config.DEBUG_LEVEL )
-    {
-      this.mainContainer.addChild( this.debugRender );
+    if ( config.DEBUG_LEVEL ) {
       
       if ( config.DEBUG_LEVEL == "FPS_ONLY" ) {
         this.debugRender.text = "FPS: " + Time.FPS;
@@ -372,7 +391,21 @@ function(
       }
     }
     
+    for ( var i = 0, c = this.mainContainer.children.length; i < c; ++i )
+    {
+      if ( this.mainContainer.children[ i ].renderUpdate ) {
+        this.mainContainer.children[ i ].renderUpdate( this._qualityRatio );
+      }
+    }
+    
     this.pixiRenderer.render( this.mainContainer );
+    
+    for ( var i = 0, c = this.mainContainer.children.length; i < c; ++i )
+    {
+      if ( this.mainContainer.children[ i ].afterUpdate ) {
+        this.mainContainer.children[ i ].afterUpdate( this._qualityRatio );
+      }
+    }
   };
   
   /**
@@ -388,14 +421,14 @@ function(
   };
 
   /**
-   * add a scene on this render
-   * // note: if we update with Camera, it should be camera added here and not scene
+   * add a container to this render
+   * You can add a Scene (if you don't need z perspective) or a Camera or a native PIXI.Container
    * @public
    * @memberOf Render
    */
-  Render.prototype.add = function( scene )
+  Render.prototype.add = function( container )
   {
-    this.mainContainer.addChild( scene );
+    this.mainContainer.addChild( container );
     // TODO need ? this.scenes.push( scene );
     
     return this;

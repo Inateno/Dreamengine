@@ -55,7 +55,9 @@ function( DE )
     // }
 
     // if no Camera, we add the Scene to the render (this can change if I make Camera)
-    Game.render.add( scene );
+    
+    Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: scene, backgroundImage: "bg" } );
+    Game.render.add( Game.camera );
       
     Game.ship; Game.ship2;
     
@@ -94,7 +96,12 @@ function( DE )
         console.log( "click" );
       }
       
-      , checkInputs: function(){ this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } ); }
+      , checkInputs: function()
+      {
+        this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } );
+        Game.camera.x += 2 * this.axes.x;
+        Game.camera.y += 2 * this.axes.y;
+      }
       , automatisms: [ [ "checkInputs", "checkInputs" ] ]
       
       , gameObjects: [
@@ -122,14 +129,15 @@ function( DE )
     {
       DE.Audio.fx.play( "piew" );
       var bullet = new DE.GameObject( {
-        x        : this.x
-        ,y       : this.y
+        x        : 960//this.x
+        ,y       : 940//this.y
         ,rotation: this.rotation
         ,renderer: new DE.SpriteRenderer( { spriteName: "player-bullet" } )
       } );
       bullet.addAutomatism( "translateY", "translateY", { value1: -6  } );
-      bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
-      bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
+      bullet.moveTo( { z: 10 }, 2000 );
+      // bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
+      // bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
       bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );
       
       scene.add( bullet );
@@ -174,7 +182,39 @@ function( DE )
       , rectangle2: rectangle2
     };
     
-    scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
+    function scroller(){
+      this.z -= 0.1;
+      if ( this.z < -4 ) {
+        this.z = 10;
+      }
+    }
+    for ( var i = 0, a, b, c, d, e, f; i < 150; i += 5 )
+    {
+      a = new DE.GameObject( { _staticPosition: true, x: 100, y: 100, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
+      a.scroller = scroller;
+      a.addAutomatism( "scroller", "scroller" );
+      b = new DE.GameObject( { _staticPosition: true, x: 1820, y: 100, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
+      b.scroller = scroller;
+      b.addAutomatism( "scroller", "scroller" );
+      c = new DE.GameObject( { _staticPosition: true, x: 1820, y: 980, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
+      c.scroller = scroller;
+      c.addAutomatism( "scroller", "scroller" );
+      d = new DE.GameObject( { _staticPosition: true, x: 100, y: 980, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
+      d.scroller = scroller;
+      d.addAutomatism( "scroller", "scroller" );
+      
+      e = new DE.GameObject( { _staticPosition: true, x: 960, y: 100, z: i * 0.1, renderer: new DE.RectRenderer( 1720, 10, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: false, x: -860, y: -5 } ) } )
+      e.scroller = scroller;
+      e.addAutomatism( "scroller", "scroller" );
+      
+      f = new DE.GameObject( { _staticPosition: true, x: 960, y: 980, z: i * 0.1, renderer: new DE.RectRenderer( 1720, 10, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: false, x: -860, y: -5 } ) } )
+      f.scroller = scroller;
+      f.addAutomatism( "scroller", "scroller" );
+      scene.add( a, b, c, d, e, f );
+    }
+    
+    scene.add( Game.ship );
+    // scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
     Game.scene = scene;
     
     DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -2; } );

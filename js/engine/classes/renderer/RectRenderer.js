@@ -23,23 +23,24 @@ function(
 {
   function RectRenderer( width, height, color, params )
   {
+    var _params = params || {};
     PIXI.Graphics.call( this );
     
-    if ( params && params.lineStyle ) {
-      this.lineStyle.apply( this, params.lineStyle ); // 4, 0xFF3300, 1);
-      delete params.lineStyle;
+    if ( _params && _params.lineStyle ) {
+      this.lineStyle.apply( this, _params.lineStyle ); // 4, 0xFF3300, 1);
+      delete _params.lineStyle;
     }
     
-    if ( !params || params.fill !== false ) {
+    if ( !_params || _params.fill !== false ) {
       this.beginFill( color || "0xFF3300" );
-      delete params.fill;
+      delete _params.fill;
     }
     
     this.drawRect( 0, 0, width, height );
     
     this.endFill();
     
-    BaseRenderer.instantiate( this, params );
+    BaseRenderer.instantiate( this, _params );
   }
 
   RectRenderer.prototype = Object.create( PIXI.Graphics.prototype );

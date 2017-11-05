@@ -17,14 +17,16 @@ define( [
   , 'DE.Achievements'
   , 'DE.ImageManager'
   
-  // core classes
   , 'DE.Render'
   , 'DE.Scene'
+  , 'DE.Camera'
   , 'DE.Vector2'
   
+  // engine custom renderer
   , 'DE.BaseRenderer'
   , 'DE.TextureRenderer'
   , 'DE.SpriteRenderer'
+  , 'DE.TilingRenderer'
   , 'DE.TextRenderer'
   , 'DE.RectRenderer'
   , 'DE.GraphicRenderer'
@@ -123,6 +125,8 @@ function(
     DE.ImageManager.init( params.images.baseUrl, params.images.pools );
     
     params.onReady();
+    
+    DE.emit( "change-debug", DE.config.DEBUG, DE.config.DEBUG_LEVEL );
   };
   
   // this is called when the pool "default" is loaded (the MainLoop will display a loader)
@@ -145,6 +149,8 @@ function(
     DE.MainLoop.displayLoader = true;
     DE.Events.once( "ImageManager-pool-" + _defaultPoolName + "-loaded", this.onLoad, this );
     DE.ImageManager.loadPool( _defaultPoolName );
+    
+    DE.emit( "change-debug", DE.config.DEBUG, DE.config.DEBUG_LEVEL );
   };
   
   // pause / unpause the game
@@ -165,7 +171,8 @@ function(
   };
   
   // quick event access
-  DE.on = function() { this.Events.on.apply( this.Events, arguments ); };
+  DE.on      = function() { this.Events.on.apply( this.Events, arguments ); };
+  DE.emit    = function() { this.Events.emit.apply( this.Events, arguments ); };
   DE.trigger = function() { this.Events.emit.apply( this.Events, arguments ); };
   
   return DE;

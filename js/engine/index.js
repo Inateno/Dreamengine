@@ -30,11 +30,12 @@ require.config( {
     , 'DE.Render' : 'classes/Render'
     , 'DE.Scene'  : 'classes/Scene'
     , 'DE.Vector2': 'classes/Vector2'
-    // TODO -- needed ? , 'DE.Camera': 'classes/Camera'
+    , 'DE.Camera' : 'classes/Camera'
     
     , 'DE.BaseRenderer'   : 'classes/renderer/BaseRenderer'
     , 'DE.TextureRenderer': 'classes/renderer/TextureRenderer'
     , 'DE.SpriteRenderer' : 'classes/renderer/SpriteRenderer'
+    , 'DE.TilingRenderer' : 'classes/renderer/TilingRenderer'
     , 'DE.TextRenderer'   : 'classes/renderer/TextRenderer'
     , 'DE.GraphicRenderer': 'classes/renderer/GraphicRenderer'
     , 'DE.RectRenderer'   : 'classes/renderer/RectRenderer'

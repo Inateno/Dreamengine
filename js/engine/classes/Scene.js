@@ -6,7 +6,8 @@
  * @constructor Scene
  * @class a Scene is a world. You push GameObjects inside this world.
  * There is no world Size, just objects inside
- * For rendering convenience it use a PIXI.Container (actually I didn't make Camera but if I do later probably Scene wont need to be a Container)
+ * For rendering convenience it use a PIXI.Container
+ * a Scene can be added to a Render or a Camera can look at this Scene
  * @example Game.scene = new DE.Scene( "Test" );
  */
 define( [
@@ -77,7 +78,10 @@ function(
     for ( var i = 0; i < args.length; ++i )
     {
       if ( args[ i ].length ) {
-        this.add( args[ i ] );
+        for ( var o = 0, m = args[ i ].length || 1; o < m; ++o )
+        {
+          this.addOne( args[ i ][ o ] );
+        }
       }
       else {
         this.addOne( args[ i ] );
