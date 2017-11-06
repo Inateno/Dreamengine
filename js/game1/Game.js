@@ -57,8 +57,17 @@ function( DE )
     // if no Camera, we add the Scene to the render (this can change if I make Camera)
     
     Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: scene, backgroundImage: "bg" } );
+    Game.camera.interactive = true;
+    Game.camera.pointermove = function( e, pos ) { Game.targetPointer.moveTo( pos, 100 ); };
+    Game.camera.pointerdown = function( e, pos ) { console.log( "down" ); Game.targetPointer.shake( 10, 10, 200 ); };
+    Game.camera.pointerup = function( e, pos ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
     Game.render.add( Game.camera );
-      
+    
+    Game.targetPointer = new DE.GameObject( {
+      zindex: 500
+      , renderer: new DE.SpriteRenderer( { spriteName: "target", scale: 0.3 } )
+    } );
+    
     Game.ship; Game.ship2;
     
     // WIP working on a simple "AnimatedSprite" declaration
@@ -99,8 +108,11 @@ function( DE )
       , checkInputs: function()
       {
         this.translate( { x: this.axes.x * 2, y: this.axes.y * 2 } );
-        Game.camera.x += 2 * this.axes.x;
-        Game.camera.y += 2 * this.axes.y;
+        
+        if ( Game.moveCamera ) {
+          Game.camera.x -= 2 * this.axes.x;
+          Game.camera.y -= 2 * this.axes.y;
+        }
       }
       , automatisms: [ [ "checkInputs", "checkInputs" ] ]
       
@@ -153,19 +165,31 @@ function( DE )
     Game.ship2.addAutomatism( "lookAt", "lookAt", { value1: Game.ship } );
     
     Game.heart1 = new DE.GameObject( {
-      x: 700, y: 100
+      x: 1600, y: 100
       , zindex : 10
       ,renderer: new DE.TextureRenderer( { spriteName: "heart" } )
     } );
     Game.heart2 = new DE.GameObject( {
-      x: 800, y: 100
+      x: 1700, y: 100
       , zindex : 10
       ,renderer: new DE.TextureRenderer( { spriteName: "heart", width: 50, height: 20 } )
     } );
     
     var rectangle = new DE.GameObject( {
       x: 800, y: 300
-      ,renderer: new DE.RectRenderer( 40, 70, "0xDDCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: false, x: -20, y: -35 } )
+      ,interactive: true
+      ,renderers: [
+        new DE.RectRenderer( 40, 70, "0xFFFF00", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } )
+        ,new DE.RectRenderer( 40, 70, "0xF0F0F0", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35, visible: false } )
+      ]
+      ,pointerover: function() {
+        this.renderers[ 1 ].visible = true;
+        console.log( "mouse over" );
+      }
+      ,pointerout: function() {
+        this.renderers[ 1 ].visible = false;
+        console.log( "mouse out" );
+      }
     } );
     var rectangle2 = new DE.GameObject( {
       x: 850, y: 300
@@ -184,11 +208,11 @@ function( DE )
     
     function scroller(){
       this.z -= 0.1;
-      if ( this.z < -4 ) {
+      if ( this.z < 2 ) {
         this.z = 10;
       }
     }
-    for ( var i = 0, a, b, c, d, e, f, g; i < 150; i += 5 )
+    for ( var i = 0, a, b, c, d, e, f, g; i < 100; i += 5 )
     {
       a = new DE.GameObject( { _staticPosition: true, x: 100, y: 100, z: i * 0.1, renderer: new DE.RectRenderer( 40, 70, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: true, x: -20, y: -35 } ) } )
       a.scroller = scroller;
@@ -221,8 +245,56 @@ function( DE )
       }
     }
     
-    scene.add( Game.ship );
-    // scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2 );
+    var button = new DE.GameObject( {
+      x: 960, y: 100
+      ,zindex     : 50
+      ,interactive: true
+      ,hitArea    : new DE.PIXI.Rectangle( -225, -50, 450, 100 )
+      ,cursor     : "pointer"
+      ,renderers  : [
+        new DE.RectRenderer( 400, 80, "0xFFCDCD", { lineStyle: [ 4, "0x000000", 1 ], fill: true, x: -200, y: -40 } )
+        , new DE.TextRenderer( "Camera Move: false", {
+          textStyle: {
+            fill           : 'black',
+            fontSize       : 35,
+            fontFamily     : 'Snippet, Monaco, monospace',
+            strokeThickness: 1,
+            align          : "center"
+          }
+        } )
+      ]
+      ,pointerover: function() {
+        if ( !Game.moveCamera ) {
+          this.renderer.updateRender( { color: "0xFFDEDE" } );
+        }
+        else {
+          this.renderer.updateRender( { color: "0xDEFFDE" } );
+        }
+      }
+      ,pointerout: function() {
+        if ( !Game.moveCamera ) {
+          this.renderer.updateRender( { color: "0xFFCDCD" } );
+        }
+        else {
+          this.renderer.updateRender( { color: "0xCDFFCD" } );
+        }
+      }
+      ,pointerdown: function() {
+        if ( !Game.moveCamera ) {
+          this.renderer.updateRender( { color: "0xFF0000" } );
+        }
+        else {
+          this.renderer.updateRender( { color: "0x00FF00" } );
+        }
+      }
+      ,pointerup: function() {
+        Game.moveCamera = !Game.moveCamera;
+        this.renderers[ 1 ].text = "Camera Move: " + Game.moveCamera.toString();
+        this.pointerover();
+      }
+    } );
+    
+    scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2, button, Game.targetPointer );
     Game.scene = scene;
     
     DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -2; } );

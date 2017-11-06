@@ -59,6 +59,8 @@ function(
     
     var _params = params || {};
     
+    this.interactive = params.interactive !== undefined ? params.interactive : true;
+    
     this.name   = _params.name || "";
     this.id     = "camera_" + Date.now() + "-" + Math.random() * Date.now();
     this._scene = null;
@@ -66,6 +68,7 @@ function(
     
     if ( _params.backgroundImage ) {
       this.background = new TilingRenderer( { backgroundImage: _params.backgroundImage, width: width, height: height } );
+      this.background.interactive = false;
       this.background.anchor.set( -0.5 );
       this.addChild( this.background );
     }
@@ -132,6 +135,11 @@ function(
       }
     }
     
+    /**
+     * Camera is rendering this scene
+     * @public
+     * @memberOf Camera
+     */
     , scene: {
       get: function()
       {
@@ -147,7 +155,105 @@ function(
         this.addChild( scene );
       }
     }
+    
+    /**
+     * override the PIXI pointer event to add the "local" camera position in 2nd argument
+     * you get/set this method as usual, nothing change
+     * @override
+     * @public
+     * @memberOf Camera
+     */
+    , pointermove: {
+      get: function() { return this._pointermove; }
+      , set: function( fn ) { this._customPointerMove = fn; }
+    }
+    , pointerdown: {
+      get: function() { return this._pointerdown; }
+      , set: function( fn ) { this._customPointerDown = fn; }
+    }
+    , pointerup: {
+      get: function() { return this._pointerup; }
+      , set: function( fn ) { this._customPointerUp = fn; }
+    }
+    , pointerover: {
+      get: function() { return this._pointerover; }
+      , set: function( fn ) { this._customPointerOver = fn; }
+    }
+    , pointerout: {
+      get: function() { return this._pointerOut; }
+      , set: function( fn ) { this._customPointerOut = fn; }
+    }
+    , pointertap: {
+      get: function() { return this._pointertap; }
+      , set: function( fn ) { this._customPointerTap = fn; }
+    }
+    , pointerupoutside: {
+      get: function() { return this._pointerupoutsid; }
+      , set: function( fn ) { this._customPointerUpOutside = fn; }
+    }
   } );
+  
+  /**
+   * handle pointerevents before calling your custom function
+   * this method add an argument "pos" which is the pointer event position + local camera position (to retrieve the true position of the event)
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._pointerHandler = function( type, event )
+  {
+    var pos = {
+      x : event.data.global.x + ( this.pivot.x - this.x )
+      ,y: event.data.global.y + ( this.pivot.y - this.y )
+    };
+    
+    this[ "_customPointer" + type ]( event, pos );
+  };
+  
+  Camera.prototype._pointermove      = function( e ) { this._pointerHandler( "Move", e ); };
+  Camera.prototype._pointerdown      = function( e ) { this._pointerHandler( "Down", e ); };
+  Camera.prototype._pointerup        = function( e ) { this._pointerHandler( "Up", e ); };
+  Camera.prototype._pointerover      = function( e ) { this._pointerHandler( "Over", e ); };
+  Camera.prototype._pointerout       = function( e ) { this._pointerHandler( "Out", e ); };
+  Camera.prototype._pointertap       = function( e ) { this._pointerHandler( "Tap", e ); };
+  Camera.prototype._pointerupoutside = function( e ) { this._pointerHandler( "UpOutside", e ); };
+  
+  /**
+   * your custom method for handling pointer events is _customPointerEventType (where EventType is the Move/Down etc.)
+   * you can directly override these functions or just set via "pointerevent" (the setter will do it correctly for you).
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerMove      = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerDown      = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerUp        = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerOver      = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerOut       = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerTap       = function(){};
+  /**
+   * @private
+   * @memberOf Camera
+   */
+  Camera.prototype._customPointerUpOutside = function(){};
   
   /**
    * this update the lifecycle of the camera, binded on rendering because if a Camera is "off" it doesn't need to be updated
@@ -159,8 +265,10 @@ function(
     this.checkLimits( qualityRatio );
     this.calculatePerspective();
     
-    this.background.x = -this.x;
-    this.background.y = -this.y;
+    if ( this.background ) {
+      this.background.x = -this.x;
+      this.background.y = -this.y;
+    }
   };
   
   /**

@@ -40,6 +40,7 @@ function()
         [ "ayeraShip", "shmup/ayera-ship.png" ]
         ,[ "player-bullet", "shmup/p-bullet.png", { "totalFrame": 10, "interval": 50, "animated": true, "loop": false } ]
         ,[ "heart", "shmup/heart.png" ]
+        ,[ "target", "shmup/target.png" ]
         ,[ "reactor", "shmup/reactor.png", { "totalFrame": 4, "interval": 40, "animated": true } ]
         ,"shmup/ship.json"
         

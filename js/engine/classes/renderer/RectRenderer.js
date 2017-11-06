@@ -26,19 +26,24 @@ function(
     var _params = params || {};
     PIXI.Graphics.call( this );
     
-    if ( _params && _params.lineStyle ) {
-      this.lineStyle.apply( this, _params.lineStyle ); // 4, 0xFF3300, 1);
-      delete _params.lineStyle;
-    }
+    _params.width  = width;
+    _params.height = height;
+    _params.color  = color;
     
-    if ( !_params || _params.fill !== false ) {
-      this.beginFill( color || "0xFF3300" );
-      delete _params.fill;
-    }
+    /**
+     * save last parameters
+     * @memberOf RectRenderer
+     * @private
+     */
+    this._initial = {
+      width     : _params.width
+      ,height   : _params.height
+      ,fill     : _params.fill
+      ,color    : _params.color
+      ,lineStyle: _params.lineStyle
+    };
     
-    this.drawRect( 0, 0, width, height );
-    
-    this.endFill();
+    _params = this.updateRender( _params );
     
     BaseRenderer.instantiate( this, _params );
   }
@@ -47,6 +52,36 @@ function(
   RectRenderer.prototype.constructor = RectRenderer;
   
   BaseRenderer.inherits( RectRenderer );
+  
+  RectRenderer.prototype.updateRender = function( params )
+  {
+    this.clear();
+    
+    if ( params && ( params.lineStyle || this._initial.lineStyle ) ) {
+      this.lineStyle.apply( this, params.lineStyle || this._initial.lineStyle ); // 4, 0xFF3300, 1);
+    }
+    
+    if ( !params || params.fill !== false || ( params.fill === undefined && this._initial.fill !== false ) ) {
+      this.beginFill( params.color || this._initial.color || "0xFF3300" );
+    }
+    
+    this.drawRect( 0, 0, params.width || this._initial.width, params.height || this._initial.height );
+    
+    this.endFill();
+    
+    this._initial = {
+      width     : params.width || this._initial.width
+      ,height   : params.height || this._initial.height
+      ,fill     : params.fill || this._initial.fill
+      ,color    : params.color || this._initial.color
+      ,lineStyle: params.lineStyle || this._initial.lineStyle
+    };
+    
+    delete params.lineStyle;
+    delete params.fill;
+    
+    return params;
+  }
   
   RectRenderer.prototype.DEName = "RectRenderer";
   
