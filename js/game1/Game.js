@@ -59,7 +59,11 @@ function( DE )
     Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: scene, backgroundImage: "bg" } );
     Game.camera.interactive = true;
     Game.camera.pointermove = function( e, pos ) { Game.targetPointer.moveTo( pos, 100 ); };
-    Game.camera.pointerdown = function( e, pos ) { console.log( "down" ); Game.targetPointer.shake( 10, 10, 200 ); };
+    Game.camera.pointerdown = function( e, pos )
+    {
+      Game.targetPointer.shake( 10, 10, 200 );
+      Game.targetPointer.renderer.setBrightness( [ 1, 0 ] );
+    };
     Game.camera.pointerup = function( e, pos ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
     Game.render.add( Game.camera );
     

@@ -228,7 +228,12 @@ function(
       }
     }
   } );
-
+  
+  /**
+   * change the tint of the Sprite, this is chain-able
+   * @public
+   * @memberOf SpriteRenderer
+   */
   SpriteRenderer.prototype.setTint = function( value )
   {
     this.tint = value || 0xFFFFFF;
@@ -236,8 +241,194 @@ function(
     if ( this._originalTexture ) {
       this._originalTexture.tint = this.tint;
     }
+    
+    return this;
   };
   
+  /**
+   * change the hue of the Sprite, this is chain-able
+   * this is an easy setup filter for SpriteRenderer and it use PIXI filters, check PIXI filters doc if you need more deeper informations
+   * @public
+   * @memberOf SpriteRenderer
+   * @param {number} rotation - in degrees
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setHue = function( rotation, multiply )
+  {
+    if ( !this.hueFilter ) {
+      this.hueFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.hueFilter.hue( 0, 0 );
+    }
+    
+    this.hueFilter.hue( rotation, multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.hueFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.hueFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.hueFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * change the saturation of the Sprite, this is chain-able
+   * this is an easy setup filter for SpriteRenderer and it use PIXI filters, check PIXI filters doc if you need more deeper informations
+   * @public
+   * @memberOf SpriteRenderer
+   * @param {number} amount - The saturation amount (0-1)
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setSaturation = function( amount, multiply )
+  {
+    if ( !this.saturationFilter ) {
+      this.saturationFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.saturationFilter.desaturate();
+    }
+    
+    this.saturationFilter.saturate( amount, multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.saturationFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.saturationFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.saturationFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * change the brightness of the Sprite, this is chain-able
+   * this is an easy setup filter for SpriteRenderer and it use PIXI filters, check PIXI filters doc if you need more deeper informations
+   * @public
+   * @memberOf SpriteRenderer
+   * @param {number} b - value of the brigthness (0-1, where 0 is black)
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setBrightness = function( b, multiply )
+  {
+    if ( !this.brightnessFilter ) {
+      this.brightnessFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.brightnessFilter.brightness( 0, 0 );
+    }
+    
+    this.brightnessFilter.brightness( b, multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.brightnessFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.brightnessFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.brightnessFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * change the contrast of the Sprite, this is chain-able
+   * this is an easy setup filter for SpriteRenderer and it use PIXI filters, check PIXI filters doc if you need more deeper informations
+   * @public
+   * @memberOf SpriteRenderer
+   * @param {number} amount - value of the contrast (0-1)
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setContrast = function( amount, multiply )
+  {
+    if ( !this.contrastFilter ) {
+      this.contrastFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.contrastFilter.contrast( 0, 0 );
+    }
+    
+    this.contrastFilter.contrast( amount, multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.contrastFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.contrastFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.contrastFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * apply a grascale on the Sprite, this is chain-able
+   * this is an easy setup filter for SpriteRenderer and it use PIXI filters, check PIXI filters doc if you need more deeper informations
+   * @public
+   * @memberOf SpriteRenderer
+   * @param {number} scale - value of the grey (0-1, where 0 is black)
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setGreyscale = function( scale, multiply )
+  {
+    if ( !this.grayscaleFilter ) {
+      this.grayscaleFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.grayscaleFilter.greyscale( 0, 0 );
+    }
+    
+    this.grayscaleFilter.greyscale( scale, multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.grayscaleFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.grayscaleFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.grayscaleFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * Set the black and white matrice.
+   * @public
+   * @memberOf SpriteRenderer
+   *
+   * @param {boolean} multiply - if true, current matrix and matrix are multiplied. If false,
+   *  just set the current matrix with @param matrix
+   */
+  SpriteRenderer.prototype.setBlackAndWhite = function( multiply )
+  {
+    if ( !this.blackAndWhiteFilter ) {
+      this.blackAndWhiteFilter = new PIXI.filters.ColorMatrixFilter();
+    }
+    else {
+      this.blackAndWhiteFilter.blackAndWhite( 0 );
+    }
+    
+    this.blackAndWhiteFilter.blackAndWhite( multiply );
+    
+    if ( !this.filters ) {
+      this.filters = [ this.blackAndWhiteFilter ];
+    }
+    else if ( this.filters.length >= 1 && this.filters.indexOf( this.blackAndWhiteFilter ) == -1 ) {
+      this.filters = this.filters.concat( [ this.blackAndWhiteFilter ] );
+    }
+    
+    return this;
+  };
+  
+  /**
+   * update the animation (called by the GameObject, if you use it an other way you have to call update)
+   * @protected
+   * @memberOf SpriteRenderer
+   */
   SpriteRenderer.prototype.update = function()
   {
     if ( !this.animated || this.isPaused || this.isOver ) {
@@ -447,8 +638,8 @@ function(
       this.normalTexture = new PIXI.Texture( this.baseNormalTexture, normsize, normsize.clone(), null, null );
     }
     
-    if ( this.tint ) {
-      this._originalTexture.tint = this.tint;
+    if ( params.tint ) {
+      this.setTint( params.tint );
     }
     
     if ( params.filters ) {
@@ -456,74 +647,66 @@ function(
     }
     
     if ( params.hue ) {
-      if ( !this.hueFilter ) {
-        this.hueFilter = new PIXI.filters.ColorMatrixFilter();
+      if ( params.hue.length ) {
+        this.setHue( params.hue[ 0 ], params.hue[ 1 ] );
+      }
+      else if ( params.hue.value ) {
+        this.setHue( params.hue.value, params.hue.multiply );
       }
       else {
-        this.hueFilter.hue( 0, 0 );
-      }
-      
-      this.hueFilter.hue( params.hue[ 0 ], params.hue[ 1 ] );
-      
-      if ( !this.filters ) {
-        this.filters = [ this.hueFilter ];
-      }
-      else if ( this.filters.length >= 1 && this.filters.indexOf( this.hueFilter ) == -1 ) {
-        this.filters = this.filters.concat( [ this.hueFilter ] );
+        this.setHue( params.hue );
       }
     }
     
     if ( params.saturation ) {
-      if ( !this.saturationFilter ) {
-        this.saturationFilter = new PIXI.filters.ColorMatrixFilter();
+      if ( params.saturation.length ) {
+        this.setSaturation( params.saturation[ 0 ], params.saturation[ 1 ] );
+      }
+      else if ( params.saturation.value ) {
+        this.setSaturation( params.saturation.value, params.saturation.multiply );
       }
       else {
-        this.saturationFilter.saturate( 0, 0 );
-      }
-      
-      this.saturationFilter.saturate( params.saturation[ 0 ], params.saturation[ 1 ] );
-      
-      if ( !this.filters ) {
-        this.filters = [ this.saturationFilter ];
-      }
-      else if ( this.filters.length >= 1 && this.filters.indexOf( this.saturationFilter ) == -1 ) {
-        this.filters = this.filters.concat( [ this.saturationFilter ] );
+        this.setSaturation( params.saturation );
       }
     }
     
     if ( params.brightness ) {
-      if ( !this.brightnessFilter ) {
-        this.brightnessFilter = new PIXI.filters.ColorMatrixFilter();
+      if ( params.brightness.length ) {
+        this.setBrightness( params.brightness[ 0 ], params.brightness[ 1 ] );
+      }
+      else if ( params.brightness.value ) {
+        this.setBrightness( params.brightness.value, params.brightness.multiply );
       }
       else {
-        this.brightnessFilter.brightness( 0, 0 );
-      }
-      
-      this.brightnessFilter.brightness( params.brightness[ 0 ], params.brightness[ 1 ] );
-      
-      if ( !this.filters ) {
-        this.filters = [ this.brightnessFilter ];
-      }
-      else if ( this.filters.length >= 1 && this.filters.indexOf( this.brightnessFilter ) == -1 ) {
-        this.filters = this.filters.concat( [ this.brightnessFilter ] );
+        this.setBrightness( params.brightness );
       }
     }
     
     if ( params.contrast ) {
-      if ( !this.contrastFilter ) {
-        this.contrastFilter = new PIXI.filters.ColorMatrixFilter();
+      if ( params.contrast.length ) {
+        this.setContrast( params.contrast[ 0 ], params.contrast[ 1 ] );
+      }
+      else if ( params.contrast.value ) {
+        this.setContrast( params.contrast.value, params.contrast.multiply );
       }
       else {
-        this.contrastFilter.contrast( 0, 0 );
+        this.setContrast( params.contrast );
       }
-      
-      this.contrastFilter.contrast( params.contrast[ 0 ], params.contrast[ 1 ] );
-      
-      if ( !this.filters ) {
-        this.filters = [ this.contrastFilter ];
+    }
+    
+    if ( params.blackAndWhite ) {
+      this.setBlackAndWhite( params.blackAndWhite );
+    }
+    
+    if ( params.greyscale ) {
+      if ( params.greyscale.length ) {
+        this.setGreyscale( params.greyscale[ 0 ], params.greyscale[ 1 ] );
       }
-      else if ( this.filters.length >= 1 && this.filters.indexOf( this.contrastFilter ) == -1 ) {
-        this.filters = this.filters.concat( [ this.contrastFilter ] );
+      else if ( params.greyscale.value ) {
+        this.setGreyscale( params.greyscale.value, params.greyscale.multiply );
+      }
+      else {
+        this.setGreyscale( params.greyscale );
       }
     }
   };
