@@ -9,9 +9,22 @@
     "pixijs-charm": "^0.1.4",
     "requirejs": "^2.3.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "parallel-webpack": "^2.2.0",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4",
+    "webpack-utf8-bom": "^1.1.3"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified this is a TODO\" && exit 1",
+    
+    "watch": "echo TODO",
+    
+    "build": "DEV_BUILD=true FINAL_BUILD=true parallel-webpack --config webpack.config.js --verbose --no-stats",
+    "build-dev": "DEV_BUILD=true parallel-webpack --config webpack.config.js --verbose --no-stats",
+    
+    "win-build": "set DEV_BUILD=true && set FINAL_BUILD=true&& parallel-webpack --config webpack.config.js --verbose --no-stats",
+    "win-build-dev": "set DEV_BUILD=true && parallel-webpack --config webpack.config.js --verbose --no-stats"
   },
   "repository": {
     "type": "git",
