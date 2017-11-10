@@ -25,6 +25,8 @@ function(
 {
   function Render( id, params )
   {
+    Events.Emitter.call( this );
+    
     var _params = params || {};
     
     /**
@@ -135,7 +137,10 @@ function(
      */
     this.isFullscreen = false;
   }
-
+  
+  Render.prototype = Object.create( Events.Emitter.prototype );
+  Render.prototype.constructor = Render;
+  
   /**
    * create the parent div, add it to the dom, add this render to the MainLoop
    * bind Inputs, then call updateSizes
