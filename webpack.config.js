@@ -34,8 +34,8 @@ function makeConfig( options )
   return {
     context: __dirname + '/src', // `__dirname` is root of project and `src` is source
     entry: {
-      full: './main.js',
-      // engine: './main.js', // other build entry point if require
+      full: './index.js',
+      // engine: './index.js', // other build entry point if require
     },
     output: {
       path         : __dirname + '/dist',
