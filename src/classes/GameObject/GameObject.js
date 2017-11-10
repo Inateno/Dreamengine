@@ -702,6 +702,22 @@ function(
   };
   
   /**
+   * this function return the "world" rotation of the object.
+   * It doesn't include render/scene/camera rotation
+   * @memberOf GameObject
+   * @public
+   */
+  GameObject.prototype.getGlobalRotation = function()
+  {
+    if ( this.parent.getGlobalRotation ) {
+      return this.rotation + this.parent.getGlobalRotation();
+    }
+    else {
+      return this.rotation;
+    }
+  };
+  
+  /**
    * Sort gameObjects in the scene along z axis or using z-index for objects on the same same plan.
    * The priority is the following, z, z-index, y, x
    * You shouldn't call this method directly because engine do it for you, but in some case it can be useful to do it yourself
