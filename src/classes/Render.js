@@ -264,7 +264,7 @@ function(
     this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
     
     this._drawRatio = newW / this._savedSizes.x;
-    // TODO // this.trigger( "resize", this._drawRatio );
+    this.emit( "resize", this._drawRatio );
   };
   
   /**
