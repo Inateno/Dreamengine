@@ -114,12 +114,31 @@ function(
   
   Object.defineProperties( Camera.prototype, {
     /**
+     * easy way to shutdown a camera rendering
+     * NB: shutdown a camera wont prevent scene to update, set your scene to enable = false if you want to kill it too
+     * @public
+     * @memberOf Camera
+     * @type {Boolean}
+     */
+    enable: {
+      get: function()
+      {
+        return this.renderable && this.visible;
+      }
+      , set: function( bool )
+      {
+        this.visible = bool;
+        this.renderable = bool;
+      }
+    }
+    
+    /**
      * public getter/setter for _usePerspective, if true perspective is calculated before rendering
      * @public
      * @memberOf GameObject
      * @type {Boolean}
      */
-    usePerspective: {
+    , usePerspective: {
       get: function()
       {
         return this._usePerspective;
@@ -321,6 +340,10 @@ function(
    */
   Camera.prototype.clearPerspective = function()
   {
+    if ( !this._usePerspective || !this._scene ) {
+      return;
+    }
+    
     var children = this._scene.children;
     for ( var i = 0, child; i < children.length; ++i )
     {
