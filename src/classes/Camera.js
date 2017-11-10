@@ -178,6 +178,7 @@ function(
     /**
      * override the PIXI pointer event to add the "local" camera position in 2nd argument
      * you get/set this method as usual, nothing change
+     * WARN: the engine give pos in first argument, and original event in second (not like PIXI)
      * @override
      * @public
      * @memberOf Camera
@@ -199,7 +200,7 @@ function(
       , set: function( fn ) { this._customPointerOver = fn; }
     }
     , pointerout: {
-      get: function() { return this._pointerOut; }
+      get: function() { return this._pointerout; }
       , set: function( fn ) { this._customPointerOut = fn; }
     }
     , pointertap: {
@@ -225,7 +226,7 @@ function(
       ,y: event.data.global.y + ( this.pivot.y - this.y )
     };
     
-    this[ "_customPointer" + type ]( event, pos );
+    this[ "_customPointer" + type ]( pos, event );
   };
   
   Camera.prototype._pointermove      = function( e ) { this._pointerHandler( "Move", e ); };
