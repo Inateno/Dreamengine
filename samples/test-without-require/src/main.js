@@ -19,8 +19,8 @@ window.onload = function()
   
   DE.init(
   {
-    'onReady'              : Game.init
-    , 'onLoad'             : Game.onload
+    'onReady'              : Game.onReady
+    , 'onLoad'             : Game.onLoad
     , 'ignoreNotifications': true
     , 'inputs'             : inputs
     , 'audios'             : audios

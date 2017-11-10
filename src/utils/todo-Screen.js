@@ -7,6 +7,7 @@
 
 ***
 * singleton@Screen
+* module to select quality (by default, it load depending on the screen size)
  this part is a little bit complicated (but really easy in fact)
  it choose depend on the screen sizes * dpi the nearest resolution
  (avalaible in config)

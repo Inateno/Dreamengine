@@ -8,8 +8,8 @@
 ***
 simple Game declaration
 **/
-define( [ 'DREAM_ENGINE' ],
-function( DE )
+define( [ 'DREAM_ENGINE', 'DE.NebulaOffline' ],
+function( DE, NebulaOffline )
 {
   var Game = {};
     
@@ -35,6 +35,8 @@ function( DE )
       , powerPreferences: "high-performance"
     } );
     Game.render.init();
+    
+    NebulaOffline.init();
     
     DE.start();
   }

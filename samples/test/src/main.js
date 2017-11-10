@@ -16,7 +16,8 @@
 require.config( {
   baseUrl: "./src/"
   , paths: {
-    'DREAM_ENGINE'    : '../../../dist/Dreamengine.amd'
+    'DREAM_ENGINE'     : '../../../dist/Dreamengine.amd'
+    ,'DE.NebulaOffline': '../../../plugins/NebulaOffline/index'
     
     // ,'gameLoop'       : 'custom/gameLoop'
     ,'Game'           : 'Game'
@@ -46,7 +47,6 @@ function( DE, Game, inputs, audios, dictionary, images, achievements )
   {
     'onReady'              : Game.init
     , 'onLoad'             : Game.onload
-    , 'ignoreNotifications': true
     , 'inputs'             : inputs
     , 'audios'             : audios
     , 'dictionary'         : dictionary
@@ -54,7 +54,6 @@ function( DE, Game, inputs, audios, dictionary, images, achievements )
     , 'achievements'       : achievements
     , 'about': { 'gameName': "Engine Dev Game 1", "namespace": "noting", 'author': "Inateno", 'gameVersion': "0.1" }
     , 'saveModel': { "nShoots": 0 }, 'saveIgnoreVersion': true
-    , 'ignoreNebula': true
     // , 'loader': { interval: 10, scale: 2 }
   } );
 } );

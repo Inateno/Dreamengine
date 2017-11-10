@@ -15,8 +15,8 @@ Game.scene  = null;
 Game.ship  = null;
 Game.obj = null;
 
-// init
-Game.init = function()
+// onReady = after DREAM_ENGINE init
+Game.onReady = function()
 {
   console.log( "game init" );
   // DE.config.DEBUG = 1;
@@ -36,7 +36,7 @@ Game.init = function()
   DE.start();
 }
 
-Game.onload = function()
+Game.onLoad = function()
 {
 
   console.log( "game start" );

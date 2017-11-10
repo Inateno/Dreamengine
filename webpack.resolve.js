@@ -27,10 +27,8 @@ var resolve = {
     , 'DE.Inputs$'       : path.resolve( __dirname, 'src/utils/Inputs' )
     , 'DE.gamepad$'      : path.resolve( __dirname, 'src/utils/gamepad' )
     , 'DE.ImageManager$' : path.resolve( __dirname, 'src/utils/ImageManager' )
-    // TODO , 'DE.NebulaOffline$': path.resolve( __dirname, 'src/utils/NebulaOffline' )
     // TODO , 'DE.Screen$': path.resolve( __dirname, 'src/utils/Screen' )
     // TODO , 'DE.SystemDetection$': path.resolve( __dirname, 'src/utils/SystemDetection' )
-    // TODO ImageLoader / Manager something to load and handle images / spritesheets (with the ability to add some later)
     
     , 'DE.Render$' : path.resolve( __dirname, 'src/classes/Render' )
     , 'DE.Scene$'  : path.resolve( __dirname, 'src/classes/Scene' )

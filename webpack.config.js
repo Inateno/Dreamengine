@@ -5,9 +5,10 @@ var resolve = require( './webpack.resolve' );
 var BomPlugin = require( 'webpack-utf8-bom' );
 
 // to create multiple process of webpack, reduce build time
-var createVariants = require('parallel-webpack').createVariants;
+var createVariants = require( 'parallel-webpack' ).createVariants;
 
-function makeConfig( options ) {
+function makeConfig( options )
+{
   
   var suffix = "";
   if ( options.target !== "var" ) {

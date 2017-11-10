@@ -2,10 +2,8 @@
 <html style="margin: 0;">
   <head>
     <title>Stress test</title>
-    <link href="css/1.style.css" rel="stylesheet" type="text/css" />
-    <link href="css/2.Nebula.css" rel="stylesheet" type="text/css" />
-    <link href="css/popup.css" rel="stylesheet" type="text/css" />
-    <link href="css/lightbox.css" rel="stylesheet" type="text/css" />
+    <link href="../../css/default.css" rel="stylesheet" type="text/css" />
+    <link href="../../plugins/NebulaOffline/index.css" rel="stylesheet" type="text/css" />
     
     <meta name="viewport" 
       content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -21,7 +19,17 @@
     
   </head>
     <body style="margin:0;overflow: hidden;">
-      <div id="render"></div>
+      <div id="render">
+        <div id="notifsContainer"></div>
+        <div id="Dreamirl-Nebula"></div>
+      </div>
+      
+      <div id="notificationTemplate" style="display:none">
+        <div>
+          <span class="content"></span>
+          <div class="notifClose">X</div>
+        </div>
+      </div>
       <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
       <script type="text/javascript" src="../../node_modules/requirejs/require.js" data-main="src/main"></script>
     </body>
