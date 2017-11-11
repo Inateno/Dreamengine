@@ -30,7 +30,7 @@ function(
     x: {
       get: function()
       {
-        return this.gameObject.x || this._x;
+        return this.gameObject ? this.gameObject.x : this._x;
       }
       , set: function( value )
       {
@@ -43,7 +43,7 @@ function(
     , y: {
       get: function()
       {
-        return this.gameObject.y || this._y;
+        return this.gameObject ? this.gameObject.y : this._y;
       }
       , set: function( value )
       {
@@ -56,7 +56,7 @@ function(
     , rotation: {
       get: function()
       {
-        return this.gameObject.rotation || this._rotation;
+        return this.gameObject ? this.gameObject.rotation : this._rotation;
       }
       , set: function( value )
       {
