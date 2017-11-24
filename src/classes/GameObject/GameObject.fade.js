@@ -16,7 +16,7 @@ function(
    * @param {Int} [duration=500] fade duration in ms
    * @example myObject.fade( 0.5, 1, 850 );
    */
-  GameObject.prototype.fade = function( from, to, duration, force )
+  GameObject.prototype.fade = function( from, to, duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
@@ -29,7 +29,9 @@ function(
       ,oDuration: duration || 500
       ,fadeScale: Math.abs( from - to )
       ,done     : false
+      ,callback : callback
     };
+    
     data.dir       = data.from > to ? -1 : 1;
     this.alpha     = from;
     this._fadeData = data;
@@ -49,9 +51,9 @@ function(
    * @param {Int} [duration=500] fade duration in ms
    * @example myObject.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
    */
-  GameObject.prototype.fadeTo = function( to, duration, force )
+  GameObject.prototype.fadeTo = function( to, duration, force, callback )
   {
-    this.fade( this.alpha, to, duration, force );
+    this.fade( this.alpha, to, duration, force, callback );
     
     return this;
   };
@@ -66,14 +68,14 @@ function(
    * @example // alpha = 0 in 850ms
    * myObject.fadeOut( 850 );
    */
-  GameObject.prototype.fadeOut = function( duration, force )
+  GameObject.prototype.fadeOut = function( duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
       this.alpha = 1;
     }
     
-    this.fade( this.alpha, 0, duration, force );
+    this.fade( this.alpha, 0, duration, force, callback );
     return this;
   };
   
@@ -87,14 +89,14 @@ function(
    * @example // alpha = 1 in 850ms
    * myObject.fadeIn( 850 );
    */
-  GameObject.prototype.fadeIn = function( duration, force )
+  GameObject.prototype.fadeIn = function( duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
       this.alpha = 0;
     }
     
-    this.fade( this.alpha, 1, duration, force );
+    this.fade( this.alpha, 1, duration, force, callback );
     return this;
   };
   
@@ -118,6 +120,11 @@ function(
       }
       
       if ( this._fadeData.duration <= 0 ) {
+        
+        if ( this._fadeData.callback ) {
+          this._fadeData.callback.call( this );
+        }
+        
         this._fadeData.done = true;
         
         if ( this.alpha == 0 ) {

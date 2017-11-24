@@ -40849,6 +40849,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
     // call correctly the scale modifier to update zscale and worldScale
     this.setScale( this.savedScale.x, this.savedScale.y );
     
+    /**
+     * can prevent event propagation
+     * @private 
+     * @memberOf GameObject 
+     */
+    this._killArgs = {};
     
     /**
      * object used to apply fade transition
@@ -41292,9 +41298,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
   GameObject.prototype.askToKill = function( params )
   {
     this.target = null;
-    this.killArgs = params || {};
+    this._killArgs = params || {};
     
-    if ( !this.killArgs.preventEvents && !this.killArgs.preventKillEvent ) {
+    if ( !this._killArgs.preventEvents && !this._killArgs.preventKillEvent ) {
       if ( this.onKill ) {
         this.onKill();
       }
@@ -41340,7 +41346,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
    */
   GameObject.prototype.killMePlease = function()
   {
-    if ( !this.killArgs.preventEvents && !this.killArgs.preventKilledEvent ) {
+    if ( !this._killArgs.preventEvents && !this._killArgs.preventKilledEvent ) {
       if ( this.onKilled )
         this.onKilled();
       this.emit( "killed", this );
@@ -41367,6 +41373,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       , baseTexture: this.destroyTextureOnKill
       , texture    : this.destroyTextureOnKill
     } );
+  };
+  
+  /**
+   * this function return the "world" rotation of the object.
+   * It doesn't include render/scene/camera rotation
+   * @memberOf GameObject
+   * @public
+   */
+  GameObject.prototype.getGlobalRotation = function()
+  {
+    if ( this.parent.getGlobalRotation ) {
+      return this.rotation + this.parent.getGlobalRotation();
+    }
+    else {
+      return this.rotation;
+    }
   };
   
   /**
@@ -41719,7 +41741,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
  * you can use getForce to get a value in a specific language
  * @namespace Localization
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(2)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+)
 {
   var Localization = new function()
   {
@@ -42001,10 +42027,20 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
 
 /**
  * bring Gamepad API with Chrome and Windows8
- * TODO - comment and document it (big taff here)
+ * TODO - comment and document it (big work here)
  * @namespace Inputs
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2), __webpack_require__(3), __webpack_require__(10), __webpack_require__(6) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config, Events, Notifications, Localization )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(2)
+  , __webpack_require__(3)
+  , __webpack_require__(10)
+  , __webpack_require__(6)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+  , Events
+  , Notifications
+  , Localization
+)
 {
   // var addEvent = Event.addEventCapabilities;
   var detectBrowser = function( browser )
@@ -42627,7 +42663,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
  * (and set padding on the parent to simulate a margin)</b>
  * @namespace Notifications
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(2)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+)
 {
   var Notifications = new function()
   {
@@ -42796,7 +42836,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
  * Handle images, ready to use spritesImages, json sheets, json particles files or custom files
  * @namespace ImageManagser
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(1), __webpack_require__(2), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( PIXI, config, Events )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(1)
+  , __webpack_require__(2)
+  , __webpack_require__(3)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  PIXI
+  , config
+  , Events
+)
 {
   /* TODO redefine if used or not 
     PIXI.loader.on( 'complete', function()
@@ -43107,7 +43155,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     x: {
       get: function()
       {
-        return this.gameObject.x || this._x;
+        return this.gameObject ? this.gameObject.x : this._x;
       }
       , set: function( value )
       {
@@ -43120,7 +43168,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     , y: {
       get: function()
       {
-        return this.gameObject.y || this._y;
+        return this.gameObject ? this.gameObject.y : this._y;
       }
       , set: function( value )
       {
@@ -43133,7 +43181,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     , rotation: {
       get: function()
       {
-        return this.gameObject.rotation || this._rotation;
+        return this.gameObject ? this.gameObject.rotation : this._rotation;
       }
       , set: function( value )
       {
@@ -43557,6 +43605,30 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
         return b.z - a.z;
       }
     } );
+    
+    if ( this.children ) {
+      this.children.sort( function( a, b )
+      {
+        if ( b.z == a.z ) {
+        
+          if ( b.zindex == a.zindex ) {
+            if ( b.y == a.y ) {
+              return a.x - b.x;
+            }
+            else {
+              return a.y - b.y;
+            }
+          }
+          else {
+            return a.zindex - b.zindex;
+          }
+          
+        }
+        else {
+          return b.z - a.z;
+        }
+      } );
+    }
     
     this._shouldSortChildren = false;
     
@@ -44356,7 +44428,17 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
    if you want to ignore backup olds version when saving, add saveIgnoreVersion = true on Engine Initialisation
  * @namespace Save
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(25), __webpack_require__(2), __webpack_require__(7), __webpack_require__(3) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( stash, config, about, Events )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(25)
+  , __webpack_require__(2)
+  , __webpack_require__(7)
+  , __webpack_require__(3)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  stash
+  , config
+  , about
+  , Events
+)
 {
   var Save = new function()
   {
@@ -44556,7 +44638,15 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
  * An audio tool over howler, provide some simple middleware + direct access to howler sounds
  * @namespace Audio
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2), __webpack_require__(27), __webpack_require__(3), __webpack_require__(29) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config, howler, Events )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(2)
+  , __webpack_require__(27)
+  , __webpack_require__(3)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+  , howler
+  , Events
+)
 {
   var Audio = new function()
   {
@@ -45141,57 +45231,57 @@ const gamepad       = __webpack_require__( 9 );
 const Audio         = __webpack_require__( 19 );
 const Localization  = __webpack_require__( 6 );
 const Notifications = __webpack_require__( 10 );
-const Achievements  = __webpack_require__( 30 );
+const Achievements  = __webpack_require__( 29 );
 const ImageManager  = __webpack_require__( 11 );
-const Render        = __webpack_require__( 31 );
-const Scene         = __webpack_require__( 32 );
-const Camera        = __webpack_require__( 33 );
+const Render        = __webpack_require__( 30 );
+const Scene         = __webpack_require__( 31 );
+const Camera        = __webpack_require__( 32 );
 const Vector2       = __webpack_require__( 13 );
 
 // engine custom renderer
 const BaseRenderer          = __webpack_require__( 5 );
-const TextureRenderer       = __webpack_require__( 34 );
+const TextureRenderer       = __webpack_require__( 33 );
 const SpriteRenderer        = __webpack_require__( 17 );
 const TilingRenderer        = __webpack_require__( 21 );
 const TextRenderer          = __webpack_require__( 16 );
 const RectRenderer          = __webpack_require__( 20 );
 const GraphicRenderer       = __webpack_require__( 14 );
 const GameObject            = __webpack_require__( 4 );
-const GameObject_automatism = __webpack_require__( 35 );
-const GameObject_fade       = __webpack_require__( 36 );
-const GameObject_focus      = __webpack_require__( 37 );
-const GameObject_moveTo     = __webpack_require__( 38 );
-const GameObject_scale      = __webpack_require__( 39 );
-const GameObject_shake      = __webpack_require__( 40 );
-const GameObject_update     = __webpack_require__( 41 );
+const GameObject_automatism = __webpack_require__( 34 );
+const GameObject_fade       = __webpack_require__( 35 );
+const GameObject_focus      = __webpack_require__( 36 );
+const GameObject_moveTo     = __webpack_require__( 37 );
+const GameObject_scale      = __webpack_require__( 38 );
+const GameObject_shake      = __webpack_require__( 39 );
+const GameObject_update     = __webpack_require__( 40 );
 
 var DE = {
-  config: config,
-  about: about,
-  Events: Events,
-  Time: Time,
-  MainLoop: MainLoop,
-  Save: Save,
-  Inputs: Inputs,
-  gamepad: gamepad,
-  Audio: Audio,
-  Localization: Localization,
-  Notifications: Notifications,
-  Achievements: Achievements,
-  ImageManager: ImageManager,
-  Render: Render,
-  Scene: Scene,
-  Camera: Camera,
-  Vector2: Vector2,
-  BaseRenderer: BaseRenderer,
+  config         : config,
+  about          : about,
+  Events         : Events,
+  Time           : Time,
+  MainLoop       : MainLoop,
+  Save           : Save,
+  Inputs         : Inputs,
+  gamepad        : gamepad,
+  Audio          : Audio,
+  Localization   : Localization,
+  Notifications  : Notifications,
+  Achievements   : Achievements,
+  ImageManager   : ImageManager,
+  Render         : Render,
+  Scene          : Scene,
+  Camera         : Camera,
+  Vector2        : Vector2,
+  BaseRenderer   : BaseRenderer,
   TextureRenderer: TextureRenderer,
-  SpriteRenderer: SpriteRenderer,
-  TilingRenderer: TilingRenderer,
-  TextRenderer: TextRenderer,
-  RectRenderer: RectRenderer,
+  SpriteRenderer : SpriteRenderer,
+  TilingRenderer : TilingRenderer,
+  TextRenderer   : TextRenderer,
+  RectRenderer   : RectRenderer,
   GraphicRenderer: GraphicRenderer,
-  GameObject: GameObject,
-  PIXI: PIXI
+  GameObject     : GameObject,
+  PIXI           : PIXI
 };
 
 DE.VERSION = DE.config.VERSION;
@@ -45883,7 +45973,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
  * !! there is no all KEYBOARD keys, but you can easily add some, and share it if you want, I will add them !!
  * @namespace Inputs
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2), __webpack_require__(3), __webpack_require__(9), __webpack_require__(6), __webpack_require__(0) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config, Events, gamepad, Localization, Time )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+  __webpack_require__(2)
+  , __webpack_require__(3)
+  , __webpack_require__(9)
+  , __webpack_require__(6)
+  , __webpack_require__(0)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+  , Events
+  , gamepad
+  , Localization
+  , Time
+)
 {
   var _langs = {
     "en": {
@@ -46370,13 +46472,6 @@ module.exports = __webpack_amd_options__;
 
 /***/ }),
 /* 29 */
-/***/ (function(module, exports) {
-
-/*! howler.js v2.0.5 | Spatial Plugin | (c) 2013-2017, James Simpson of GoldFire Studios | MIT License | howlerjs.com */
-!function(){"use strict";HowlerGlobal.prototype._pos=[0,0,0],HowlerGlobal.prototype._orientation=[0,0,-1,0,1,0],HowlerGlobal.prototype.stereo=function(n){var e=this;if(!e.ctx||!e.ctx.listener)return e;for(var t=e._howls.length-1;t>=0;t--)e._howls[t].stereo(n);return e},HowlerGlobal.prototype.pos=function(n,e,t){var o=this;return o.ctx&&o.ctx.listener?(e="number"!=typeof e?o._pos[1]:e,t="number"!=typeof t?o._pos[2]:t,"number"!=typeof n?o._pos:(o._pos=[n,e,t],o.ctx.listener.setPosition(o._pos[0],o._pos[1],o._pos[2]),o)):o},HowlerGlobal.prototype.orientation=function(n,e,t,o,r,a){var i=this;if(!i.ctx||!i.ctx.listener)return i;var p=i._orientation;return e="number"!=typeof e?p[1]:e,t="number"!=typeof t?p[2]:t,o="number"!=typeof o?p[3]:o,r="number"!=typeof r?p[4]:r,a="number"!=typeof a?p[5]:a,"number"!=typeof n?p:(i._orientation=[n,e,t,o,r,a],i.ctx.listener.setOrientation(n,e,t,o,r,a),i)},Howl.prototype.init=function(n){return function(e){var t=this;return t._orientation=e.orientation||[1,0,0],t._stereo=e.stereo||null,t._pos=e.pos||null,t._pannerAttr={coneInnerAngle:void 0!==e.coneInnerAngle?e.coneInnerAngle:360,coneOuterAngle:void 0!==e.coneOuterAngle?e.coneOuterAngle:360,coneOuterGain:void 0!==e.coneOuterGain?e.coneOuterGain:0,distanceModel:void 0!==e.distanceModel?e.distanceModel:"inverse",maxDistance:void 0!==e.maxDistance?e.maxDistance:1e4,panningModel:void 0!==e.panningModel?e.panningModel:"HRTF",refDistance:void 0!==e.refDistance?e.refDistance:1,rolloffFactor:void 0!==e.rolloffFactor?e.rolloffFactor:1},t._onstereo=e.onstereo?[{fn:e.onstereo}]:[],t._onpos=e.onpos?[{fn:e.onpos}]:[],t._onorientation=e.onorientation?[{fn:e.onorientation}]:[],n.call(this,e)}}(Howl.prototype.init),Howl.prototype.stereo=function(e,t){var o=this;if(!o._webAudio)return o;if("loaded"!==o._state)return o._queue.push({event:"stereo",action:function(){o.stereo(e,t)}}),o;var r=void 0===Howler.ctx.createStereoPanner?"spatial":"stereo";if(void 0===t){if("number"!=typeof e)return o._stereo;o._stereo=e,o._pos=[e,0,0]}for(var a=o._getSoundIds(t),i=0;i<a.length;i++){var p=o._soundById(a[i]);if(p){if("number"!=typeof e)return p._stereo;p._stereo=e,p._pos=[e,0,0],p._node&&(p._pannerAttr.panningModel="equalpower",p._panner&&p._panner.pan||n(p,r),"spatial"===r?p._panner.setPosition(e,0,0):p._panner.pan.value=e),o._emit("stereo",p._id)}}return o},Howl.prototype.pos=function(e,t,o,r){var a=this;if(!a._webAudio)return a;if("loaded"!==a._state)return a._queue.push({event:"pos",action:function(){a.pos(e,t,o,r)}}),a;if(t="number"!=typeof t?0:t,o="number"!=typeof o?-.5:o,void 0===r){if("number"!=typeof e)return a._pos;a._pos=[e,t,o]}for(var i=a._getSoundIds(r),p=0;p<i.length;p++){var s=a._soundById(i[p]);if(s){if("number"!=typeof e)return s._pos;s._pos=[e,t,o],s._node&&(s._panner&&!s._panner.pan||n(s,"spatial"),s._panner.setPosition(e,t,o)),a._emit("pos",s._id)}}return a},Howl.prototype.orientation=function(e,t,o,r){var a=this;if(!a._webAudio)return a;if("loaded"!==a._state)return a._queue.push({event:"orientation",action:function(){a.orientation(e,t,o,r)}}),a;if(t="number"!=typeof t?a._orientation[1]:t,o="number"!=typeof o?a._orientation[2]:o,void 0===r){if("number"!=typeof e)return a._orientation;a._orientation=[e,t,o]}for(var i=a._getSoundIds(r),p=0;p<i.length;p++){var s=a._soundById(i[p]);if(s){if("number"!=typeof e)return s._orientation;s._orientation=[e,t,o],s._node&&(s._panner||(s._pos||(s._pos=a._pos||[0,0,-.5]),n(s,"spatial")),s._panner.setOrientation(e,t,o)),a._emit("orientation",s._id)}}return a},Howl.prototype.pannerAttr=function(){var e,t,o,r=this,a=arguments;if(!r._webAudio)return r;if(0===a.length)return r._pannerAttr;if(1===a.length){if("object"!=typeof a[0])return o=r._soundById(parseInt(a[0],10)),o?o._pannerAttr:r._pannerAttr;e=a[0],void 0===t&&(e.pannerAttr||(e.pannerAttr={coneInnerAngle:e.coneInnerAngle,coneOuterAngle:e.coneOuterAngle,coneOuterGain:e.coneOuterGain,distanceModel:e.distanceModel,maxDistance:e.maxDistance,refDistance:e.refDistance,rolloffFactor:e.rolloffFactor,panningModel:e.panningModel}),r._pannerAttr={coneInnerAngle:void 0!==e.pannerAttr.coneInnerAngle?e.pannerAttr.coneInnerAngle:r._coneInnerAngle,coneOuterAngle:void 0!==e.pannerAttr.coneOuterAngle?e.pannerAttr.coneOuterAngle:r._coneOuterAngle,coneOuterGain:void 0!==e.pannerAttr.coneOuterGain?e.pannerAttr.coneOuterGain:r._coneOuterGain,distanceModel:void 0!==e.pannerAttr.distanceModel?e.pannerAttr.distanceModel:r._distanceModel,maxDistance:void 0!==e.pannerAttr.maxDistance?e.pannerAttr.maxDistance:r._maxDistance,refDistance:void 0!==e.pannerAttr.refDistance?e.pannerAttr.refDistance:r._refDistance,rolloffFactor:void 0!==e.pannerAttr.rolloffFactor?e.pannerAttr.rolloffFactor:r._rolloffFactor,panningModel:void 0!==e.pannerAttr.panningModel?e.pannerAttr.panningModel:r._panningModel})}else 2===a.length&&(e=a[0],t=parseInt(a[1],10));for(var i=r._getSoundIds(t),p=0;p<i.length;p++)if(o=r._soundById(i[p])){var s=o._pannerAttr;s={coneInnerAngle:void 0!==e.coneInnerAngle?e.coneInnerAngle:s.coneInnerAngle,coneOuterAngle:void 0!==e.coneOuterAngle?e.coneOuterAngle:s.coneOuterAngle,coneOuterGain:void 0!==e.coneOuterGain?e.coneOuterGain:s.coneOuterGain,distanceModel:void 0!==e.distanceModel?e.distanceModel:s.distanceModel,maxDistance:void 0!==e.maxDistance?e.maxDistance:s.maxDistance,refDistance:void 0!==e.refDistance?e.refDistance:s.refDistance,rolloffFactor:void 0!==e.rolloffFactor?e.rolloffFactor:s.rolloffFactor,panningModel:void 0!==e.panningModel?e.panningModel:s.panningModel};var l=o._panner;l?(l.coneInnerAngle=s.coneInnerAngle,l.coneOuterAngle=s.coneOuterAngle,l.coneOuterGain=s.coneOuterGain,l.distanceModel=s.distanceModel,l.maxDistance=s.maxDistance,l.refDistance=s.refDistance,l.rolloffFactor=s.rolloffFactor,l.panningModel=s.panningModel):(o._pos||(o._pos=r._pos||[0,0,-.5]),n(o,"spatial"))}return r},Sound.prototype.init=function(n){return function(){var e=this,t=e._parent;e._orientation=t._orientation,e._stereo=t._stereo,e._pos=t._pos,e._pannerAttr=t._pannerAttr,n.call(this),e._stereo?t.stereo(e._stereo):e._pos&&t.pos(e._pos[0],e._pos[1],e._pos[2],e._id)}}(Sound.prototype.init),Sound.prototype.reset=function(n){return function(){var e=this,t=e._parent;return e._orientation=t._orientation,e._pos=t._pos,e._pannerAttr=t._pannerAttr,n.call(this)}}(Sound.prototype.reset);var n=function(n,e){e=e||"spatial","spatial"===e?(n._panner=Howler.ctx.createPanner(),n._panner.coneInnerAngle=n._pannerAttr.coneInnerAngle,n._panner.coneOuterAngle=n._pannerAttr.coneOuterAngle,n._panner.coneOuterGain=n._pannerAttr.coneOuterGain,n._panner.distanceModel=n._pannerAttr.distanceModel,n._panner.maxDistance=n._pannerAttr.maxDistance,n._panner.refDistance=n._pannerAttr.refDistance,n._panner.rolloffFactor=n._pannerAttr.rolloffFactor,n._panner.panningModel=n._pannerAttr.panningModel,n._panner.setPosition(n._pos[0],n._pos[1],n._pos[2]),n._panner.setOrientation(n._orientation[0],n._orientation[1],n._orientation[2])):(n._panner=Howler.ctx.createStereoPanner(),n._panner.pan.value=n._stereo),n._panner.connect(n._node),n._paused||n._parent.pause(n._id,!0).play(n._id)}}();
-
-/***/ }),
-/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -46387,9 +46482,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
  * provide a system to create achievements. Use events in the engine to detect unlockeds
  * @namespace Achievements
  */
-!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(2), __webpack_require__(7), __webpack_require__(3), __webpack_require__(19)
-        , __webpack_require__(10), __webpack_require__(6), __webpack_require__(18) ], __WEBPACK_AMD_DEFINE_RESULT__ = function( config, about, Events, Audio
-        , Notifications, Localization, Save )
+!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
+ __webpack_require__(2)
+ , __webpack_require__(7)
+ , __webpack_require__(3)
+ , __webpack_require__(19)
+ , __webpack_require__(10)
+ , __webpack_require__(6)
+ , __webpack_require__(18)
+], __WEBPACK_AMD_DEFINE_RESULT__ = function(
+  config
+  , about
+  , Events
+  , Audio
+  , Notifications
+  , Localization
+  , Save
+)
 {
   // achievement-unlock added in dictionary
   var langs = {
@@ -46563,7 +46672,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -46592,6 +46701,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 {
   function Render( id, params )
   {
+    Events.Emitter.call( this );
+    
     var _params = params || {};
     
     /**
@@ -46702,7 +46813,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
      */
     this.isFullscreen = false;
   }
-
+  
+  Render.prototype = Object.create( Events.Emitter.prototype );
+  Render.prototype.constructor = Render;
+  
   /**
    * create the parent div, add it to the dom, add this render to the MainLoop
    * bind Inputs, then call updateSizes
@@ -46826,7 +46940,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
     this.div.style.marginTop = ( ( h - newH ) / 2 ) + "px";
     
     this._drawRatio = newW / this._savedSizes.x;
-    // TODO // this.trigger( "resize", this._drawRatio );
+    this.emit( "resize", this._drawRatio );
   };
   
   /**
@@ -47007,7 +47121,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -47236,7 +47350,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -47354,12 +47468,31 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
   
   Object.defineProperties( Camera.prototype, {
     /**
+     * easy way to shutdown a camera rendering
+     * NB: shutdown a camera wont prevent scene to update, set your scene to enable = false if you want to kill it too
+     * @public
+     * @memberOf Camera
+     * @type {Boolean}
+     */
+    enable: {
+      get: function()
+      {
+        return this.renderable && this.visible;
+      }
+      , set: function( bool )
+      {
+        this.visible = bool;
+        this.renderable = bool;
+      }
+    }
+    
+    /**
      * public getter/setter for _usePerspective, if true perspective is calculated before rendering
      * @public
      * @memberOf GameObject
      * @type {Boolean}
      */
-    usePerspective: {
+    , usePerspective: {
       get: function()
       {
         return this._usePerspective;
@@ -47399,6 +47532,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
     /**
      * override the PIXI pointer event to add the "local" camera position in 2nd argument
      * you get/set this method as usual, nothing change
+     * WARN: the engine give pos in first argument, and original event in second (not like PIXI)
      * @override
      * @public
      * @memberOf Camera
@@ -47420,7 +47554,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       , set: function( fn ) { this._customPointerOver = fn; }
     }
     , pointerout: {
-      get: function() { return this._pointerOut; }
+      get: function() { return this._pointerout; }
       , set: function( fn ) { this._customPointerOut = fn; }
     }
     , pointertap: {
@@ -47446,7 +47580,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       ,y: event.data.global.y + ( this.pivot.y - this.y )
     };
     
-    this[ "_customPointer" + type ]( event, pos );
+    this[ "_customPointer" + type ]( pos, event );
   };
   
   Camera.prototype._pointermove      = function( e ) { this._pointerHandler( "Move", e ); };
@@ -47561,6 +47695,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
    */
   Camera.prototype.clearPerspective = function()
   {
+    if ( !this._usePerspective || !this._scene ) {
+      return;
+    }
+    
     var children = this._scene.children;
     for ( var i = 0, child; i < children.length; ++i )
     {
@@ -47607,7 +47745,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -47656,7 +47794,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -47785,7 +47923,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -47805,7 +47943,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @param {Int} [duration=500] fade duration in ms
    * @example myObject.fade( 0.5, 1, 850 );
    */
-  GameObject.prototype.fade = function( from, to, duration, force )
+  GameObject.prototype.fade = function( from, to, duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
@@ -47818,7 +47956,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       ,oDuration: duration || 500
       ,fadeScale: Math.abs( from - to )
       ,done     : false
+      ,callback : callback
     };
+    
     data.dir       = data.from > to ? -1 : 1;
     this.alpha     = from;
     this._fadeData = data;
@@ -47838,9 +47978,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @param {Int} [duration=500] fade duration in ms
    * @example myObject.fadeTo( 0.5, 850 ); // don't care if alpha is 0.2 or 0.8
    */
-  GameObject.prototype.fadeTo = function( to, duration, force )
+  GameObject.prototype.fadeTo = function( to, duration, force, callback )
   {
-    this.fade( this.alpha, to, duration, force );
+    this.fade( this.alpha, to, duration, force, callback );
     
     return this;
   };
@@ -47855,14 +47995,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @example // alpha = 0 in 850ms
    * myObject.fadeOut( 850 );
    */
-  GameObject.prototype.fadeOut = function( duration, force )
+  GameObject.prototype.fadeOut = function( duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
       this.alpha = 1;
     }
     
-    this.fade( this.alpha, 0, duration, force );
+    this.fade( this.alpha, 0, duration, force, callback );
     return this;
   };
   
@@ -47876,14 +48016,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @example // alpha = 1 in 850ms
    * myObject.fadeIn( 850 );
    */
-  GameObject.prototype.fadeIn = function( duration, force )
+  GameObject.prototype.fadeIn = function( duration, force, callback )
   {
     if ( force ) {
       this.enable = true;
       this.alpha = 0;
     }
     
-    this.fade( this.alpha, 1, duration, force );
+    this.fade( this.alpha, 1, duration, force, callback );
     return this;
   };
   
@@ -47907,6 +48047,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       }
       
       if ( this._fadeData.duration <= 0 ) {
+        
+        if ( this._fadeData.callback ) {
+          this._fadeData.callback.call( this );
+        }
+        
         this._fadeData.done = true;
         
         if ( this.alpha == 0 ) {
@@ -47922,7 +48067,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -47991,7 +48136,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -48132,7 +48277,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -48235,7 +48380,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @example // scale to 2,3 in 1 second
    * myGameObject.scaleTo( { x: 2, y: 3 }, 1000 );
    */
-  GameObject.prototype.scaleTo = function( scale, duration )
+  GameObject.prototype.scaleTo = function( scale, duration, callback )
   {
     var dscale = {
       "x"     : !isNaN( scale ) ? scale : scale.x
@@ -48255,6 +48400,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       ,"destY"    : dscale.y
       ,"scaleX"   : this.savedScale.x
       ,"scaleY"   : this.savedScale.y
+      ,"callback" : callback
     };
     this._scaleData.leftX = this._scaleData.valX;
     this._scaleData.leftY = this._scaleData.valY;
@@ -48306,6 +48452,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     this.scale.set( scaleD.scaleX, scaleD.scaleY );
     
     if ( scaleD.duration <= 0 ) {
+      
+      if ( this._scaleData.callback ) {
+        this._scaleData.callback.call( this );
+      }
+      
       this._scaleData.done = true;
       this.scale.set( scaleD.destX, scaleD.destY );
       this.emit( "scale-end", this );
@@ -48319,7 +48470,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
@@ -48377,7 +48528,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     if ( shake.duration <= 0 ) {
       
       if ( shake.callback ) {
-        shake.callback.call( this, shake.callback );
+        shake.callback.call( this );
       }
       
       shake.done = true;
@@ -48399,7 +48550,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [

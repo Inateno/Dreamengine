@@ -36,7 +36,7 @@ function( DE, NebulaOffline )
     } );
     Game.render.init();
     
-    NebulaOffline.init();
+    // NebulaOffline.init();
     
     DE.start();
   }
@@ -47,7 +47,7 @@ function( DE, NebulaOffline )
     console.log( "game start" );
 
     // scene
-    var scene = new DE.Scene();
+    Game.scene = new DE.Scene();
 
     // don't do this because DisplayObject bounds is not set to the render size but to the objects inside the scene
     // scene.interactive = true;
@@ -58,15 +58,15 @@ function( DE, NebulaOffline )
 
     // if no Camera, we add the Scene to the render (this can change if I make Camera)
     
-    Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: scene, backgroundImage: "bg" } );
+    Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: Game.scene, backgroundImage: "bg" } );
     Game.camera.interactive = true;
-    Game.camera.pointermove = function( e, pos ) { Game.targetPointer.moveTo( pos, 100 ); };
-    Game.camera.pointerdown = function( e, pos )
+    Game.camera.pointermove = function( pos, e ) { Game.targetPointer.moveTo( pos, 100 ); };
+    Game.camera.pointerdown = function( pos, e )
     {
       Game.targetPointer.shake( 10, 10, 200 );
       Game.targetPointer.renderer.setBrightness( [ 1, 0 ] );
     };
-    Game.camera.pointerup = function( e, pos ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
+    Game.camera.pointerup = function( pos, e ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
     Game.render.add( Game.camera );
     
     Game.targetPointer = new DE.GameObject( {
@@ -158,7 +158,7 @@ function( DE, NebulaOffline )
       // bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
       bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );
       
-      scene.add( bullet );
+      Game.scene.add( bullet );
     };
     
     Game.ship2 = new DE.GameObject( {
@@ -240,14 +240,14 @@ function( DE, NebulaOffline )
       f = new DE.GameObject( { _staticPosition: true, x: 960, y: 980, z: i * 0.1, renderer: new DE.RectRenderer( 1720, 10, "0x" + i + "DCCFC", { lineStyle: [ 4, "0xFF3300", 1 ], fill: false, x: -860, y: -5 } ) } )
       f.scroller = scroller;
       f.addAutomatism( "scroller", "scroller" );
-      scene.add( a, b, c, d, e, f );
+      Game.scene.add( a, b, c, d, e, f );
       
       if ( i % 10 == 0 ) {
         g = new DE.GameObject( { _staticPosition: true, x: 960, y: 980, zindex: 10, z: i * 0.1, renderer: new DE.RectRenderer( 10, 30, "0xFFFFFF", { x: -5, y: -15 } ) } )
         g.scroller = scroller;
         g.addAutomatism( "scroller", "scroller" );
         
-        scene.add( g );
+        Game.scene.add( g );
       }
     }
     
@@ -300,8 +300,7 @@ function( DE, NebulaOffline )
       }
     } );
     
-    scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2, button, Game.targetPointer );
-    Game.scene = scene;
+    Game.scene.add( Game.ship, Game.ship2, Game.heart1, Game.heart2, customShape, rectangle, rectangle2, button, Game.targetPointer );
     
     DE.Inputs.on( "keyDown", "left", function() { Game.ship.axes.x = -2; } );
     DE.Inputs.on( "keyDown", "right", function() { Game.ship.axes.x = 2; } );
@@ -317,8 +316,8 @@ function( DE, NebulaOffline )
     DE.Inputs.on( "keyUp", "fire", function() { Game.ship.removeAutomatism( "fire" ); } );
   }
   
-  // window.Game = Game;
-  // window.DE = DE;
+  window.Game = Game;
+  window.DE = DE;
 
   return Game;
 } );

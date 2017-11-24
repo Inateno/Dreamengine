@@ -54,7 +54,7 @@ function(
     if ( shake.duration <= 0 ) {
       
       if ( shake.callback ) {
-        shake.callback.call( this, shake.callback );
+        shake.callback.call( this );
       }
       
       shake.done = true;

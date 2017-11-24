@@ -99,7 +99,7 @@ function(
    * @example // scale to 2,3 in 1 second
    * myGameObject.scaleTo( { x: 2, y: 3 }, 1000 );
    */
-  GameObject.prototype.scaleTo = function( scale, duration )
+  GameObject.prototype.scaleTo = function( scale, duration, callback )
   {
     var dscale = {
       "x"     : !isNaN( scale ) ? scale : scale.x
@@ -119,6 +119,7 @@ function(
       ,"destY"    : dscale.y
       ,"scaleX"   : this.savedScale.x
       ,"scaleY"   : this.savedScale.y
+      ,"callback" : callback
     };
     this._scaleData.leftX = this._scaleData.valX;
     this._scaleData.leftY = this._scaleData.valY;
@@ -170,6 +171,11 @@ function(
     this.scale.set( scaleD.scaleX, scaleD.scaleY );
     
     if ( scaleD.duration <= 0 ) {
+      
+      if ( this._scaleData.callback ) {
+        this._scaleData.callback.call( this );
+      }
+      
       this._scaleData.done = true;
       this.scale.set( scaleD.destX, scaleD.destY );
       this.emit( "scale-end", this );
