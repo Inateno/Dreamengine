@@ -181,6 +181,12 @@ function(
     // call correctly the scale modifier to update zscale and worldScale
     this.setScale( this.savedScale.x, this.savedScale.y );
     
+    /**
+     * can prevent event propagation
+     * @private 
+     * @memberOf GameObject 
+     */
+    this._killArgs = {};
     
     /**
      * object used to apply fade transition
@@ -624,9 +630,9 @@ function(
   GameObject.prototype.askToKill = function( params )
   {
     this.target = null;
-    this.killArgs = params || {};
+    this._killArgs = params || {};
     
-    if ( !this.killArgs.preventEvents && !this.killArgs.preventKillEvent ) {
+    if ( !this._killArgs.preventEvents && !this._killArgs.preventKillEvent ) {
       if ( this.onKill ) {
         this.onKill();
       }
@@ -672,7 +678,7 @@ function(
    */
   GameObject.prototype.killMePlease = function()
   {
-    if ( !this.killArgs.preventEvents && !this.killArgs.preventKilledEvent ) {
+    if ( !this._killArgs.preventEvents && !this._killArgs.preventKilledEvent ) {
       if ( this.onKilled )
         this.onKilled();
       this.emit( "killed", this );
