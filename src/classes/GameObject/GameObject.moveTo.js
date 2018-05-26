@@ -42,8 +42,8 @@ function(
       ,"dirX"     : myPos.x > pos.x ? 1 : -1
       ,"dirY"     : myPos.y > pos.y ? 1 : -1
       ,"dirZ"     : myPos.z > pos.z ? 1 : -1
-      ,"duration" : duration || 500
-      ,"oDuration": duration || 500
+      ,"duration" : Number.isInteger( duration ) ? duration : 500
+      ,"oDuration": Number.isInteger( duration ) ? duration : 500
       ,"curveName": curveName || "linear"
       ,"done"     : false
       ,"stepValX" : 0
