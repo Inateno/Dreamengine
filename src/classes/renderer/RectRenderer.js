@@ -43,7 +43,9 @@ function(
       ,lineStyle: _params.lineStyle
     };
     
-    _params = this.updateRender( _params );
+    this.updateRender( _params );
+    delete _params.lineStyle;
+    delete _params.fill;
     
     BaseRenderer.instantiate( this, _params );
   }
@@ -77,10 +79,7 @@ function(
       ,lineStyle: params.lineStyle || this._initial.lineStyle
     };
     
-    delete params.lineStyle;
-    delete params.fill;
-    
-    return params;
+    return this;
   }
   
   RectRenderer.prototype.DEName = "RectRenderer";

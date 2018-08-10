@@ -62,7 +62,6 @@ function( Time )
           if ( _ignore.indexOf( i ) !== -1 ) {
             continue;
           }
-          
           target[ i ] = params[ i ];
         }
       }

@@ -120,15 +120,14 @@ function(
       }
       
       if ( this._fadeData.duration <= 0 ) {
-        
-        if ( this._fadeData.callback ) {
-          this._fadeData.callback.call( this );
-        }
-        
         this._fadeData.done = true;
         
         if ( this.alpha == 0 ) {
           this.visible = false;
+        }
+        
+        if ( this._fadeData.callback ) {
+          this._fadeData.callback.call( this );
         }
         this.trigger( "fadeEnd", this );
       }

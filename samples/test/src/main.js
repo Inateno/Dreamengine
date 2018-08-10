@@ -16,7 +16,7 @@
 require.config( {
   baseUrl: "./src/"
   , paths: {
-    'DREAM_ENGINE'     : '../../../dist/Dreamengine.amd.min'
+    'DREAM_ENGINE'     : '../../../dist/Dreamengine.amd'
     ,'DE.NebulaOffline': '../../../plugins/NebulaOffline/index'
     
     // ,'gameLoop'       : 'custom/gameLoop'

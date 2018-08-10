@@ -272,9 +272,9 @@ function(
         continue;
       }
       
-      if ( this[ i ] ) {
-        console.log( "WARN GameObject: you are overriding " + i + " method/attribute" );
-      }
+      // if ( this[ i ] ) {
+      //   console.log( "WARN GameObject: you are overriding " + i + " method/attribute" );
+      // }
       this[ i ] = _params[ i ];
     }
     
@@ -605,7 +605,7 @@ function(
    */
   GameObject.prototype.delete = function( object )
   {
-    var target = this.remove( this.gameObjects[ object ] );
+    var target = this.remove( object );
     
     target.killMePlease();
     delete target;

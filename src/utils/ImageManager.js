@@ -15,11 +15,13 @@ define( [
   'PIXI'
   , 'DE.config'
   , 'DE.Events'
+  , 'DE.about'
 ],
 function(
   PIXI
   , config
   , Events
+  , about
 )
 {
   /* TODO redefine if used or not 
@@ -70,6 +72,7 @@ function(
       
       this.pools = pools;
       
+      var version = config.USE_APPCACHE ? "" : "?v" + about.gameVersion;
       var p, data;
       for ( var i in pools )
       {
@@ -97,7 +100,7 @@ function(
               ,animated    : data[ 2 ].animated !== undefined ? data[ 2 ].animated : true
               ,pingPongMode: data[ 2 ].pingPongMode !== undefined ? data[ 2 ].pingPongMode : false
             };
-            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] + "?v" + config.VERSION } );
+            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] + version } );
           }
           else
           {

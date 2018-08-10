@@ -10,9 +10,11 @@
  */
 define( [
   'DE.config'
+  , 'DE.Events'
 ],
 function(
   config
+  , Events
 )
 {
   var Localization = new function()
@@ -93,6 +95,7 @@ function(
      */
     this.getLang = function( lang )
     {
+      var old = this.currentLang;
       this.currentLang = this.avalaibleLang[ 0 ];
       if ( !lang ) {
         lang = navigator.language || navigator.browserLanguage || navigator.userLanguage || "en";
@@ -109,6 +112,9 @@ function(
       
       if ( !this.dictionary[ this.currentLang ] ) {
         this.dictionary[ this.currentLang ] = {};
+      }
+      if ( old !== this.currentLang ) {
+        Events.trigger( "lang-changed", this.currentLang );
       }
     };
   };

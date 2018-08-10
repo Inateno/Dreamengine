@@ -6,6 +6,7 @@ define( [
   , 'DE.Events'
   , 'DE.TextRenderer'
   , 'DE.SpriteRenderer'
+  , 'DE.Localization'
 ],
 function(
   Time
@@ -15,6 +16,7 @@ function(
   , Events
   , TextRenderer
   , SpriteRenderer
+  , Localization
 )
 {
   var MainLoop = new function()
@@ -22,6 +24,7 @@ function(
     this.DEName = "MainLoop";
     this.scenes = [];
     this.renders = [];
+    this.additionalModules = {};
     
     this.createLoader = function()
     {
@@ -36,13 +39,28 @@ function(
           } }
         )
       } );
+      var n_dots = 0;
+      this.loader.animateLoader = function()
+      {
+        var dots = ".";
+        for ( var i = 0; i < 3; ++i ){ dots+= n_dots < i ? " " : "."; }
+
+        ++n_dots
+        if ( n_dots > 3 ) {
+          n_dots = 0;
+        }
+        this.renderer.text = "Loading" + dots;
+      };
+      this.loader.addAutomatism( "animateLoader", "animateLoader", { interval: 500 } );
       this.loader.renderer.y += 150;
       Events.on( 'ImageManager-pool-progress', function( poolName, progression )
       {
+        MainLoop.loader.removeAutomatism( "animateLoader" );
         MainLoop.loader.renderer.text = poolName + ": " + progression + "%";
       } );
       Events.on( 'ImageManager-pool-complete', function( poolName )
       {
+        MainLoop.loader.removeAutomatism( "animateLoader" );
         MainLoop.loader.renderer.text = "100%";
       } );
     };
@@ -93,8 +111,10 @@ function(
       {
         /* TODO
           => update MainLoop.customLoop (keep it ?)
-          => update DE.additionalModules[ x ].update( time ) ?
           */
+        for ( var r in MainLoop.additionalModules )
+          MainLoop.additionalModules[ r ].update( Time.currentTime );
+        
         for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
         {
           if ( s.enable ) {
@@ -122,6 +142,38 @@ function(
     {
       this.renders.push( render );
       // TODO call the resize of this render ?
+    }
+  }
+  
+  Events.on( "lang-changed", function()
+  {
+    for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
+    {
+      for ( var ii = 0, g; g = s.gameObjects[ ii ]; ++ii )
+      {
+        checkGameObjectsTextRenderer( g );
+      }
+    }
+  }, MainLoop );
+  
+  function checkGameObjectsTextRenderer( go ) {
+    for ( var ix = 0, sub; sub = go.gameObjects[ ix ]; ++ix )
+    {
+      checkGameObjectsTextRenderer( sub );
+    }
+    if ( !go.renderers ) {
+      return;
+    }
+    for ( var ir = 0, r; r = go.renderers[ ir ]; ++ir )
+    {
+      if ( r.localizationKey ) {
+        if ( r.subKey ) {
+          r.text = Localization.get( r.localizationKey )[ r.subKey ];
+        }
+        else {
+          r.text = Localization.get( r.localizationKey );
+        }
+      }
     }
   }
   

@@ -600,7 +600,7 @@ function(
     this.startFrame    = params.startFrame || d.startFrame || 0;
     this.endFrame      = params.endFrame || d.endFrame
                         || d.totalFrame || 0;
-    this._currentFrame = this.startFrame || 0;
+    this._currentFrame = this.startFrame || params.currentFrame || 0;
     this._currentLine  = params.startLine || 0;
     this.startLine     = params.startLine || 0;
     

@@ -15,20 +15,37 @@
  *     textStyle: { fontFamily: "cordova", fontSize: 12, fill: "white" }
  *   } )
  * } );
+ 
+ * if you use "Localizations" you should give "localizationKey" instead of the text value
+ * by doing this, the text will be automatically updated when the lang change if the Renderer exist in a scene (active or not)
+ * you can use the locales with one . to go deeper (but only one)
+ * => intro.title will do Localization.get( "intro" ).title
  */
 define( [
   'PIXI'
   , 'DE.BaseRenderer'
+  , 'DE.Localization'
 ],
 function(
   PIXI
   , BaseRenderer
+  , Localization
 )
 {
   function TextRenderer( text, params )
   {
     var _params = params || {};
     
+    if ( _params.localizationKey ) {
+      var locales = _params.localizationKey.split( "." );
+      this.localizationKey = locales[ 0 ];
+      this.subKey = locales[ 1 ] || undefined;
+      text = Localization.get( this.localizationKey );
+      if ( this.subKey ) {
+        text = text[ this.subKey ];
+      }
+      delete _params.localizationKey;
+    }
     PIXI.Text.call( this, text, new PIXI.TextStyle( _params.textStyle ) );
     delete _params.textStyle;
     

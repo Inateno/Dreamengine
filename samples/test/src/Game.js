@@ -68,6 +68,7 @@ function( DE, NebulaOffline )
     };
     Game.camera.pointerup = function( pos, e ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
     Game.render.add( Game.camera );
+    // Game.render.add( Game.scene );
     
     Game.targetPointer = new DE.GameObject( {
       zindex: 500

@@ -63,6 +63,7 @@ function(
         ,"PAD+":107, "PAD-":109, "PAD*":106, "PAD/":111, "PAD0":96, "PAD1":97, "PAD2":98, "PAD3":99, "PAD4":100
         ,"PAD5":101, "PAD6":102, "PAD7":103, "PAD8":104, "PAD9":105
         ,"F5":116,"F11":122,"F12":123
+        ,"escape": 27
       }
       ,"GAMEPADBUTTONS":{
         "A" : 0

@@ -40939,9 +40939,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
         continue;
       }
       
-      if ( this[ i ] ) {
-        console.log( "WARN GameObject: you are overriding " + i + " method/attribute" );
-      }
+      // if ( this[ i ] ) {
+      //   console.log( "WARN GameObject: you are overriding " + i + " method/attribute" );
+      // }
       this[ i ] = _params[ i ];
     }
     
@@ -41272,7 +41272,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
    */
   GameObject.prototype.delete = function( object )
   {
-    var target = this.remove( this.gameObjects[ object ] );
+    var target = this.remove( object );
     
     target.killMePlease();
     delete target;
@@ -41491,7 +41491,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
           if ( _ignore.indexOf( i ) !== -1 ) {
             continue;
           }
-          
           target[ i ] = params[ i ];
         }
       }
@@ -41742,8 +41741,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
  */
 !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
   __webpack_require__(2)
+  , __webpack_require__(3)
 ], __WEBPACK_AMD_DEFINE_RESULT__ = function(
   config
+  , Events
 )
 {
   var Localization = new function()
@@ -41824,6 +41825,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
      */
     this.getLang = function( lang )
     {
+      var old = this.currentLang;
       this.currentLang = this.avalaibleLang[ 0 ];
       if ( !lang ) {
         lang = navigator.language || navigator.browserLanguage || navigator.userLanguage || "en";
@@ -41840,6 +41842,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
       
       if ( !this.dictionary[ this.currentLang ] ) {
         this.dictionary[ this.currentLang ] = {};
+      }
+      if ( old !== this.currentLang ) {
+        Events.trigger( "lang-changed", this.currentLang );
       }
     };
   };
@@ -41889,6 +41894,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   , __webpack_require__(3)
   , __webpack_require__(16)
   , __webpack_require__(17)
+  , __webpack_require__(6)
 ], __WEBPACK_AMD_DEFINE_RESULT__ = function(
   Time
   , gamepad
@@ -41897,6 +41903,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   , Events
   , TextRenderer
   , SpriteRenderer
+  , Localization
 )
 {
   var MainLoop = new function()
@@ -41904,6 +41911,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     this.DEName = "MainLoop";
     this.scenes = [];
     this.renders = [];
+    this.additionalModules = {};
     
     this.createLoader = function()
     {
@@ -41918,13 +41926,28 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
           } }
         )
       } );
+      var n_dots = 0;
+      this.loader.animateLoader = function()
+      {
+        var dots = ".";
+        for ( var i = 0; i < 3; ++i ){ dots+= n_dots < i ? " " : "."; }
+
+        ++n_dots
+        if ( n_dots > 3 ) {
+          n_dots = 0;
+        }
+        this.renderer.text = "Loading" + dots;
+      };
+      this.loader.addAutomatism( "animateLoader", "animateLoader", { interval: 500 } );
       this.loader.renderer.y += 150;
       Events.on( 'ImageManager-pool-progress', function( poolName, progression )
       {
+        MainLoop.loader.removeAutomatism( "animateLoader" );
         MainLoop.loader.renderer.text = poolName + ": " + progression + "%";
       } );
       Events.on( 'ImageManager-pool-complete', function( poolName )
       {
+        MainLoop.loader.removeAutomatism( "animateLoader" );
         MainLoop.loader.renderer.text = "100%";
       } );
     };
@@ -41975,8 +41998,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       {
         /* TODO
           => update MainLoop.customLoop (keep it ?)
-          => update DE.additionalModules[ x ].update( time ) ?
           */
+        for ( var r in MainLoop.additionalModules )
+          MainLoop.additionalModules[ r ].update( Time.currentTime );
+        
         for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
         {
           if ( s.enable ) {
@@ -42004,6 +42029,38 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     {
       this.renders.push( render );
       // TODO call the resize of this render ?
+    }
+  }
+  
+  Events.on( "lang-changed", function()
+  {
+    for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
+    {
+      for ( var ii = 0, g; g = s.gameObjects[ ii ]; ++ii )
+      {
+        checkGameObjectsTextRenderer( g );
+      }
+    }
+  }, MainLoop );
+  
+  function checkGameObjectsTextRenderer( go ) {
+    for ( var ix = 0, sub; sub = go.gameObjects[ ix ]; ++ix )
+    {
+      checkGameObjectsTextRenderer( sub );
+    }
+    if ( !go.renderers ) {
+      return;
+    }
+    for ( var ir = 0, r; r = go.renderers[ ir ]; ++ir )
+    {
+      if ( r.localizationKey ) {
+        if ( r.subKey ) {
+          r.text = Localization.get( r.localizationKey )[ r.subKey ];
+        }
+        else {
+          r.text = Localization.get( r.localizationKey );
+        }
+      }
     }
   }
   
@@ -42839,10 +42896,12 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
   __webpack_require__(1)
   , __webpack_require__(2)
   , __webpack_require__(3)
+  , __webpack_require__(7)
 ], __WEBPACK_AMD_DEFINE_RESULT__ = function(
   PIXI
   , config
   , Events
+  , about
 )
 {
   /* TODO redefine if used or not 
@@ -42893,6 +42952,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
       
       this.pools = pools;
       
+      var version = config.USE_APPCACHE ? "" : "?v" + about.gameVersion;
       var p, data;
       for ( var i in pools )
       {
@@ -42920,7 +42980,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
               ,animated    : data[ 2 ].animated !== undefined ? data[ 2 ].animated : true
               ,pingPongMode: data[ 2 ].pingPongMode !== undefined ? data[ 2 ].pingPongMode : false
             };
-            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] + "?v" + config.VERSION } );
+            this.pools[ i ].push( { name: data[ 0 ], url: data[ 1 ] + version } );
           }
           else
           {
@@ -43657,19 +43717,36 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
  *     textStyle: { fontFamily: "cordova", fontSize: 12, fill: "white" }
  *   } )
  * } );
+ 
+ * if you use "Localizations" you should give "localizationKey" instead of the text value
+ * by doing this, the text will be automatically updated when the lang change if the Renderer exist in a scene (active or not)
+ * you can use the locales with one . to go deeper (but only one)
+ * => intro.title will do Localization.get( "intro" ).title
  */
 !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
   __webpack_require__(1)
   , __webpack_require__(5)
+  , __webpack_require__(6)
 ], __WEBPACK_AMD_DEFINE_RESULT__ = function(
   PIXI
   , BaseRenderer
+  , Localization
 )
 {
   function TextRenderer( text, params )
   {
     var _params = params || {};
     
+    if ( _params.localizationKey ) {
+      var locales = _params.localizationKey.split( "." );
+      this.localizationKey = locales[ 0 ];
+      this.subKey = locales[ 1 ] || undefined;
+      text = Localization.get( this.localizationKey );
+      if ( this.subKey ) {
+        text = text[ this.subKey ];
+      }
+      delete _params.localizationKey;
+    }
     PIXI.Text.call( this, text, new PIXI.TextStyle( _params.textStyle ) );
     delete _params.textStyle;
     
@@ -44292,7 +44369,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
     this.startFrame    = params.startFrame || d.startFrame || 0;
     this.endFrame      = params.endFrame || d.endFrame
                         || d.totalFrame || 0;
-    this._currentFrame = this.startFrame || 0;
+    this._currentFrame = this.startFrame || params.currentFrame || 0;
     this._currentLine  = params.startLine || 0;
     this.startLine     = params.startLine || 0;
     
@@ -44641,16 +44718,19 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
   __webpack_require__(2)
   , __webpack_require__(27)
   , __webpack_require__(3)
+  , __webpack_require__(7)
 ], __WEBPACK_AMD_DEFINE_RESULT__ = function(
   config
   , howler
   , Events
+  , about
 )
 {
   var Audio = new function()
   {
     this.DEName = "Audio";
     this.howler = howler;
+    this.volume = 0.75;
     
     this.loadAudios = function( audioList )
     {
@@ -44661,7 +44741,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
         /* Howler format */
         urls = [];
         for ( var i = 0; i < audioData[ 2 ].length; ++i ) {
-          urls.push( audioData[ 1 ] + "." + audioData[ 2 ][ i ] );
+          urls.push( audioData[ 1 ] + "." + audioData[ 2 ][ i ] + "?v=" + about.gameVersion );
         }
         audio = new howler.Howl( {
           src          : urls
@@ -44723,7 +44803,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
       }
       else if ( sign == "-" ) {
         this.music.setVolume( this.music.volume - musicValue );
-        this.fx.setVolume( this.fx.volume - ( fxValue || ( musicValue * 1.25 ) ) );
+        this.fx.setVolume( this.fx.volume - ( fxValue || ( musicValue * 0.75 ) ) );
       }
       else {
         this.music.setVolume( musicValue );
@@ -44787,6 +44867,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
         if ( !this._musics[ name ] ){
           console.error( "Audio.music: not declared: " + name + " - " + sprite );
           return;
+        }
+        
+        // if the sound was preload = false, it must be loaded now !
+        if ( this._musics[ name ]._sounds.length === 0 ) {
+          this._musics[ name ].load();
         }
         
         this._musics[ name ].play( sprite );
@@ -44982,6 +45067,11 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
       {
         if ( !this._fxs[ name ] ){ return; }
         
+        // if the sound was preload = false, it must be loaded now !
+        if ( this._fxs[ name ]._sounds.length === 0 ) {
+          this._fxs[ name ].load();
+        }
+        
         this._fxs[ name ].play( sprite );
         return this;
       }   
@@ -45116,7 +45206,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       ,lineStyle: _params.lineStyle
     };
     
-    _params = this.updateRender( _params );
+    this.updateRender( _params );
+    delete _params.lineStyle;
+    delete _params.fill;
     
     BaseRenderer.instantiate( this, _params );
   }
@@ -45150,10 +45242,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       ,lineStyle: params.lineStyle || this._initial.lineStyle
     };
     
-    delete params.lineStyle;
-    delete params.fill;
-    
-    return params;
+    return this;
   }
   
   RectRenderer.prototype.DEName = "RectRenderer";
@@ -45311,9 +45400,6 @@ DE.init = function( params )
   // init localization with dictionary
   DE.Localization.init( params.dictionary || {} );
   
-  // make all audios instance and launch preload if required
-  DE.Audio.loadAudios( params.audios || [] );
-  
   // init SystemDetection (if you develop special features for a special OS release)
   // TODO DE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
   
@@ -45360,6 +45446,7 @@ DE.init = function( params )
   DE.Events.once( "ImageManager-loader-loaded", function() { DE.MainLoop.updateLoaderImage( loader ); } );
   
   DE.ImageManager.load( loader );
+  DE.___params = params;
   
   params.onReady();
   
@@ -45379,6 +45466,10 @@ DE.onLoad = function()
 var _defaultPoolName = "default";
 DE.start = function()
 {
+  // make all audios instance and launch preload if required
+  DE.Audio.loadAudios( DE.___params.audios || [] );
+  delete DE.___params;
+  
   DE.MainLoop.createLoader();
   DE.MainLoop.launched = true;
   DE.MainLoop.loop();
@@ -46023,6 +46114,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;﻿/**
         ,"PAD+":107, "PAD-":109, "PAD*":106, "PAD/":111, "PAD0":96, "PAD1":97, "PAD2":98, "PAD3":99, "PAD4":100
         ,"PAD5":101, "PAD6":102, "PAD7":103, "PAD8":104, "PAD9":105
         ,"F5":116,"F11":122,"F12":123
+        ,"escape": 27
       }
       ,"GAMEPADBUTTONS":{
         "A" : 0
@@ -47841,7 +47933,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
     
     // if using the old way - TODO - remove it on version 0.2.0
     if ( methodName.type ) {
-      console.error( "You use the old way to call addAutomatism, check the doc please" );
+      console.error( "Call arguments Deprecated: You use the old way to call addAutomatism, check the doc please" );
       params = methodName;
       methodName = params.type;
     }
@@ -47873,7 +47965,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
   GameObject.prototype.removeAutomatism = function( id )
   {
     if ( !this._automatisms[ id ] ) {
-      console.warn( "%c[RemoveAutomatism] Automatism " + id + " not found", 1, "color:orange" );
+      // console.warn( "%c[RemoveAutomatism] Automatism " + id + " not found", 1, "color:orange" );
       return;
     }
     delete this._automatisms[ id ];
@@ -48046,15 +48138,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       }
       
       if ( this._fadeData.duration <= 0 ) {
-        
-        if ( this._fadeData.callback ) {
-          this._fadeData.callback.call( this );
-        }
-        
         this._fadeData.done = true;
         
         if ( this.alpha == 0 ) {
           this.visible = false;
+        }
+        
+        if ( this._fadeData.callback ) {
+          this._fadeData.callback.call( this );
         }
         this.trigger( "fadeEnd", this );
       }

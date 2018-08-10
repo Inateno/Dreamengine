@@ -14,17 +14,20 @@ define( [
   'DE.config'
   , 'howler'
   , 'DE.Events'
+  , 'DE.about'
 ],
 function(
   config
   , howler
   , Events
+  , about
 )
 {
   var Audio = new function()
   {
     this.DEName = "Audio";
     this.howler = howler;
+    this.volume = 0.75;
     
     this.loadAudios = function( audioList )
     {
@@ -35,7 +38,7 @@ function(
         /* Howler format */
         urls = [];
         for ( var i = 0; i < audioData[ 2 ].length; ++i ) {
-          urls.push( audioData[ 1 ] + "." + audioData[ 2 ][ i ] );
+          urls.push( audioData[ 1 ] + "." + audioData[ 2 ][ i ] + "?v=" + about.gameVersion );
         }
         audio = new howler.Howl( {
           src          : urls
@@ -97,7 +100,7 @@ function(
       }
       else if ( sign == "-" ) {
         this.music.setVolume( this.music.volume - musicValue );
-        this.fx.setVolume( this.fx.volume - ( fxValue || ( musicValue * 1.25 ) ) );
+        this.fx.setVolume( this.fx.volume - ( fxValue || ( musicValue * 0.75 ) ) );
       }
       else {
         this.music.setVolume( musicValue );
@@ -161,6 +164,11 @@ function(
         if ( !this._musics[ name ] ){
           console.error( "Audio.music: not declared: " + name + " - " + sprite );
           return;
+        }
+        
+        // if the sound was preload = false, it must be loaded now !
+        if ( this._musics[ name ]._sounds.length === 0 ) {
+          this._musics[ name ].load();
         }
         
         this._musics[ name ].play( sprite );
@@ -355,6 +363,11 @@ function(
       this.play = function( name, sprite )
       {
         if ( !this._fxs[ name ] ){ return; }
+        
+        // if the sound was preload = false, it must be loaded now !
+        if ( this._fxs[ name ]._sounds.length === 0 ) {
+          this._fxs[ name ].load();
+        }
         
         this._fxs[ name ].play( sprite );
         return this;

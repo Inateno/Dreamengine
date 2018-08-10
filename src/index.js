@@ -94,9 +94,6 @@ DE.init = function( params )
   // init localization with dictionary
   DE.Localization.init( params.dictionary || {} );
   
-  // make all audios instance and launch preload if required
-  DE.Audio.loadAudios( params.audios || [] );
-  
   // init SystemDetection (if you develop special features for a special OS release)
   // TODO DE.SystemDetection.initSystem( params.system, params.paramsSystem || {} );
   
@@ -143,6 +140,7 @@ DE.init = function( params )
   DE.Events.once( "ImageManager-loader-loaded", function() { DE.MainLoop.updateLoaderImage( loader ); } );
   
   DE.ImageManager.load( loader );
+  DE.___params = params;
   
   params.onReady();
   
@@ -162,6 +160,10 @@ DE.onLoad = function()
 var _defaultPoolName = "default";
 DE.start = function()
 {
+  // make all audios instance and launch preload if required
+  DE.Audio.loadAudios( DE.___params.audios || [] );
+  delete DE.___params;
+  
   DE.MainLoop.createLoader();
   DE.MainLoop.launched = true;
   DE.MainLoop.loop();

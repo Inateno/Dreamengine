@@ -44,7 +44,7 @@ function(
     
     // if using the old way - TODO - remove it on version 0.2.0
     if ( methodName.type ) {
-      console.error( "You use the old way to call addAutomatism, check the doc please" );
+      console.error( "Call arguments Deprecated: You use the old way to call addAutomatism, check the doc please" );
       params = methodName;
       methodName = params.type;
     }
@@ -76,7 +76,7 @@ function(
   GameObject.prototype.removeAutomatism = function( id )
   {
     if ( !this._automatisms[ id ] ) {
-      console.warn( "%c[RemoveAutomatism] Automatism " + id + " not found", 1, "color:orange" );
+      // console.warn( "%c[RemoveAutomatism] Automatism " + id + " not found", 1, "color:orange" );
       return;
     }
     delete this._automatisms[ id ];
