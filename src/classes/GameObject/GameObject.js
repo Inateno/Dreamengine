@@ -751,6 +751,23 @@ function(
    */
   GameObject.prototype.getPos  = GameObject.prototype.getGlobalPosition;
   
+  // a tester
+  GameObject.prototype.getWorldPos = function()
+  {
+    if ( this.parent && this.parent.getWorldPos )
+    {
+      var pos = this.parent.getWorldPos();
+      var harmonics = this.parent.vector2.getHarmonics();
+      
+      return { x: -(-this.position.x * harmonics.cos + this.position.y * harmonics.sin) + pos.x
+        , y: -(-this.position.x * harmonics.sin + this.position.y * -harmonics.cos) + pos.y
+        , z: this.z + pos.z
+      };
+    }
+    
+    return { x: this.x, y: this.y, z: this.z };
+  };
+  
   
   GameObject.prototype.DEName = "GameObject";
   return GameObject;

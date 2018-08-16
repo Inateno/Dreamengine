@@ -41428,6 +41428,23 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
    */
   GameObject.prototype.getPos  = GameObject.prototype.getGlobalPosition;
   
+  // a tester
+  GameObject.prototype.getWorldPos = function()
+  {
+    if ( this.parent && this.parent.getWorldPos )
+    {
+      var pos = this.parent.getWorldPos();
+      var harmonics = this.parent.vector2.getHarmonics();
+      
+      return { x: -(-this.position.x * harmonics.cos + this.position.y * harmonics.sin) + pos.x
+        , y: -(-this.position.x * harmonics.sin + this.position.y * -harmonics.cos) + pos.y
+        , z: this.z + pos.z
+      };
+    }
+    
+    return { x: this.x, y: this.y, z: this.z };
+  };
+  
   
   GameObject.prototype.DEName = "GameObject";
   return GameObject;
@@ -43675,6 +43692,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
       }
     } );
     
+    // TODO when parsing children after gameObjects it's like twice the job
+    // but IF we want to parse children which are PIXI stuff that is added directly as child
+    // we need this
+    // so, remove this and let the dev choose the filtering OR remove the previous one and add a z conditional here ?
     if ( this.children ) {
       this.children.sort( function( a, b )
       {
@@ -48260,20 +48281,22 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
    * @example // move to bonus position
    * player.moveTo( bonus, 1000, function(){ console.log( this ) } );
    */
-  GameObject.prototype.moveTo = function( pos, duration, callback, curveName ) // TODO add curveName (not coded)
+  GameObject.prototype.moveTo = function( pos, duration, callback, curveName, forceLocalPos ) // TODO add curveName (not coded)
   {
-    if ( pos.getGlobalPosition ) {
-      var z = pos.z;
-      pos = pos.getGlobalPosition();
-      pos.z = z;
-      var parentPos = this.parent.getGlobalPosition();
-      
-      pos.x = pos.x - parentPos.x;
-      pos.y = pos.y - parentPos.y;
-      pos.z = pos.z - this.parent.z;
+    if ( pos.getWorldPos ) {
+      pos = pos.getWorldPos();
     }
     
     var myPos = this;
+    var parentPos = null;
+    
+    if ( !forceLocalPos ) {
+      myPos = this.getWorldPos();
+      
+      if ( this.parent && this.parent.getWorldPos ) {
+        parentPos = this.parent.getWorldPos();
+      }
+    }
     
     this._moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
@@ -48289,8 +48312,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
       ,"stepValX" : 0
       ,"stepValY" : 0
       ,"stepValZ" : 0
-      ,"destX"    : pos.x
-      ,"destY"    : pos.y
+      ,"destX"    : parentPos ? pos.x - parentPos.x : pos.x
+      ,"destY"    : parentPos ? pos.y - parentPos.y : pos.y
       ,"destZ"    : pos.z
       ,"callback" : callback
     };

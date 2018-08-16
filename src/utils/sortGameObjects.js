@@ -33,6 +33,10 @@ define( []
       }
     } );
     
+    // TODO when parsing children after gameObjects it's like twice the job
+    // but IF we want to parse children which are PIXI stuff that is added directly as child
+    // we need this
+    // so, remove this and let the dev choose the filtering OR remove the previous one and add a z conditional here ?
     if ( this.children ) {
       this.children.sort( function( a, b )
       {

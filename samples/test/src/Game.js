@@ -63,7 +63,8 @@ function( DE, NebulaOffline )
     Game.camera.pointermove = function( pos, e ) { Game.targetPointer.moveTo( pos, 100 ); };
     Game.camera.pointerdown = function( pos, e )
     {
-      Game.targetPointer.shake( 10, 10, 200 );
+      Game.ship.gameObjects[ 0 ].moveTo( Game.targetPointer, 500 )
+      // Game.targetPointer.shake( 10, 10, 200 );
       Game.targetPointer.renderer.setBrightness( [ 1, 0 ] );
     };
     Game.camera.pointerup = function( pos, e ) { console.log( "up" ); Game.targetPointer.shake( 10, 10, 200 ); };
@@ -140,6 +141,21 @@ function( DE, NebulaOffline )
               , rotation: Math.PI
               , renderer: new DE.SpriteRenderer( { spriteName: "player-bullet", loop: true } )
             } )
+            // this object is moving in local coords only
+            , new DE.GameObject( {
+              y: -250
+              , scale: 2
+              , rotation: Math.PI
+              , renderer: new DE.SpriteRenderer( { spriteName: "player-bullet", loop: true } )
+              , getCorrectMoveTo: function()
+              {
+                // console.log( this.y, this.getWorldPos().y )
+                this.moveTo( { y: -this.y }, 500, null, null, true );
+              }
+              , automatisms: [
+                [ "moveTo", "getCorrectMoveTo", { interval: 550 } ]
+              ]
+            } )
           ]
         } ) ]
     } );
@@ -148,13 +164,13 @@ function( DE, NebulaOffline )
     {
       DE.Audio.fx.play( "piew" );
       var bullet = new DE.GameObject( {
-        x        : 960//this.x
-        ,y       : 940//this.y
+        x        : this.x
+        ,y       : this.y
         ,rotation: this.rotation
         ,renderer: new DE.SpriteRenderer( { spriteName: "player-bullet" } )
       } );
       bullet.addAutomatism( "translateY", "translateY", { value1: -6  } );
-      bullet.moveTo( { z: 10 }, 2000 );
+      // bullet.moveTo( { z: 10 }, 2000 );
       // bullet.addAutomatism( "rotate", "rotate", { value1: Math.random() * 0.1 } );
       // bullet.addAutomatism( "inverseAutomatism", "inverseAutomatism", { value1: "rotate", interval: 100 } );
       bullet.addAutomatism( "askToKill", "askToKill", { interval: 2000, persistent: false } );

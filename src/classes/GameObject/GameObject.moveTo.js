@@ -20,20 +20,22 @@ function(
    * @example // move to bonus position
    * player.moveTo( bonus, 1000, function(){ console.log( this ) } );
    */
-  GameObject.prototype.moveTo = function( pos, duration, callback, curveName ) // TODO add curveName (not coded)
+  GameObject.prototype.moveTo = function( pos, duration, callback, curveName, forceLocalPos ) // TODO add curveName (not coded)
   {
-    if ( pos.getGlobalPosition ) {
-      var z = pos.z;
-      pos = pos.getGlobalPosition();
-      pos.z = z;
-      var parentPos = this.parent.getGlobalPosition();
-      
-      pos.x = pos.x - parentPos.x;
-      pos.y = pos.y - parentPos.y;
-      pos.z = pos.z - this.parent.z;
+    if ( pos.getWorldPos ) {
+      pos = pos.getWorldPos();
     }
     
     var myPos = this;
+    var parentPos = null;
+    
+    if ( !forceLocalPos ) {
+      myPos = this.getWorldPos();
+      
+      if ( this.parent && this.parent.getWorldPos ) {
+        parentPos = this.parent.getWorldPos();
+      }
+    }
     
     this._moveData = {
       "distX"     : - ( myPos.x - ( pos.x !== undefined ? pos.x : myPos.x ) )
@@ -49,8 +51,8 @@ function(
       ,"stepValX" : 0
       ,"stepValY" : 0
       ,"stepValZ" : 0
-      ,"destX"    : pos.x
-      ,"destY"    : pos.y
+      ,"destX"    : parentPos ? pos.x - parentPos.x : pos.x
+      ,"destY"    : parentPos ? pos.y - parentPos.y : pos.y
       ,"destZ"    : pos.z
       ,"callback" : callback
     };
