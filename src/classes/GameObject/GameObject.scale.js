@@ -173,6 +173,7 @@ function(
     if ( scaleD.duration <= 0 ) {     
       this._scaleData.done = true;
       this.scale.set( scaleD.destX, scaleD.destY );
+      
       this.emit( "scale-end", this );
             
       if ( this._scaleData.callback ) {

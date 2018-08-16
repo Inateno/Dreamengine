@@ -126,10 +126,11 @@ function(
           this.visible = false;
         }
         
+        this.trigger( "fadeEnd", this );
+        
         if ( this._fadeData.callback ) {
           this._fadeData.callback.call( this );
         }
-        this.trigger( "fadeEnd", this );
       }
     }
   };

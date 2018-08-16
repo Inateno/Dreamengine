@@ -52,15 +52,15 @@ function(
     shake.duration -= Time.timeSinceLastFrame * Time.scaleDelta;
     // old way - Date.now() - this._shakeData.startedAt > this._shakeData.duration )
     if ( shake.duration <= 0 ) {
+      shake.done = true;
+      shake.prevX = 0;
+      shake.prevY = 0;
+      
+      this.trigger( "shakeEnd" );
       
       if ( shake.callback ) {
         shake.callback.call( this );
       }
-      
-      shake.done = true;
-      shake.prevX = 0;
-      shake.prevY = 0;
-      this.trigger( "shakeEnd" );
       return;
     }
     
