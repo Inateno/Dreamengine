@@ -124,11 +124,11 @@ function(
       );
       this.z = move.destZ !== undefined ? move.destZ : this.z;
       
+      this.trigger( "moveEnd" );
+      
       if ( move.callback ) {
         move.callback.call( this, move.callback );
       }
-      
-      this.trigger( "moveEnd" );
     }
   };
   
