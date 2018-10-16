@@ -113,12 +113,12 @@ function(
           => update MainLoop.customLoop (keep it ?)
           */
         for ( var r in MainLoop.additionalModules )
-          MainLoop.additionalModules[ r ].update( Time.currentTime );
+          MainLoop.additionalModules[ r ].update(( Time.currentTime - Time.timeSinceLastFrameScaled ) + ( 16 * Time.deltaTime ));
         
         for ( var i = 0, s; s = MainLoop.scenes[ i ]; ++i )
         {
           if ( s.enable ) {
-            s.update( Time.currentTime );
+            s.update(( Time.currentTime - Time.timeSinceLastFrameScaled ) + ( 16 * Time.deltaTime ));
           }
         }
         
@@ -126,9 +126,9 @@ function(
           => update Renders GUIs ?
         */
         
+        Time.timeSinceLastFrameScaled -= ( 16 * Time.deltaTime * Time.scaleDelta );
+        Time.timeSinceLastFrame -= ( 16 * Time.deltaTime );
         Time.deltaTime = 1;
-        Time.timeSinceLastFrameScaled = 0;
-        Time.timeSinceLastFrame = 0;
         --Time.missedFrame;
       }
     }
