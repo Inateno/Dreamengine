@@ -13,6 +13,10 @@ function( DE , Tile, astar)
   {
     DE.GameObject.call(this);
 
+    this.tiles = [];
+    this.walls = [];
+    this.ennemiSpawns = [];
+
     var pixelReader = document.createElement('canvas').getContext('2d');
     pixelReader.drawImage(data.baseTexture.source, 0, 0);
 
@@ -56,12 +60,6 @@ function( DE , Tile, astar)
   Map.prototype = new DE.GameObject();
   Map.prototype.constructor = Map;
   Map.prototype.supr        = DE.GameObject.prototype;
-
-  Map.prototype.graph = undefined;
-  Map.prototype.tiles = [];
-  Map.prototype.walls = [];
-  Map.prototype.ennemiSpawns = [];
-  Map.prototype.playerSpawn = undefined;
 
   Map.prototype.checkWallCollision = function(box)
   {

@@ -12,6 +12,23 @@ function( DE , Player, Map, Ennemi, HUD)
   {
     DE.GameObject.call(this);
 
+    this.targetPointer = undefined;
+    this.map = undefined;
+    this.HUD = undefined;
+    this.player = undefined;
+
+    this.ennemies = [];
+    this.playerScore = 0;
+    this.scorePerKill = 10;
+    
+    this.waveCounter = 1;
+    this.numberWaveEnnemies = 5;
+    this.remainingWaveEnnemies = 5;
+    this.spawnedEnnemies = 0;
+    this.ennemiSpawnInterval = 500;
+    this.toughnessRatio = 1;
+    this.intervalBetweenWaves = 3000;
+
     this.targetPointer = new DE.GameObject( {
       zindex:500
       ,renderer: new DE.SpriteRenderer( { spriteName: "target" } )
@@ -38,24 +55,6 @@ function( DE , Player, Map, Ennemi, HUD)
   World.prototype = new DE.GameObject();
   World.prototype.constructor = World;
   World.prototype.supr        = DE.GameObject.prototype;
-
-  World.prototype.targetPointer = undefined;
-  World.prototype.map = undefined;
-  World.prototype.HUD = undefined;
-  World.prototype.player = undefined;
-  World.prototype.ennemies = [];
-
-  World.prototype.playerScore = 0;
-  World.prototype.scorePerKill = 10;
-
-  World.prototype.waveCounter = 1;
-  World.prototype.numberWaveEnnemies = 5;
-  World.prototype.remainingWaveEnnemies = 5;
-  World.prototype.spawnedEnnemies = 0;
-  World.prototype.ennemiSpawnInterval = 500;
-  World.prototype.toughnessRatio = 1;
-  World.prototype.intervalBetweenWaves = 3000;
-
 
   World.prototype.checkMouseEvent = function(event)
   {
@@ -254,6 +253,7 @@ function( DE , Player, Map, Ennemi, HUD)
           this.removeAutomatism("updateCamera");
           this.removeAutomatism("checkEnnemiHitPlayer");
           this.HUD.showDead(this.playerScore);
+          break;
         }
       }
     }

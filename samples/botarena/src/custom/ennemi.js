@@ -24,8 +24,11 @@ function( DE, astar , Lifebar)
     this.type = data.type;
 
     this.health = data.health;
+    this.moveSpeed = 2;
     this.radius = 20;
     this.damage = data.damage;
+
+    this.findPath();
 
     this.addAutomatism("findPath","findPath", {interval:100});
     this.addAutomatism("move","move");
@@ -35,11 +38,6 @@ function( DE, astar , Lifebar)
   Ennemi.prototype = new DE.GameObject();
   Ennemi.prototype.constructor = Ennemi;
   Ennemi.prototype.supr        = DE.GameObject.prototype;
-
-  Ennemi.prototype.health = undefined;
-  Ennemi.prototype.damage = undefined;
-  Ennemi.prototype.moveSpeed = 2;
-  Ennemi.prototype.path = [];
 
   //override ennemi lookat to handle specific behaviour
 	Ennemi.prototype.lookAt = function( vector2, angleOffset )

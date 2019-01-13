@@ -11,11 +11,33 @@ function( DE , Projectile, Lifebar)
 
   function Player(data)
   {
+    this.health = 100;
     this.lifebar = new Lifebar({maxHealth:this.health});
     this.lifebar.y = -25;
 
-    this.turret = new DE.GameObject({renderer : new DE.TextureRenderer( { spriteName: "turret" } )});
+    this.timeSinceLastGatlingFire = 0;
+    this.gatlingFireInterval = 10;
+    this.gatlingDmg = 10;
 
+    this.timeSinceLastCanonFire = 0;
+    this.canonFireInterval = 90;
+    this.canonDmg = 50;
+    this.canonAoe = 2;
+
+    this.timeSinceLastMineFire = 0;
+    this.mineFireInterval = 300;
+    this.mineDmg = 100;
+    this.mineAoe = 2;
+
+    this.explosions = [];
+    this.projectiles = [];
+
+    this.boxCollider = {x:0, y:0, width:35, height:35};
+    this.htestBox = {x:0, y:0, width:35, height:35};
+    this.vtestBox = {x:0, y:0, width:35, height:35};
+    this.radius = 20 * this.scale.x;
+
+    this.turret = new DE.GameObject({renderer : new DE.TextureRenderer( { spriteName: "turret" } )});
     this.wheels = new DE.GameObject({renderer : new DE.SpriteRenderer( { spriteName: "playerWheels" } )});
 
     //override wheels lookat to handle specific behaviour
@@ -41,8 +63,6 @@ function( DE , Projectile, Lifebar)
 
     this.add(this.lifebar);
 
-    this.radius = 20 * this.scale.x;
-
     this.turret.addAutomatism("lookAt", "lookAt", { value1: data.target, value2: Math.PI/2 });
     this.wheels.addAutomatism("lookAt", "lookAt", { value1: this.axes, value2: Math.PI/2 });
 
@@ -56,34 +76,6 @@ function( DE , Projectile, Lifebar)
   Player.prototype = new DE.GameObject();
   Player.prototype.constructor = Player;
   Player.prototype.supr        = DE.GameObject.prototype;
-
-  Player.prototype.lifebar = undefined;
-  Player.prototype.turret = undefined;
-  Player.prototype.wheels = undefined;
-
-  Player.prototype.health = 100;
-  Player.prototype.radius = undefined;
-
-  Player.prototype.timeSinceLastGatlingFire = 0;
-  Player.prototype.gatlingFireInterval = 10;
-  Player.prototype.gatlingDmg = 10;
-
-  Player.prototype.timeSinceLastCanonFire = 0;
-  Player.prototype.canonFireInterval = 90;
-  Player.prototype.canonDmg = 50;
-  Player.prototype.canonAoe = 2;
-
-  Player.prototype.timeSinceLastMineFire = 0;
-  Player.prototype.mineFireInterval = 300;
-  Player.prototype.mineDmg = 100;
-  Player.prototype.mineAoe = 2;
-
-  Player.prototype.explosions = [];
-  Player.prototype.projectiles = [];
-
-  Player.prototype.boxCollider = {x:0, y:0, width:35, height:35};
-  Player.prototype.htestBox = {x:0, y:0, width:35, height:35};
-  Player.prototype.vtestBox = {x:0, y:0, width:35, height:35};
 
   Player.prototype.bindInputs = function()
   {

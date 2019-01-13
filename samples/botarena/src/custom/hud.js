@@ -95,14 +95,6 @@ function( DE )
   HUD.prototype.constructor = HUD;
   HUD.prototype.supr        = DE.GameObject.prototype;
 
-  topLeftTextStyle = undefined;
-  upgradePanelTextStyle = undefined;
-  upgradePanel = undefined;
-  waveNumber = undefined;
-  remainingEnnemies = undefined;
-  score = undefined;
-
-
   HUD.prototype.createUpgradeButton = function(x, y, text, fName)
   {
     var self = this;

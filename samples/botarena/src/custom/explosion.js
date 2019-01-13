@@ -26,6 +26,7 @@ function( DE )
     this.type = data.type;
     this.owner = data.owner;
     this.radius = (this.type === "canon" ? 15 : 40) * this.scale.x;
+    this.activeDmg = true;
 
     this.renderer.onAnimEnd = function(){ this.askToKill() }.bind(this);
   }
@@ -33,11 +34,6 @@ function( DE )
   Explosion.prototype = new DE.GameObject();
   Explosion.prototype.constructor = Explosion;
   Explosion.prototype.supr        = DE.GameObject.prototype;
-
-  Explosion.prototype.data = undefined;
-  Explosion.prototype.type = undefined;
-  Explosion.prototype.owner = undefined;
-  Explosion.prototype.activeDmg = true;
 
   Explosion.prototype.onKill = function()
   {

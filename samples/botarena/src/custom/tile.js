@@ -22,7 +22,6 @@ function( DE )
       x : data.x, y:data.y
       ,renderer : new DE.TextureRenderer( { spriteName: spriteName  } )
     });
-
   }
 
   Tile.Types = {
@@ -53,8 +52,6 @@ function( DE )
   Tile.prototype = new DE.GameObject();
   Tile.prototype.constructor = Tile;
   Tile.prototype.supr        = DE.GameObject.prototype;
-
-  Tile.prototype.type = null;
 
   return Tile;
 

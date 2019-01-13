@@ -37,10 +37,6 @@ function( DE , Explosion)
   Projectile.prototype.constructor = Projectile;
   Projectile.prototype.supr        = DE.GameObject.prototype;
 
-  Projectile.prototype.data = undefined;
-  Projectile.prototype.type = undefined;
-  Projectile.prototype.owner = undefined;
-
   Projectile.prototype.checkWallCollision = function()
   {
     if(Game.world.map.checkWallCollision({x:this.x,y:this.y,width:0,height:0}))

@@ -77,7 +77,8 @@ function( DE, Home, World )
     // show cursor in home
     Game.render.view.style.cursor = "default";
 
-    Game.scene.removeChildren();
+    if(Game.world)
+      Game.world.askToKill();
     Game.world = null;
 
     //reset camera
@@ -94,7 +95,7 @@ function( DE, Home, World )
     // hide cursor on world
     Game.render.view.style.cursor = "none";
 
-    Game.scene.removeChildren();
+    Game.home.askToKill();
     Game.home = null;
 
     Game.world = new World();
