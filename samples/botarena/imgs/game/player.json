@@ -1,0 +1,28 @@
+{"frames": {
+
+"turret":
+{
+	"frame": {"x":0,"y":0,"w":40,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
+	"sourceSize": {"w":40,"h":40}
+},
+"dead":
+{
+	"frame": {"x":40,"y":0,"w":40,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
+	"sourceSize": {"w":40,"h":40}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "player.png",
+	"format": "RGBA8888",
+	"size": {"w":80,"h":40},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:1e0647db2c66f9c330b3efe4ac388214:4c685c1a4f3bae94b253723f16bb7036:878d09cf2bf4ec0dfb23d5bcf7e0eb82$"
+}
+}

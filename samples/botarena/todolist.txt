@@ -1,0 +1,11 @@
+bonus : 
+-leaderboards
+-sounds...
+-visual fx...
+
+
+retours
+-indentation, espaces et autres normes de code sales
+-une camera une scène
+-pool pour projectiles/explosions
+-better feeling
