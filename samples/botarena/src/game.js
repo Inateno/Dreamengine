@@ -39,11 +39,11 @@ function( DE, Home, World )
     // Create the renderer before assets start loading
     Game.render = new DE.Render( "render", {
       resizeMode       : "stretch-ratio"
-      , width          : 1920
-      , height         : 1080
-      , backgroundColor: "0x00004F"
-      , roundPixels    : false
-      , powerPreferences: "high-performance"
+      ,width           : 1920
+      ,height          : 1080
+      ,backgroundColor : "0x00004F"
+      ,roundPixels     : false
+      ,powerPreferences: "high-performance"
     } );
     
     Game.render.init();
@@ -63,9 +63,9 @@ function( DE, Home, World )
 
     Game.camera = new DE.Camera( 0, 0, 1920, 1080, { scene: Game.scene, backgroundImage: "bg" } );
     Game.camera.interactive = true;
-    Game.camera.pointermove = function( pos, e ) { if(Game.world) Game.world.moveTarget(pos); };
-    Game.camera.pointerdown = function( pos, e ) { if(Game.world) Game.world.checkMouseEvent(e); }
-    Game.camera.pointerup = function( pos, e ) { if(Game.world) Game.world.checkMouseEvent(e); }
+    Game.camera.pointermove = function( pos, e ) { if ( Game.world) Game.world.moveTarget( pos ); };
+    Game.camera.pointerdown = function( pos, e ) { if ( Game.world) Game.world.checkMouseEvent( e ); }
+    Game.camera.pointerup = function( pos, e ) { if ( Game.world) Game.world.checkMouseEvent( e ); }
 
     Game.render.add( Game.camera );
 

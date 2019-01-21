@@ -20,27 +20,27 @@ require.config( {
     ,'DE.NebulaOffline': '../../../plugins/NebulaOffline/index'
 
     //game stuff
-    ,'Game'        : 'Game'
-    ,'Home'        : 'custom/Home'
-    ,'World'       : 'custom/World'
-    ,'Player'      : 'custom/Player'
-    ,'Lifebar'     : 'custom/Lifebar'
-    ,'Projectile'  : 'custom/Projectile'
-    ,'Explosion'   : 'custom/Explosion'
-    ,'Ennemi'      : 'custom/Ennemi'
-    ,'Tile'        : 'custom/Tile'
-    ,'Map'         : 'custom/Map'
-    ,'HUD'         : 'custom/HUD'
+    ,'Game'            : 'Game'
+    ,'Home'            : 'custom/Home'
+    ,'World'           : 'custom/World'
+    ,'Player'          : 'custom/Player'
+    ,'Lifebar'         : 'custom/Lifebar'
+    ,'Projectile'      : 'custom/Projectile'
+    ,'Explosion'       : 'custom/Explosion'
+    ,'Ennemi'          : 'custom/Ennemi'
+    ,'Tile'            : 'custom/Tile'
+    ,'Map'             : 'custom/Map'
+    ,'HUD'             : 'custom/HUD'
 
     //plugins
-    ,"astar"       : '../plugins/astar'
+    ,"astar"           : '../plugins/astar'
 
     // custom data
-    ,'inputs'      : 'data/inputs'
-    ,'audios'      : 'data/audios'
-    ,'dictionary'  : 'data/dictionary'
-    ,'achievements': 'data/achievements'
-    ,'images'      : 'data/images'
+    ,'inputs'          : 'data/inputs'
+    ,'audios'          : 'data/audios'
+    ,'dictionary'      : 'data/dictionary'
+    ,'achievements'    : 'data/achievements'
+    ,'images'          : 'data/images'
   }
   , urlArgs: 'bust=' + Date.now()
 } );

@@ -10,10 +10,10 @@ define( [],
 function()
 {
   var inputs = {
-    "left":{"keycodes":[ 'K.a', 'K.q' ] }
-    ,"right":{"keycodes":[ 'K.d' ] }
-    ,"up":{"keycodes":[ 'K.z', 'K.w' ] }
-    ,"down":{"keycodes":[ 'K.s' ] }
+    "left"    :{"keycodes":[ 'K.a', 'K.q' ] }
+    ,"right"  :{"keycodes":[ 'K.d' ] }
+    ,"up"     :{"keycodes":[ 'K.z', 'K.w' ] }
+    ,"down"   :{"keycodes":[ 'K.s' ] }
 
     ,"useMine":{"keycodes":[ 'K.space' ] }
   };

@@ -5,45 +5,45 @@
 ***
 Player declaration
 **/
-define( [ 'DREAM_ENGINE', "Projectile", 'Lifebar'],
-function( DE , Projectile, Lifebar)
+define( [ 'DREAM_ENGINE', "Projectile", 'Lifebar' ],
+function( DE , Projectile, Lifebar )
 {
 
-  function Player(data)
+  function Player( data )
   {
-    this.health = 100;
-    this.lifebar = new Lifebar({maxHealth:this.health});
-    this.lifebar.y = -25;
+    this.health                  = 100;
+    this.lifebar                 = new Lifebar( { maxHealth: this.health } );
+    this.lifebar.y               = -25;
 
-    this.timeSinceLastGatlingFire = 0;
-    this.gatlingFireInterval = 10;
-    this.gatlingDmg = 10;
+    this.timeSinceLastGatlingFire= 0;
+    this.gatlingFireInterval     = 10;
+    this.gatlingDmg              = 10;
 
-    this.timeSinceLastCanonFire = 0;
-    this.canonFireInterval = 90;
-    this.canonDmg = 50;
-    this.canonAoe = 2;
+    this.timeSinceLastCanonFire  = 0;
+    this.canonFireInterval       = 90;
+    this.canonDmg                = 50;
+    this.canonAoe                = 2;
 
-    this.timeSinceLastMineFire = 0;
-    this.mineFireInterval = 300;
-    this.mineDmg = 100;
-    this.mineAoe = 2;
+    this.timeSinceLastMineFire   = 0;
+    this.mineFireInterval        = 300;
+    this.mineDmg                 = 100;
+    this.mineAoe                 = 2;
 
-    this.explosions = [];
-    this.projectiles = [];
+    this.explosions              = [];
+    this.projectiles             = [];
 
-    this.boxCollider = {x:0, y:0, width:35, height:35};
-    this.htestBox = {x:0, y:0, width:35, height:35};
-    this.vtestBox = {x:0, y:0, width:35, height:35};
-    this.radius = 20 * this.scale.x;
+    this.boxCollider             = { x: 0, y: 0, width: 35, height: 35 };
+    this.htestBox                = { x: 0, y: 0, width: 35, height: 35 };
+    this.vtestBox                = { x: 0, y: 0, width: 35, height: 35 };
+    this.radius                  = 20 * this.scale.x;
 
-    this.turret = new DE.GameObject({renderer : new DE.TextureRenderer( { spriteName: "turret" } )});
-    this.wheels = new DE.GameObject({renderer : new DE.SpriteRenderer( { spriteName: "playerWheels" } )});
+    this.turret                  = new DE.GameObject( { renderer: new DE.TextureRenderer( { spriteName: "turret" } ) } );
+    this.wheels                  = new DE.GameObject( { renderer: new DE.SpriteRenderer( { spriteName: "playerWheels" } ) } );
 
     //override wheels lookat to handle specific behaviour
     this.wheels.lookAt = function( vector2, angleOffset )
     {
-      if(vector2.x === 0 && vector2.y === 0)
+      if ( vector2.x === 0 && vector2.y === 0 )
         return this;
       
       var origin = { x: 0, y: 0 };
@@ -53,29 +53,31 @@ function( DE , Projectile, Lifebar)
     };
 
     DE.GameObject.call(this,{
-      x : data.startX, y:data.startY, scale : 1.5
-      , gameObjects:[ this.wheels, this.turret, this.lifebar ]
-      , axes : new DE.Vector2( 0, 0)
-      , moveSpeed : 3.5
-      , automatisms: [ [ "move", "move" ] ]
+      x           : data.startX
+      ,y          : data.startY
+      ,scale      : 1.5
+      ,gameObjects: [ this.wheels, this.turret, this.lifebar ]
+      ,axes       : new DE.Vector2( 0, 0 )
+      ,moveSpeed  : 3.5
+      ,automatisms: [ [ "move", "move" ] ]
     });
 
 
-    this.add(this.lifebar);
+    this.add( this.lifebar );
 
-    this.turret.addAutomatism("lookAt", "lookAt", { value1: data.target, value2: Math.PI/2 });
-    this.wheels.addAutomatism("lookAt", "lookAt", { value1: this.axes, value2: Math.PI/2 });
+    this.turret.addAutomatism( "lookAt", "lookAt", { value1: data.target, value2: Math.PI/2 } );
+    this.wheels.addAutomatism( "lookAt", "lookAt", { value1: this.axes, value2: Math.PI/2 } );
 
-    this.addAutomatism("updateWeapons", "updateWeapons");
+    this.addAutomatism( "updateWeapons", "updateWeapons" );
 
     this.bindInputs();
 
     this.updateColliders();
   }
 
-  Player.prototype = new DE.GameObject();
-  Player.prototype.constructor = Player;
-  Player.prototype.supr        = DE.GameObject.prototype;
+  Player.prototype            = new DE.GameObject();
+  Player.prototype.constructor= Player;
+  Player.prototype.supr       = DE.GameObject.prototype;
 
   Player.prototype.bindInputs = function()
   {
@@ -96,8 +98,8 @@ function( DE , Projectile, Lifebar)
 
   Player.prototype.updateColliders = function()
   {
-    this.boxCollider.x = this.x - this.boxCollider.width/2;
-    this.boxCollider.y = this.y - this.boxCollider.height/2;
+    this.boxCollider.x = this.x - this.boxCollider.width / 2;
+    this.boxCollider.y = this.y - this.boxCollider.height / 2;
 
     this.htestBox.x = this.boxCollider.x;
     this.htestBox.y = this.boxCollider.y;
@@ -107,24 +109,24 @@ function( DE , Projectile, Lifebar)
 
   Player.prototype.move = function()
   {
-    if(this.axes.x === 0 && this.axes.y === 0)
+    if ( this.axes.x === 0 && this.axes.y === 0 )
     {
-      this.wheels.renderer.setPause(true);
+      this.wheels.renderer.setPause( true );
       return;
     }
 
-    this.wheels.renderer.setPause(false);
+    this.wheels.renderer.setPause( false );
 
     this.axes.normalize();
 
-    var newAxes = new DE.Vector2(this.axes.x, this.axes.y);
+    var newAxes = new DE.Vector2( this.axes.x, this.axes.y );
 
     this.htestBox.x += newAxes.x * this.moveSpeed * DE.Time.deltaTime;
-    if(Game.world.map.checkWallCollision(this.htestBox))
+    if ( Game.world.map.checkWallCollision( this.htestBox ) )
       newAxes.x = 0;
 
     this.vtestBox.y += newAxes.y * this.moveSpeed * DE.Time.deltaTime;
-    if(Game.world.map.checkWallCollision(this.vtestBox))
+    if ( Game.world.map.checkWallCollision( this.vtestBox ) )
       newAxes.y = 0;
 
     this.translate( { x: newAxes.x * this.moveSpeed, y: newAxes.y * this.moveSpeed }, true );
@@ -132,15 +134,15 @@ function( DE , Projectile, Lifebar)
     this.updateColliders();
   }
 
-  Player.prototype.checkMouseEvent = function(e)
+  Player.prototype.checkMouseEvent = function( e )
   {
-    if(e.data.button === 0) {
-      if(e.type === "pointerdown")
-        this.addAutomatism("fireGatling", "fireGatling");
+    if ( e.data.button === 0 ) {
+      if ( e.type === "pointerdown" )
+        this.addAutomatism( "fireGatling", "fireGatling" );
       else
-        this.removeAutomatism("fireGatling");
+        this.removeAutomatism( "fireGatling" );
     }
-    else if(e.data.button === 2 && e.type === "pointerdown") {
+    else if ( e.data.button === 2 && e.type === "pointerdown" ) {
       this.shootCanon();
     }
   }
@@ -154,65 +156,93 @@ function( DE , Projectile, Lifebar)
 
   Player.prototype.fireGatling = function()
   {
-    if(this.timeSinceLastGatlingFire <= 0)
+    if ( this.timeSinceLastGatlingFire <= 0 )
     {
       this.timeSinceLastGatlingFire = this.gatlingFireInterval;
 
-      this.createBullet( { type:"smallBullet", speed:15, damage:this.gatlingDmg, accuracy:5, bulletFx:"piew" } );
+      this.createBullet( { 
+        type     : "smallBullet"
+        ,speed   : 15
+        ,damage  : this.gatlingDmg
+        ,accuracy: 5
+        ,bulletFx: "piew" 
+      } );
     }
   }
 
   Player.prototype.shootCanon = function()
   {
-    if(this.timeSinceLastCanonFire <= 0)
+    if ( this.timeSinceLastCanonFire <= 0 )
     {
       this.timeSinceLastCanonFire = this.canonFireInterval;
 
-      this.createBullet( { type:"bigBullet", speed:7.5, damage:this.canonDmg * 0.2, bulletFx:"piew", explosion:{ type:"canon", explosionFx:"piew", scale:this.canonAoe, damage: this.canonDmg } } );
+      this.createBullet( { 
+        type      : "bigBullet"
+        ,speed    : 7.5
+        ,damage   : this.canonDmg * 0.2
+        ,bulletFx : "piew"
+        ,explosion: { 
+          type        : "canon"
+          ,explosionFx: "piew"
+          ,scale      : this.canonAoe
+          ,damage     :  this.canonDmg 
+        } 
+      } );
     }
   }
 
   Player.prototype.useMine = function()
   {
-    if(this.timeSinceLastMineFire <= 0)
+    if (this.timeSinceLastMineFire <= 0 )
     {
       this.timeSinceLastMineFire = this.mineFireInterval;
 
-      this.createBullet( { type:"mine", lifetime:3000, bulletFx:"piew", explosion:{ type:"mine", explosionFx:"piew", scale:this.mineAoe, damage:this.mineDmg } } );
-    } else { //if a mine is alive, make it manually explode
-      for (var i = 0; i < this.projectiles.length; i++)
-      {
-        var proj = this.projectiles[i];
+      this.createBullet( { 
+        type      : "mine"
+        ,lifetime : 3000
+        ,bulletFx : "piew"
+        ,explosion: { 
+          type        : "mine"
+          ,explosionFx: "piew"
+          ,scale      : this.mineAoe
+          ,damage     : this.mineDmg 
+        } 
+      } );
 
-        if(proj.type === "mine")
+    } else { //if a mine is alive, make it manually explode
+      for ( var i = 0; i < this.projectiles.length; i++ )
+      {
+        var proj = this.projectiles[ i ];
+
+        if ( proj.type === "mine" )
         {
           proj.askToKill();
-          this.projectiles.splice(i, 1);
+          this.projectiles.splice( i, 1 );
           break;
         }
       }
     }
   }
 
-  Player.prototype.createBullet = function(data)
+  Player.prototype.createBullet = function( data )
   {
     data.owner = this;
     data.x = this.x;
     data.y = this.y;
     data.rotation = this.turret.rotation;
-    var projectile = new Projectile(data);
+    var projectile = new Projectile( data );
 
-    Game.world.add(projectile);
-    this.projectiles.push(projectile);
+    Game.world.add( projectile );
+    this.projectiles.push( projectile );
   }
 
-  Player.prototype.takeDamage = function(amount)
+  Player.prototype.takeDamage = function( amount )
   {
     this.health -= amount;
-    if(this.health <= 0)
+    if ( this.health <= 0 )
       this.dead = true;
 
-    this.lifebar.setCurrentHealth(this.health);
+    this.lifebar.setCurrentHealth( this.health );
   }
 
   Player.prototype.upgradeGatlingDmg = function()
